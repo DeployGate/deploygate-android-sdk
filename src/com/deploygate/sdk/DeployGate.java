@@ -3,8 +3,10 @@ package com.deploygate.sdk;
 
 import android.app.Application;
 import android.content.Intent;
+import android.util.Log;
 
 public class DeployGate {
+    private static final String TAG = "DeployGate";
 
     static final String ACTION_APPLICATION_START = "com.deploygate.action.ApplicationStart";
     static final String ACTION_APPLICATION_CRASHED = "com.deploygate.action.ApplicationCrashed";
@@ -35,5 +37,20 @@ public class DeployGate {
         } catch (Exception e) {
             // we care nothing here
         }
+    }
+
+    public static boolean isManaged() {
+        Log.w(TAG, "isManaged() is not implemented yet");
+        return false;
+    }
+
+    public static boolean isAuthorized() {
+        Log.w(TAG, "isAuthorized() is not implemented yet");
+        return false;
+    }
+
+    public static String getLoginUser() {
+        Log.w(TAG, "getLoginUser() is not implemented yet");
+        return null;
     }
 }
