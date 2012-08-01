@@ -1,3 +1,4 @@
+
 package com.deploygate.sdk;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -10,35 +11,34 @@ import android.content.Intent;
  * 
  * @author tnj
  */
-class DeployGateUncaughtExceptionHandler implements
-		UncaughtExceptionHandler {
+class DeployGateUncaughtExceptionHandler implements UncaughtExceptionHandler {
 
-	private final UncaughtExceptionHandler mParentHandler;
-	private final Context mApplicationContext;
+    private final UncaughtExceptionHandler mParentHandler;
+    private final Context mApplicationContext;
 
-	public DeployGateUncaughtExceptionHandler(Context applicationContext,
-			UncaughtExceptionHandler parentHandler) {
-		mApplicationContext = applicationContext;
-		mParentHandler = parentHandler;
-	}
+    public DeployGateUncaughtExceptionHandler(Context applicationContext,
+            UncaughtExceptionHandler parentHandler) {
+        mApplicationContext = applicationContext;
+        mParentHandler = parentHandler;
+    }
 
-	@Override
-	public void uncaughtException(Thread thread, Throwable ex) {
-		sendExceptionToService(ex);
+    @Override
+    public void uncaughtException(Thread thread, Throwable ex) {
+        sendExceptionToService(ex);
 
-		if (mParentHandler != null)
-			mParentHandler.uncaughtException(thread, ex);
-	}
+        if (mParentHandler != null)
+            mParentHandler.uncaughtException(thread, ex);
+    }
 
-	private void sendExceptionToService(Throwable ex) {
-		Intent service = new Intent(DeployGate.ACTION_REPORT_EXCEPTION);
-		service.setPackage(DeployGate.DEPLOYGATE_PACKAGE);
-		service.putExtra(DeployGate.EXTRA_PACKAGE, mApplicationContext.getPackageName());
-		service.putExtra(DeployGate.EXTRA_EXCEPTION, ex);
-		try {
-			mApplicationContext.startService(service);
-		} catch (Exception e) {
-			// we care nothing here
-		}
-	}
+    private void sendExceptionToService(Throwable ex) {
+        Intent service = new Intent(DeployGate.ACTION_APPLICATION_CRASHED);
+        service.setPackage(DeployGate.DEPLOYGATE_PACKAGE);
+        service.putExtra(DeployGate.EXTRA_PACKAGE, mApplicationContext.getPackageName());
+        service.putExtra(DeployGate.EXTRA_EXCEPTION, ex);
+        try {
+            mApplicationContext.startService(service);
+        } catch (Exception e) {
+            // we care nothing here
+        }
+    }
 }
