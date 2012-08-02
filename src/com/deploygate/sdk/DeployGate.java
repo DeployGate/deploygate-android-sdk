@@ -13,7 +13,7 @@ public class DeployGate {
 
     static final String DEPLOYGATE_PACKAGE = "com.deploygate";
     static final String EXTRA_EXCEPTION = "com.deploygate.exception";
-    static final String EXTRA_PACKAGE = "com.deploygate.package";
+    static final String EXTRA_PACKAGE_NAME = "com.deploygate.packageName";
 
     /**
      * Install DeployGate on your application instance. Call this method inside
@@ -31,7 +31,7 @@ public class DeployGate {
     private static void tellApplicationStart(Application app) {
         Intent service = new Intent(ACTION_APPLICATION_START);
         service.setPackage(DEPLOYGATE_PACKAGE);
-        service.putExtra(EXTRA_PACKAGE, app.getPackageName());
+        service.putExtra(EXTRA_PACKAGE_NAME, app.getPackageName());
         try {
             app.startService(service);
         } catch (Exception e) {

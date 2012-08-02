@@ -33,7 +33,7 @@ class DeployGateUncaughtExceptionHandler implements UncaughtExceptionHandler {
     private void sendExceptionToService(Throwable ex) {
         Intent service = new Intent(DeployGate.ACTION_APPLICATION_CRASHED);
         service.setPackage(DeployGate.DEPLOYGATE_PACKAGE);
-        service.putExtra(DeployGate.EXTRA_PACKAGE, mApplicationContext.getPackageName());
+        service.putExtra(DeployGate.EXTRA_PACKAGE_NAME, mApplicationContext.getPackageName());
         service.putExtra(DeployGate.EXTRA_EXCEPTION, ex);
         try {
             mApplicationContext.startService(service);
