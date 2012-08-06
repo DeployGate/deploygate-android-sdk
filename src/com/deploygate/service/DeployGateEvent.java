@@ -1,0 +1,15 @@
+package com.deploygate.service;
+
+public interface DeployGateEvent {
+    public static final String ACTION_INIT = "init";
+    public static final String ACTION_UPDATE_AVAILABLE = "update";
+    public static final String EXTRA_IS_MANAGED = "isManaged";
+    public static final String EXTRA_IS_AUTHORIZED = "isAuthorized";
+    public static final String EXTRA_LOGIN_USERNAME = "loginUsername";
+    public static final String EXTRA_IS_STOP_REQUESTED = "isStopRequested";
+    public static final String EXTRA_SERIAL = "serial";
+    public static final String EXTRA_VERSION_NAME = "versionName";
+    public static final String EXTRA_VERSION_CODE = "versionCode";
+    public static final String EXTRA_CAN_LOGCAT = "canLogCat";
+    public static final String EXTRA_IS_BOOT = "isBoot";
+}

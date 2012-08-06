@@ -4,17 +4,22 @@ package com.deploygate.sdk;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
+import android.Manifest.permission;
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -44,9 +49,21 @@ public class DeployGate {
         public IBinder asBinder() {
             return null;
         }
+        public void onEvent(String action, Bundle extras) throws RemoteException {
+            if (DeployGateEvent.ACTION_INIT.equals(action)) {
+                onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
+                        extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false),
+                        extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME),
+                        extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false));
+            }
+            else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
+                onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL),
+                        extras.getString(DeployGateEvent.EXTRA_VERSION_NAME),
+                        extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE));
+            }
+        };
 
-        @Override
-        public void onInitialized(final boolean isManaged, final boolean isAuthorized,
+        private void onInitialized(final boolean isManaged, final boolean isAuthorized,
                 final String loginUsername, final boolean isStopped) throws RemoteException {
             Log.v(TAG, "DeployGate service initialized");
             mAppIsManaged = isManaged;
@@ -65,9 +82,8 @@ public class DeployGate {
             });
         }
         
-        @Override
-        public void onUpdateArrived(final int serial, final String versionName,
-                final String versionCode) throws RemoteException {
+        private void onUpdateArrived(final int serial, final String versionName,
+                final int versionCode) throws RemoteException {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -76,16 +92,6 @@ public class DeployGate {
                 }
             });
         }
-        
-        @Override
-        public void onLogCatRequested() throws RemoteException {}
-
-        @Override
-        public void onLogCatStopRequested() throws RemoteException {}
-        
-        @Override
-        public void onStopApplicationRequested() throws RemoteException {}
-        
     };
     
     private final Handler mHandler;
@@ -109,8 +115,7 @@ public class DeployGate {
         prepareBroadcastReceiver();
         if (isDeployGateAvailable()) {
             Log.v(TAG, "DeployGate installation detected. Initializing.");
-            tellApplicationStart();
-            bindToService();
+            bindToService(true);
         } else {
             Log.v(TAG, "DeployGate is not available on this device.");
             if (mCallback != null)
@@ -129,19 +134,32 @@ public class DeployGate {
     }
 
     private void prepareBroadcastReceiver() {
-        // TODO implement BroadcastReceiver to listen DeployGate app lifecycle event
-        
+        IntentFilter filter = new IntentFilter("com.deploygate.service.Started");
+        mApplicationContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null)
+                    return;
+                if (isDeployGateAvailable()) {
+                    bindToService(false);
+                }
+            }
+        }, filter);
     }
 
-    private void bindToService() {
+    private void bindToService(final boolean isBoot) {
         Intent service = new Intent(IDeployGateSdkService.class.getName());
         service.setPackage(DEPLOYGATE_PACKAGE);
         mApplicationContext.bindService(service, new ServiceConnection() {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.v(TAG, "DeployGate service connected");
                 mRemoteService = IDeployGateSdkService.Stub.asInterface(service);
+                
+                Bundle args = new Bundle();
+                args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
+                args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, canLogCat());
                 try {
-                    mRemoteService.init(mRemoteCallback);
+                    mRemoteService.init(mRemoteCallback, args);
                 } catch (RemoteException e) {
                     Log.w(TAG, "DeployGate service failed to be initialized.");
                 }
@@ -152,6 +170,11 @@ public class DeployGate {
                 mRemoteService = null;
             }
         }, Context.BIND_AUTO_CREATE);
+    }
+
+    protected boolean canLogCat() {
+        return mApplicationContext.getPackageManager().checkPermission(permission.READ_LOGS,
+                mApplicationContext.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
 
     public String getDeployGatePackageSignature() {
@@ -179,17 +202,6 @@ public class DeployGate {
             result.append(Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1));
         }
         return result.toString();
-    }
-    
-    private void tellApplicationStart() {
-        Intent service = new Intent(ACTION_APPLICATION_START);
-        service.setPackage(DEPLOYGATE_PACKAGE);
-        service.putExtra(EXTRA_PACKAGE_NAME, mApplicationContext.getPackageName());
-        try {
-            mApplicationContext.startService(service);
-        } catch (Exception e) {
-            // we care nothing here
-        }
     }
     
     /**
