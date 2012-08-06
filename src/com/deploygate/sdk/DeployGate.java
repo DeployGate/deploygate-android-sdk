@@ -1,8 +1,23 @@
 
 package com.deploygate.sdk;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import com.deploygate.service.IDeployGateSdkService;
+import com.deploygate.service.IDeployGateSdkServiceCallback;
+
 import android.app.Application;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
 public class DeployGate {
@@ -14,7 +29,169 @@ public class DeployGate {
     static final String DEPLOYGATE_PACKAGE = "com.deploygate";
     static final String EXTRA_EXCEPTION = "com.deploygate.exception";
     static final String EXTRA_PACKAGE_NAME = "com.deploygate.packageName";
+    
+    private static final String[] DEPLOYGATE_FINGERPRINTS = new String[] {
+        "c1f285f69cc02a397135ed182aa79af53d5d20a1", // mba debug
+        "234eff4a1600a7aa78bf68adfbb15786e886ae1a", // jenkins debug
+    };
 
+    private static DeployGate sInstance;
+    
+    private final Context mApplicationContext;
+    protected IDeployGateSdkService mRemoteService;
+    protected final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback() {
+        @Override
+        public IBinder asBinder() {
+            return null;
+        }
+
+        @Override
+        public void onInitialized(final boolean isManaged, final boolean isAuthorized,
+                final String loginUsername, final boolean isStopped) throws RemoteException {
+            Log.v(TAG, "DeployGate service initialized");
+            mAppIsManaged = isManaged;
+            mAppIsAuthorized = isAuthorized;
+            mAppIsStopRequested = isStopped;
+            mLoginUsername = loginUsername;
+            
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mCallback != null) {
+                        mCallback.onInitialized(true);
+                        mCallback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
+                    }
+                }
+            });
+        }
+        
+        @Override
+        public void onUpdateArrived(final int serial, final String versionName,
+                final String versionCode) throws RemoteException {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mCallback != null)
+                        mCallback.onUpdateAvailable(serial, versionName, versionCode);
+                }
+            });
+        }
+        
+        @Override
+        public void onLogCatRequested() throws RemoteException {}
+
+        @Override
+        public void onLogCatStopRequested() throws RemoteException {}
+        
+        @Override
+        public void onStopApplicationRequested() throws RemoteException {}
+        
+    };
+    
+    private final Handler mHandler;
+    private final DeployGateCallback mCallback;
+    
+    private boolean mAppIsManaged;
+    private boolean mAppIsAuthorized;
+    private boolean mAppIsStopRequested;
+    private String mLoginUsername;
+    
+    
+    /**
+     * Do not instantiate directly. Call {@link #install(Application)} on your
+     * {@link Application#onCreate()} instead.
+     */
+    private DeployGate(Context applicationContext, DeployGateCallback callback) {
+        mHandler = new Handler();
+        mApplicationContext = applicationContext;
+        mCallback = callback;
+        
+        prepareBroadcastReceiver();
+        if (isDeployGateAvailable()) {
+            Log.v(TAG, "DeployGate installation detected. Initializing.");
+            tellApplicationStart();
+            bindToService();
+        } else {
+            Log.v(TAG, "DeployGate is not available on this device.");
+            if (mCallback != null)
+                mCallback.onInitialized(false);
+        }
+    }
+
+    private boolean isDeployGateAvailable() {
+        String sig = getDeployGatePackageSignature();
+        if (sig == null)
+            return false;
+        for (String value : DEPLOYGATE_FINGERPRINTS)
+            if (value.equals(sig))
+                return true;
+        return false;
+    }
+
+    private void prepareBroadcastReceiver() {
+        // TODO implement BroadcastReceiver to listen DeployGate app lifecycle event
+        
+    }
+
+    private void bindToService() {
+        Intent service = new Intent(IDeployGateSdkService.class.getName());
+        service.setPackage(DEPLOYGATE_PACKAGE);
+        mApplicationContext.bindService(service, new ServiceConnection() {
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.v(TAG, "DeployGate service connected");
+                mRemoteService = IDeployGateSdkService.Stub.asInterface(service);
+                try {
+                    mRemoteService.init(mRemoteCallback);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "DeployGate service failed to be initialized.");
+                }
+            }
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.v(TAG, "DeployGate service disconneced");
+                mRemoteService = null;
+            }
+        }, Context.BIND_AUTO_CREATE);
+    }
+
+    public String getDeployGatePackageSignature() {
+        PackageInfo info;
+        try {
+            info = mApplicationContext.getPackageManager().getPackageInfo(
+                    "com.deploygate", PackageManager.GET_SIGNATURES);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
+        if (info == null || info.signatures.length == 0)
+            return null;
+        
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA1");
+        } catch (NoSuchAlgorithmException e) {
+            Log.e(TAG, "SHA1 is not supported on this platform?", e);
+            return null;
+        }
+        
+        byte[] digest = md.digest(info.signatures[0].toByteArray());
+        StringBuilder result = new StringBuilder(40);
+        for (int i = 0; i < digest.length; i++) {
+            result.append(Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        return result.toString();
+    }
+    
+    private void tellApplicationStart() {
+        Intent service = new Intent(ACTION_APPLICATION_START);
+        service.setPackage(DEPLOYGATE_PACKAGE);
+        service.putExtra(EXTRA_PACKAGE_NAME, mApplicationContext.getPackageName());
+        try {
+            mApplicationContext.startService(service);
+        } catch (Exception e) {
+            // we care nothing here
+        }
+    }
+    
     /**
      * Install DeployGate on your application instance. Call this method inside
      * of your {@link Application#onCreate()}.
@@ -22,35 +199,46 @@ public class DeployGate {
      * @param app Application instance, typically just pass <em>this<em>.
      */
     public static void install(Application app) {
-        Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(
-                app.getApplicationContext(), Thread
-                        .getDefaultUncaughtExceptionHandler()));
-        tellApplicationStart(app);
+        install(app, null);
     }
 
-    private static void tellApplicationStart(Application app) {
-        Intent service = new Intent(ACTION_APPLICATION_START);
-        service.setPackage(DEPLOYGATE_PACKAGE);
-        service.putExtra(EXTRA_PACKAGE_NAME, app.getPackageName());
-        try {
-            app.startService(service);
-        } catch (Exception e) {
-            // we care nothing here
+    /**
+     * Install DeployGate on your application instance. Call this method inside
+     * of your {@link Application#onCreate()}.
+     * 
+     * @param app Application instance, typically just pass <em>this<em>.
+     * @param callback Callback interface to listen events.
+     */
+    public static void install(Application app, DeployGateCallback callback) {
+        if (sInstance == null) {
+            Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(
+                    app.getApplicationContext(), Thread
+                            .getDefaultUncaughtExceptionHandler()));
+            sInstance = new DeployGate(app.getApplicationContext(), callback);
         }
     }
 
     public static boolean isManaged() {
-        Log.w(TAG, "isManaged() is not implemented yet");
+        if (sInstance != null)
+            return sInstance.mAppIsManaged;
         return false;
     }
 
     public static boolean isAuthorized() {
-        Log.w(TAG, "isAuthorized() is not implemented yet");
+        if (sInstance != null)
+            return sInstance.mAppIsAuthorized;
         return false;
     }
 
-    public static String getLoginUser() {
-        Log.w(TAG, "getLoginUser() is not implemented yet");
+    public static String getLoginUsername() {
+        if (sInstance != null)
+            return sInstance.mLoginUsername;
         return null;
+    }
+    
+    public static boolean isStopRequested() {
+        if (sInstance != null)
+            return sInstance.mAppIsStopRequested;
+        return false;
     }
 }
