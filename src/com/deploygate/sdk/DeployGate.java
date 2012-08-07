@@ -1,8 +1,12 @@
 
 package com.deploygate.sdk;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
@@ -26,8 +30,11 @@ import android.os.RemoteException;
 import android.util.Log;
 
 public class DeployGate {
+
     private static final String TAG = "DeployGate";
 
+    public static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
+    
     static final String ACTION_APPLICATION_START = "com.deploygate.action.ApplicationStart";
     static final String ACTION_APPLICATION_CRASHED = "com.deploygate.action.ApplicationCrashed";
 
@@ -44,7 +51,11 @@ public class DeployGate {
     
     private final Context mApplicationContext;
     protected IDeployGateSdkService mRemoteService;
+
+    protected Thread mLogcatThread;
     protected final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
+        private LogCatTranportWorker mLogcatWorker;
+
         public void onEvent(String action, Bundle extras) throws RemoteException {
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
                 onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
@@ -57,7 +68,32 @@ public class DeployGate {
                         extras.getString(DeployGateEvent.EXTRA_VERSION_NAME),
                         extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE));
             }
+            else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
+                onEnableLogcat(true);
+            }
+            else if (DeployGateEvent.ACTION_DISABLE_LOGCAT.equals(action)) {
+                onEnableLogcat(false);
+            }
         };
+
+        private void onEnableLogcat(boolean isEnabled) {
+            if (mRemoteService == null)
+                return;
+            
+            if (isEnabled) {
+                if (mLogcatThread == null || !mLogcatThread.isAlive()) {
+                    mLogcatWorker = new LogCatTranportWorker(mApplicationContext.getPackageName(),
+                            mRemoteService);
+                    mLogcatThread = new Thread(mLogcatWorker);
+                    mLogcatThread.start();
+                }
+            } else {
+                if (mLogcatThread != null && mLogcatThread.isAlive()) {
+                    mLogcatWorker.stop();
+                    mLogcatThread.interrupt();
+                }
+            }
+        }
 
         private void onInitialized(final boolean isManaged, final boolean isAuthorized,
                 final String loginUsername, final boolean isStopped) throws RemoteException {
@@ -129,7 +165,7 @@ public class DeployGate {
     }
 
     private void prepareBroadcastReceiver() {
-        IntentFilter filter = new IntentFilter("com.deploygate.service.Started");
+        IntentFilter filter = new IntentFilter(ACTION_DEPLOYGATE_STARTED);
         mApplicationContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -247,5 +283,86 @@ public class DeployGate {
         if (sInstance != null)
             return sInstance.mAppIsStopRequested;
         return false;
+    }
+    
+    private static class LogCatTranportWorker implements Runnable {
+        
+        private final String mPackageName;
+        private final IDeployGateSdkService mService;
+        private Process mProcess;
+
+        public LogCatTranportWorker(String packageName, IDeployGateSdkService service) {
+            mPackageName = packageName;
+            mService = service;
+        }
+        
+        @Override
+        public void run() {
+            mProcess = null;
+            ArrayList<String> logcatBuf = null;
+            try {
+                ArrayList<String> commandLine = new ArrayList<String>();
+                commandLine.add("logcat");
+                logcatBuf = new ArrayList<String>();
+                
+                commandLine.add("-v");
+                commandLine.add("threadtime");
+                commandLine.add("*:V");
+
+                mProcess = Runtime.getRuntime().exec(commandLine.toArray(new String[commandLine.size()]));
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(mProcess.getInputStream()));
+
+                Log.v(TAG, "Start retrieving logcat");
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    logcatBuf.add(line + "\n");
+                    if (!bufferedReader.ready()) {
+                        if (send(logcatBuf)) 
+                            logcatBuf.clear();
+                        else
+                            return;
+                    }
+                }
+                // EOF, stop it
+            } catch (IOException e) {
+                Log.d(TAG, "Logcat stopped: " + e.getMessage());
+            } finally {
+                if (mProcess != null)
+                    mProcess.destroy();
+            }
+        }
+        
+        public void stop() {
+            if (mProcess != null)
+                mProcess.destroy();
+        }
+
+        private boolean send(ArrayList<String> logcatBuf) {
+            Bundle bundle = new Bundle();
+            bundle.putStringArrayList(DeployGateEvent.EXTRA_LOG, logcatBuf);
+            try {
+                mService.sendEvent(mPackageName, DeployGateEvent.ACTION_SEND_LOGCAT, bundle);
+            } catch (RemoteException e) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    static DeployGate getInstance() {
+        return sInstance;
+    }
+
+    public void sendCrashReport(Throwable ex) {
+        if (mRemoteService == null)
+            return;
+        Bundle extras = new Bundle();
+        extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex); 
+        try {
+            mRemoteService.sendEvent(mApplicationContext.getPackageName(),
+                    DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
+        } catch (RemoteException e) {
+            Log.w(TAG, "failed to send crash report: " + e.getMessage());
+        }
     }
 }
