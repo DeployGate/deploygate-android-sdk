@@ -44,11 +44,7 @@ public class DeployGate {
     
     private final Context mApplicationContext;
     protected IDeployGateSdkService mRemoteService;
-    protected final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback() {
-        @Override
-        public IBinder asBinder() {
-            return null;
-        }
+    protected final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
         public void onEvent(String action, Bundle extras) throws RemoteException {
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
                 onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
@@ -101,7 +97,6 @@ public class DeployGate {
     private boolean mAppIsAuthorized;
     private boolean mAppIsStopRequested;
     private String mLoginUsername;
-    
     
     /**
      * Do not instantiate directly. Call {@link #install(Application)} on your
@@ -159,7 +154,7 @@ public class DeployGate {
                 args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
                 args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, canLogCat());
                 try {
-                    mRemoteService.init(mRemoteCallback, args);
+                    mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
                 } catch (RemoteException e) {
                     Log.w(TAG, "DeployGate service failed to be initialized.");
                 }
