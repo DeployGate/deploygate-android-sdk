@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
@@ -29,32 +30,50 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+/**
+ * DeployGate SDK library implementation. Import this library to the application
+ * package and call {@link #install(Application)} on the onCreate() of
+ * application class to enable crash reporting and application launch
+ * notification.
+ * <p>
+ * In order to get working Remote LogCat feature, you also have to add
+ * <code>&lt;uses-permission android:name="android.permission.READ_LOGS" /&gt;</code>
+ * in AndroidManifest.xml of your application.
+ * </p>
+ * 
+ * @author tnj
+ */
 public class DeployGate {
 
     private static final String TAG = "DeployGate";
 
-    public static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
-    
-    static final String ACTION_APPLICATION_START = "com.deploygate.action.ApplicationStart";
-    static final String ACTION_APPLICATION_CRASHED = "com.deploygate.action.ApplicationCrashed";
+    private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
+    private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
 
-    static final String DEPLOYGATE_PACKAGE = "com.deploygate";
-    static final String EXTRA_EXCEPTION = "com.deploygate.exception";
-    static final String EXTRA_PACKAGE_NAME = "com.deploygate.packageName";
-    
     private static final String[] DEPLOYGATE_FINGERPRINTS = new String[] {
-        "c1f285f69cc02a397135ed182aa79af53d5d20a1", // mba debug
-        "234eff4a1600a7aa78bf68adfbb15786e886ae1a", // jenkins debug
+            "c1f285f69cc02a397135ed182aa79af53d5d20a1", // mba debug
+            "234eff4a1600a7aa78bf68adfbb15786e886ae1a", // jenkins debug
     };
 
     private static DeployGate sInstance;
-    
-    private final Context mApplicationContext;
-    protected IDeployGateSdkService mRemoteService;
 
-    protected Thread mLogcatThread;
-    protected final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
-        private LogCatTranportWorker mLogcatWorker;
+    private final Context mApplicationContext;
+    private final Handler mHandler;
+    private final DeployGateCallback mCallback;
+
+    private CountDownLatch mInitializedLatch;
+    private boolean mIsDeployGateAvailable;
+
+    private boolean mAppIsManaged;
+    private boolean mAppIsAuthorized;
+    private boolean mAppIsStopRequested;
+    private String mLoginUsername;
+
+    private IDeployGateSdkService mRemoteService;
+    private Thread mLogcatThread;
+    private LogCatTranportWorker mLogcatWorker;
+
+    private final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
 
         public void onEvent(String action, Bundle extras) throws RemoteException {
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
@@ -79,11 +98,11 @@ public class DeployGate {
         private void onEnableLogcat(boolean isEnabled) {
             if (mRemoteService == null)
                 return;
-            
+
             if (isEnabled) {
                 if (mLogcatThread == null || !mLogcatThread.isAlive()) {
-                    mLogcatWorker = new LogCatTranportWorker(mApplicationContext.getPackageName(),
-                            mRemoteService);
+                    mLogcatWorker = new LogCatTranportWorker(
+                            mApplicationContext.getPackageName(), mRemoteService);
                     mLogcatThread = new Thread(mLogcatWorker);
                     mLogcatThread.start();
                 }
@@ -102,18 +121,22 @@ public class DeployGate {
             mAppIsAuthorized = isAuthorized;
             mAppIsStopRequested = isStopped;
             mLoginUsername = loginUsername;
-            
+
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (mCallback != null) {
                         mCallback.onInitialized(true);
-                        mCallback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
+                        mCallback
+                                .onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
                     }
                 }
             });
+
+            mIsDeployGateAvailable = true;
+            mInitializedLatch.countDown();
         }
-        
+
         private void onUpdateArrived(final int serial, final String versionName,
                 final int versionCode) throws RemoteException {
             mHandler.post(new Runnable() {
@@ -125,15 +148,7 @@ public class DeployGate {
             });
         }
     };
-    
-    private final Handler mHandler;
-    private final DeployGateCallback mCallback;
-    
-    private boolean mAppIsManaged;
-    private boolean mAppIsAuthorized;
-    private boolean mAppIsStopRequested;
-    private String mLoginUsername;
-    
+
     /**
      * Do not instantiate directly. Call {@link #install(Application)} on your
      * {@link Application#onCreate()} instead.
@@ -142,13 +157,16 @@ public class DeployGate {
         mHandler = new Handler();
         mApplicationContext = applicationContext;
         mCallback = callback;
-        
+        mInitializedLatch = new CountDownLatch(1);
+
         prepareBroadcastReceiver();
         if (isDeployGateAvailable()) {
             Log.v(TAG, "DeployGate installation detected. Initializing.");
             bindToService(true);
         } else {
             Log.v(TAG, "DeployGate is not available on this device.");
+            mInitializedLatch.countDown();
+            mIsDeployGateAvailable = false;
             if (mCallback != null)
                 mCallback.onInitialized(false);
         }
@@ -185,7 +203,7 @@ public class DeployGate {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.v(TAG, "DeployGate service connected");
                 mRemoteService = IDeployGateSdkService.Stub.asInterface(service);
-                
+
                 Bundle args = new Bundle();
                 args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
                 args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, canLogCat());
@@ -195,6 +213,7 @@ public class DeployGate {
                     Log.w(TAG, "DeployGate service failed to be initialized.");
                 }
             }
+
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 Log.v(TAG, "DeployGate service disconneced");
@@ -208,17 +227,17 @@ public class DeployGate {
                 mApplicationContext.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public String getDeployGatePackageSignature() {
+    private String getDeployGatePackageSignature() {
         PackageInfo info;
         try {
             info = mApplicationContext.getPackageManager().getPackageInfo(
-                    "com.deploygate", PackageManager.GET_SIGNATURES);
+                    DEPLOYGATE_PACKAGE, PackageManager.GET_SIGNATURES);
         } catch (NameNotFoundException e) {
             return null;
         }
         if (info == null || info.signatures.length == 0)
             return null;
-        
+
         MessageDigest md;
         try {
             md = MessageDigest.getInstance("SHA1");
@@ -226,7 +245,7 @@ public class DeployGate {
             Log.e(TAG, "SHA1 is not supported on this platform?", e);
             return null;
         }
-        
+
         byte[] digest = md.digest(info.signatures[0].toByteArray());
         StringBuilder result = new StringBuilder(40);
         for (int i = 0; i < digest.length; i++) {
@@ -234,7 +253,7 @@ public class DeployGate {
         }
         return result.toString();
     }
-    
+
     /**
      * Install DeployGate on your application instance. Call this method inside
      * of your {@link Application#onCreate()}.
@@ -254,39 +273,135 @@ public class DeployGate {
      */
     public static void install(Application app, DeployGateCallback callback) {
         if (sInstance == null) {
-            Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(
-                    app.getApplicationContext(), Thread
-                            .getDefaultUncaughtExceptionHandler()));
+            Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
+                    .getDefaultUncaughtExceptionHandler()));
             sInstance = new DeployGate(app.getApplicationContext(), callback);
         }
     }
 
+    /**
+     * Get whether SDK is completed its intialization process and ready after
+     * {@link #install(Application)}. This call will never blocked.
+     * 
+     * @return true if SDK is ready. false otherwise. If no install() called
+     *         ever, this always returns false.
+     */
+    public static boolean isInitialized() {
+        if (sInstance != null) {
+            return sInstance.mInitializedLatch.getCount() == 0;
+        }
+        return false;
+    }
+
+    /**
+     * Get whether DeployGate client service is available on this device.
+     * <p>
+     * Note this function will block until SDK get ready after
+     * {@link #install(Application)} called. So if you want to call this
+     * function from the main thread, you should confirm that
+     * {@link #isInitialized()} is true before calling this. (Or consider using
+     * {@link DeployGateCallback#onInitialized(boolean)} callback.)
+     * </p>
+     * 
+     * @return true if valid DeployGate client is available. false otherwise. If
+     *         no install() called ever, this always returns false.
+     */
+    public static boolean isDeployGateAvaliable() {
+        if (sInstance != null) {
+            waitForInitialized();
+            return sInstance.mIsDeployGateAvailable;
+        }
+        return false;
+    }
+
+    /**
+     * Get whether this application and its package is known and managed under
+     * the DeployGate.
+     * <p>
+     * Note this function will block until SDK get ready after
+     * {@link #install(Application)} called. So if you want to call this
+     * function from the main thread, you should confirm that
+     * {@link #isInitialized()} is true before calling this. (Or consider using
+     * {@link DeployGateCallback#onInitialized(boolean)} callback.)
+     * </p>
+     * 
+     * @return true if DeployGate knows and manages this package. false
+     *         otherwise. If no install() called ever, this always returns
+     *         false.
+     */
     public static boolean isManaged() {
-        if (sInstance != null)
+        if (sInstance != null) {
+            waitForInitialized();
             return sInstance.mAppIsManaged;
+        }
         return false;
     }
 
+    /**
+     * Get whether current DeployGate user has this application in his/her
+     * available list. You may want to check this value on initialization
+     * process of the main activity if you want to limit user of this
+     * application to only who you explicitly allowed.
+     * <p>
+     * Note this function will block until SDK get ready after
+     * {@link #install(Application)} called. So if you want to call this
+     * function from the main thread, you should confirm that
+     * {@link #isInitialized()} is true before calling this. (Or consider using
+     * {@link DeployGateCallback#onInitialized(boolean)} callback.)
+     * </p>
+     * 
+     * @return true if current DeployGate user has available list which contains
+     *         this application. false otherwise. If no install() called ever,
+     *         this always returns false.
+     */
     public static boolean isAuthorized() {
-        if (sInstance != null)
+        if (sInstance != null) {
+            waitForInitialized();
             return sInstance.mAppIsAuthorized;
+        }
         return false;
     }
 
+    /**
+     * Get current DeployGate username.
+     * <p>
+     * Note this function will block until SDK get ready after
+     * {@link #install(Application)} called. So if you want to call this
+     * function from the main thread, you should confirm that
+     * {@link #isInitialized()} is true before calling this. (Or consider using
+     * {@link DeployGateCallback#onInitialized(boolean)} callback.)
+     * </p>
+     * 
+     * @return true if current DeployGate user has available list which contains
+     *         this application. false otherwise. If no install() called ever,
+     *         this always returns false.
+     */
     public static String getLoginUsername() {
-        if (sInstance != null)
+        if (sInstance != null) {
+            waitForInitialized();
             return sInstance.mLoginUsername;
+        }
         return null;
     }
-    
-    public static boolean isStopRequested() {
-        if (sInstance != null)
+
+    @SuppressWarnings("unused")
+    private/* public */static boolean isStopRequested() {
+        if (sInstance != null) {
+            waitForInitialized();
             return sInstance.mAppIsStopRequested;
+        }
         return false;
     }
-    
+
+    private static void waitForInitialized() {
+        try {
+            sInstance.mInitializedLatch.await();
+        } catch (InterruptedException e) {
+            Log.w(TAG, "Interrupted while waiting initialization");
+        }
+    }
+
     private static class LogCatTranportWorker implements Runnable {
-        
         private final String mPackageName;
         private final IDeployGateSdkService mService;
         private Process mProcess;
@@ -295,7 +410,7 @@ public class DeployGate {
             mPackageName = packageName;
             mService = service;
         }
-        
+
         @Override
         public void run() {
             mProcess = null;
@@ -304,20 +419,22 @@ public class DeployGate {
                 ArrayList<String> commandLine = new ArrayList<String>();
                 commandLine.add("logcat");
                 logcatBuf = new ArrayList<String>();
-                
+
                 commandLine.add("-v");
                 commandLine.add("threadtime");
                 commandLine.add("*:V");
 
-                mProcess = Runtime.getRuntime().exec(commandLine.toArray(new String[commandLine.size()]));
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(mProcess.getInputStream()));
+                mProcess = Runtime.getRuntime().exec(
+                        commandLine.toArray(new String[commandLine.size()]));
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                        mProcess.getInputStream()));
 
                 Log.v(TAG, "Start retrieving logcat");
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     logcatBuf.add(line + "\n");
                     if (!bufferedReader.ready()) {
-                        if (send(logcatBuf)) 
+                        if (send(logcatBuf))
                             logcatBuf.clear();
                         else
                             return;
@@ -331,7 +448,7 @@ public class DeployGate {
                     mProcess.destroy();
             }
         }
-        
+
         public void stop() {
             if (mProcess != null)
                 mProcess.destroy();
@@ -353,11 +470,11 @@ public class DeployGate {
         return sInstance;
     }
 
-    public void sendCrashReport(Throwable ex) {
+    void sendCrashReport(Throwable ex) {
         if (mRemoteService == null)
             return;
         Bundle extras = new Bundle();
-        extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex); 
+        extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex);
         try {
             mRemoteService.sendEvent(mApplicationContext.getPackageName(),
                     DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
