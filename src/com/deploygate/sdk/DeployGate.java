@@ -1,18 +1,6 @@
 
 package com.deploygate.sdk;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
-
-import com.deploygate.service.DeployGateEvent;
-import com.deploygate.service.IDeployGateSdkService;
-import com.deploygate.service.IDeployGateSdkServiceCallback;
-
 import android.Manifest.permission;
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -29,6 +17,18 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.deploygate.service.DeployGateEvent;
+import com.deploygate.service.IDeployGateSdkService;
+import com.deploygate.service.IDeployGateSdkServiceCallback;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * DeployGate SDK library implementation. Import this library to the application

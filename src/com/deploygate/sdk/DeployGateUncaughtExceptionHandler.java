@@ -1,9 +1,9 @@
 
 package com.deploygate.sdk;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import android.util.Log;
+
+import java.lang.Thread.UncaughtExceptionHandler;
 
 /**
  * Exception handler class that provides crash reporting feature of DeployGate.
