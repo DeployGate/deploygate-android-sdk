@@ -52,6 +52,7 @@ public class DeployGate {
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
 
     private static final String[] DEPLOYGATE_FINGERPRINTS = new String[] {
+            "2f97f647645cb762bf5fc1445599a954e6ad76e7", // deploygate release
             "c1f285f69cc02a397135ed182aa79af53d5d20a1", // mba debug
             "234eff4a1600a7aa78bf68adfbb15786e886ae1a", // jenkins debug
     };
