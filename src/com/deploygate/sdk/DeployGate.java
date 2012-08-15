@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -59,7 +60,7 @@ public class DeployGate {
 
     private final Context mApplicationContext;
     private final Handler mHandler;
-    private final DeployGateCallback mCallback;
+    private final HashSet<DeployGateCallback> mCallbacks;
 
     private CountDownLatch mInitializedLatch;
     private boolean mIsDeployGateAvailable;
@@ -68,6 +69,10 @@ public class DeployGate {
     private boolean mAppIsAuthorized;
     private boolean mAppIsStopRequested;
     private String mLoginUsername;
+    private boolean mAppUpdateAvailable;
+    private int mAppUpdateRevision;
+    private String mAppUpdateVersionName;
+    private int mAppUpdateVersionCode;
 
     private IDeployGateSdkService mRemoteService;
     private Thread mLogcatThread;
@@ -125,10 +130,9 @@ public class DeployGate {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (mCallback != null) {
-                        mCallback.onInitialized(true);
-                        mCallback
-                                .onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
+                    for (DeployGateCallback callback : mCallbacks) {
+                        callback.onInitialized(true);
+                        callback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
                     }
                 }
             });
@@ -139,11 +143,17 @@ public class DeployGate {
 
         private void onUpdateArrived(final int serial, final String versionName,
                 final int versionCode) throws RemoteException {
+            mAppUpdateAvailable = true;
+            mAppUpdateRevision = serial;
+            mAppUpdateVersionName = versionName;
+            mAppUpdateVersionCode = versionCode;
+            
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (mCallback != null)
-                        mCallback.onUpdateAvailable(serial, versionName, versionCode);
+                    for (DeployGateCallback callback : mCallbacks) {
+                        callback.onUpdateAvailable(serial, versionName, versionCode);
+                    }
                 }
             });
         }
@@ -156,7 +166,9 @@ public class DeployGate {
     private DeployGate(Context applicationContext, DeployGateCallback callback) {
         mHandler = new Handler();
         mApplicationContext = applicationContext;
-        mCallback = callback;
+        mCallbacks = new HashSet<DeployGateCallback>();
+        if (callback != null)
+                mCallbacks.add(callback);
         mInitializedLatch = new CountDownLatch(1);
 
         prepareBroadcastReceiver();
@@ -167,8 +179,9 @@ public class DeployGate {
             Log.v(TAG, "DeployGate is not available on this device.");
             mInitializedLatch.countDown();
             mIsDeployGateAvailable = false;
-            if (mCallback != null)
-                mCallback.onInitialized(false);
+            
+            if (callback != null)
+                callback.onInitialized(false);
         }
     }
 
@@ -203,15 +216,7 @@ public class DeployGate {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.v(TAG, "DeployGate service connected");
                 mRemoteService = IDeployGateSdkService.Stub.asInterface(service);
-
-                Bundle args = new Bundle();
-                args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
-                args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, canLogCat());
-                try {
-                    mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "DeployGate service failed to be initialized.");
-                }
+                requestServiceInit(isBoot);
             }
 
             @Override
@@ -220,6 +225,17 @@ public class DeployGate {
                 mRemoteService = null;
             }
         }, Context.BIND_AUTO_CREATE);
+    }
+
+    private void requestServiceInit(final boolean isBoot) {
+        Bundle args = new Bundle();
+        args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
+        args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, canLogCat());
+        try {
+            mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
+        } catch (RemoteException e) {
+            Log.w(TAG, "DeployGate service failed to be initialized.");
+        }
     }
 
     protected boolean canLogCat() {
@@ -253,6 +269,30 @@ public class DeployGate {
         }
         return result.toString();
     }
+    
+    /**
+     * Request refreshing cached session values (e.g., isAuthorized, etc.) to
+     * the DeployGate service. Nothing happens if this called before
+     * {@link #install(Application)} or when refreshing is already in progress.
+     * Note that after calling this, {@link #isInitialized()} will changed to
+     * false immediately and any call to <tt>is*()</tt> will be blocked until
+     * refreshing get finished.
+     */
+    public static void refresh() {
+        if (sInstance != null)
+            sInstance.refreshInternal();
+    }
+
+    private void refreshInternal() {
+        if (mInitializedLatch.getCount() == 0) {
+            mInitializedLatch = new CountDownLatch(1);
+            if (mRemoteService == null) {
+                bindToService(false);
+            } else {
+                requestServiceInit(false);
+            }
+        }
+    }
 
     /**
      * Install DeployGate on your application instance. Call this method inside
@@ -266,18 +306,70 @@ public class DeployGate {
 
     /**
      * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()}.
+     * of your {@link Application#onCreate()} once.
      * 
      * @param app Application instance, typically just pass <em>this<em>.
      * @param callback Callback interface to listen events.
+     * @throws IllegalStateException if this called twice
      */
     public static void install(Application app, DeployGateCallback callback) {
-        if (sInstance == null) {
-            Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
-                    .getDefaultUncaughtExceptionHandler()));
-            sInstance = new DeployGate(app.getApplicationContext(), callback);
+        if (sInstance != null)
+            throw new IllegalStateException("install already called");
+        
+        Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
+                .getDefaultUncaughtExceptionHandler()));
+        sInstance = new DeployGate(app.getApplicationContext(), callback);
+    }
+    
+    /**
+     * Register a DeployGate event callback listener. Don't forget to call
+     * {@link #unregisterCallback(DeployGateCallback)} when the callback is no
+     * longer needed (e.g., on destroying an activity.) If the listener has
+     * already in the callback list, just ignored.
+     * 
+     * @param listener callback listener
+     * @param callbackImmediately if you want to receive cached states, set this true.
+     * @throws IllegalStateException if {@link #install(Application)} hasn't
+     *             been called yet.
+     */
+    public static void registerCallback(DeployGateCallback listener, boolean callbackImmediately) {
+        if (sInstance == null)
+            throw new IllegalStateException("DeployGate#install hasn't been called yet");
+        if (listener == null)
+            return;
+        
+        sInstance.registerCallbackInternal(listener, callbackImmediately);
+    }
+    
+    private void registerCallbackInternal(DeployGateCallback listener, boolean callbackImmediately) {
+        mCallbacks.add(listener);
+        if (callbackImmediately) {
+            if (mRemoteService != null) {
+                listener.onInitialized(mIsDeployGateAvailable);
+                listener.onStatusChanged(mAppIsManaged, mAppIsAuthorized, mLoginUsername, mAppIsStopRequested);
+            }
+            if (mAppUpdateAvailable)
+                listener.onUpdateAvailable(mAppUpdateRevision, mAppUpdateVersionName, mAppUpdateVersionCode);
         }
     }
+
+    /**
+     * Unregister a callback listener. If the listener was not registered, just
+     * ignored.
+     * 
+     * @param listener callback listener to be removed
+     * @throws IllegalStateException if {@link #install(Application)} hasn't
+     *             been called yet.
+     */
+    public static void unregisterCallback(DeployGateCallback listener) {
+        if (sInstance == null)
+            throw new IllegalStateException("DeployGate#install hasn't been called yet");
+        if (listener == null)
+            return;
+        
+        sInstance.mCallbacks.remove(listener);
+    }
+    
 
     /**
      * Get whether SDK is completed its intialization process and ready after
