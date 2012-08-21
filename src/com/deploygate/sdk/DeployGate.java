@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -302,20 +303,38 @@ public class DeployGate {
      * @param app Application instance, typically just pass <em>this<em>.
      */
     public static void install(Application app) {
-        install(app, null);
+        install(app, null, false);
     }
 
     /**
      * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()} once.
+     * of your {@link Application#onCreate()} once. On release build, which has
+     * <tt>android:isDebuggable</tt> set false on AndroidManifest.xml, this
+     * function will do nothing.
      * 
      * @param app Application instance, typically just pass <em>this<em>.
      * @param callback Callback interface to listen events.
      * @throws IllegalStateException if this called twice
      */
     public static void install(Application app, DeployGateCallback callback) {
+        install(app, callback, false);
+    }
+
+    /**
+     * Install DeployGate on your application instance. Call this method inside
+     * of your {@link Application#onCreate()} once. 
+     * 
+     * @param app Application instance, typically just pass <em>this<em>.
+     * @param callback Callback interface to listen events.
+     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on the release build, set this true.
+     * @throws IllegalStateException if this called twice
+     */
+    public static void install(Application app, DeployGateCallback callback, boolean forceApplyOnReleaseBuild) {
         if (sInstance != null)
             throw new IllegalStateException("install already called");
+        
+        if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext()))
+            return;
         
         Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
                 .getDefaultUncaughtExceptionHandler()));
@@ -330,12 +349,10 @@ public class DeployGate {
      * 
      * @param listener callback listener
      * @param callbackImmediately if you want to receive cached states, set this true.
-     * @throws IllegalStateException if {@link #install(Application)} hasn't
-     *             been called yet.
      */
     public static void registerCallback(DeployGateCallback listener, boolean callbackImmediately) {
         if (sInstance == null)
-            throw new IllegalStateException("DeployGate#install hasn't been called yet");
+            return;
         if (listener == null)
             return;
         
@@ -359,12 +376,10 @@ public class DeployGate {
      * ignored.
      * 
      * @param listener callback listener to be removed
-     * @throws IllegalStateException if {@link #install(Application)} hasn't
-     *             been called yet.
      */
     public static void unregisterCallback(DeployGateCallback listener) {
         if (sInstance == null)
-            throw new IllegalStateException("DeployGate#install hasn't been called yet");
+            return;
         if (listener == null)
             return;
         
@@ -492,6 +507,20 @@ public class DeployGate {
         } catch (InterruptedException e) {
             Log.w(TAG, "Interrupted while waiting initialization");
         }
+    }
+
+    private static boolean isDebuggable(Context context) {
+        PackageManager manager = context.getPackageManager();
+        ApplicationInfo appInfo = null;
+        try {
+            appInfo = manager.getApplicationInfo(context.getPackageName(), 0);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+        if ((appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == ApplicationInfo.FLAG_DEBUGGABLE) {
+            return true;
+        }
+        return false;
     }
 
     private static class LogCatTranportWorker implements Runnable {
