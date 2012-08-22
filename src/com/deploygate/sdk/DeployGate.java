@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * DeployGate SDK library implementation. Import this library to the application
+ * This is DeployGate SDK library. Import this library to the application
  * package and call {@link #install(Application)} on the onCreate() of
  * application class to enable crash reporting and application launch
  * notification.
@@ -71,9 +71,14 @@ public class DeployGate {
     private boolean mAppIsAuthorized;
     private boolean mAppIsStopRequested;
     private String mLoginUsername;
+
+    @SuppressWarnings("unused")
     private boolean mAppUpdateAvailable;
+    @SuppressWarnings("unused")
     private int mAppUpdateRevision;
+    @SuppressWarnings("unused")
     private String mAppUpdateVersionName;
+    @SuppressWarnings("unused")
     private int mAppUpdateVersionCode;
 
     private IDeployGateSdkService mRemoteService;
@@ -149,7 +154,7 @@ public class DeployGate {
             mAppUpdateRevision = serial;
             mAppUpdateVersionName = versionName;
             mAppUpdateVersionCode = versionCode;
-            
+
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -170,7 +175,7 @@ public class DeployGate {
         mApplicationContext = applicationContext;
         mCallbacks = new HashSet<DeployGateCallback>();
         if (callback != null)
-                mCallbacks.add(callback);
+            mCallbacks.add(callback);
         mInitializedLatch = new CountDownLatch(1);
 
         prepareBroadcastReceiver();
@@ -181,7 +186,7 @@ public class DeployGate {
             Log.v(TAG, "DeployGate is not available on this device.");
             mInitializedLatch.countDown();
             mIsDeployGateAvailable = false;
-            
+
             if (callback != null)
                 callback.onInitialized(false);
         }
@@ -271,7 +276,7 @@ public class DeployGate {
         }
         return result.toString();
     }
-    
+
     /**
      * Request refreshing cached session values (e.g., isAuthorized, etc.) to
      * the DeployGate service. Nothing happens if this called before
@@ -322,25 +327,27 @@ public class DeployGate {
 
     /**
      * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()} once. 
+     * of your {@link Application#onCreate()} once.
      * 
      * @param app Application instance, typically just pass <em>this<em>.
      * @param callback Callback interface to listen events.
-     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on the release build, set this true.
+     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
+     *            the release build, set this true.
      * @throws IllegalStateException if this called twice
      */
-    public static void install(Application app, DeployGateCallback callback, boolean forceApplyOnReleaseBuild) {
+    public static void install(Application app, DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild) {
         if (sInstance != null)
             throw new IllegalStateException("install already called");
-        
+
         if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext()))
             return;
-        
+
         Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
                 .getDefaultUncaughtExceptionHandler()));
         sInstance = new DeployGate(app.getApplicationContext(), callback);
     }
-    
+
     /**
      * Register a DeployGate event callback listener. Don't forget to call
      * {@link #unregisterCallback(DeployGateCallback)} when the callback is no
@@ -348,27 +355,22 @@ public class DeployGate {
      * already in the callback list, just ignored.
      * 
      * @param listener callback listener
-     * @param callbackImmediately if you want to receive cached states, set this true.
+     * @param refreshImmediately if you want to receive current states, set this
+     *            true.
      */
-    public static void registerCallback(DeployGateCallback listener, boolean callbackImmediately) {
+    public static void registerCallback(DeployGateCallback listener, boolean refreshImmediately) {
         if (sInstance == null)
             return;
         if (listener == null)
             return;
         
-        sInstance.registerCallbackInternal(listener, callbackImmediately);
+        sInstance.registerCallbackInternal(listener, refreshImmediately);
     }
-    
+
     private void registerCallbackInternal(DeployGateCallback listener, boolean callbackImmediately) {
         mCallbacks.add(listener);
-        if (callbackImmediately) {
-            if (mRemoteService != null) {
-                listener.onInitialized(mIsDeployGateAvailable);
-                listener.onStatusChanged(mAppIsManaged, mAppIsAuthorized, mLoginUsername, mAppIsStopRequested);
-            }
-            if (mAppUpdateAvailable)
-                listener.onUpdateAvailable(mAppUpdateRevision, mAppUpdateVersionName, mAppUpdateVersionCode);
-        }
+        if (callbackImmediately)
+            refresh();
     }
 
     /**
@@ -382,10 +384,9 @@ public class DeployGate {
             return;
         if (listener == null)
             return;
-        
+
         sInstance.mCallbacks.remove(listener);
     }
-    
 
     /**
      * Get whether SDK is completed its intialization process and ready after
@@ -490,6 +491,77 @@ public class DeployGate {
             return sInstance.mLoginUsername;
         }
         return null;
+    }
+
+    /**
+     * Record ERROR level event on DeployGate. Log message will immediately send
+     * to the server so you may see it on your dashboard. Nothing happen when
+     * DeployGate is not available, i.e. {@link #isAuthorized()} is not true.
+     * 
+     * @param message Message body to be send. May be truncated if it's too
+     *            long.
+     */
+    public static void logError(String message) {
+        if (sInstance != null) {
+            sInstance.sendLog("error", message);
+        }
+    }
+
+    /**
+     * Record WARN level event on DeployGate. Log message will immediately send
+     * to the server so you may see it on your dashboard. Nothing happen when
+     * DeployGate is not available, i.e. {@link #isAuthorized()} is not true.
+     * 
+     * @param message Message body to be send. May be truncated if it's too
+     *            long.
+     */
+    public static void logWarn(String message) {
+        if (sInstance != null) {
+            sInstance.sendLog("warn", message);
+        }
+    }
+
+    /**
+     * Record DEBUG level event on DeployGate. Log message will immediately send
+     * to the server so you may see it on your dashboard. Nothing happen when
+     * DeployGate is not available, i.e. {@link #isAuthorized()} is not true.
+     * 
+     * @param message Message body to be send. May be truncated if it's too
+     *            long.
+     */
+    public static void logDebug(String message) {
+        if (sInstance != null) {
+            sInstance.sendLog("debug", message);
+        }
+    }
+
+    /**
+     * Record INFO level event on DeployGate. Log message will immediately send
+     * to the server so you may see it on your dashboard. Nothing happen when
+     * DeployGate is not available, i.e. {@link #isAuthorized()} is not true.
+     * 
+     * @param message Message body to be send. May be truncated if it's too
+     *            long.
+     */
+    public static void logInfo(String message) {
+        if (sInstance != null) {
+            sInstance.sendLog("info", message);
+        }
+    }
+
+    /**
+     * Record VERBOSE level event on DeployGate. Log message will immediately
+     * send to the server so you may see it on your dashboard. Nothing happen
+     * when DeployGate is not available, i.e. {@link #isAuthorized()} is not
+     * true.
+     * 
+     * @param message Message body to be send. May be truncated if it's too
+     *            long.
+     */
+    public static void logVerbose(String message) {
+        if (sInstance != null) {
+            sInstance.sendLog("verbose", message);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -602,6 +674,18 @@ public class DeployGate {
                     DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to send crash report: " + e.getMessage());
+        }
+    }
+
+    void sendLog(String type, String body) {
+        Bundle extras = new Bundle();
+        extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
+        extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
+        try {
+            mRemoteService.sendEvent(mApplicationContext.getPackageName(),
+                    DeployGateEvent.ACTION_SEND_CUSTOM_LOG, extras);
+        } catch (RemoteException e) {
+            Log.w(TAG, "failed to send custom log: " + e.getMessage());
         }
     }
 }
