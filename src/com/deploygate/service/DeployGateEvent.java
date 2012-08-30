@@ -5,10 +5,13 @@ public interface DeployGateEvent {
     public static final String ACTION_UPDATE_AVAILABLE = "update";
     public static final String ACTION_ENABLE_LOGCAT = "enableLogcat";
     public static final String ACTION_DISABLE_LOGCAT = "disableLogcat";
+    public static final String ACTION_ONESHOT_LOGCAT = "oneshotLogcat";
+    
     public static final String ACTION_SEND_LOGCAT = "sendLogcat";
     public static final String ACTION_SEND_CRASH_REPORT = "reportCrash";
     public static final String ACTION_SEND_CUSTOM_LOG = "customLog";
     
+    public static final String EXTRA_SDK_VERSION = "sdkVersion";
     public static final String EXTRA_IS_MANAGED = "isManaged";
     public static final String EXTRA_IS_AUTHORIZED = "isAuthorized";
     public static final String EXTRA_LOGIN_USERNAME = "loginUsername";

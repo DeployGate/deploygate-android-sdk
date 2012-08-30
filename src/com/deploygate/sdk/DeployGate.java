@@ -48,6 +48,7 @@ import java.util.concurrent.CountDownLatch;
 public class DeployGate {
 
     private static final String TAG = "DeployGate";
+    private static final int SDK_VERSION = 1;
 
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
@@ -99,6 +100,9 @@ public class DeployGate {
                         extras.getString(DeployGateEvent.EXTRA_VERSION_NAME),
                         extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE));
             }
+            else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
+                onOneshotLogcat();
+            }
             else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
                 onEnableLogcat(true);
             }
@@ -107,6 +111,15 @@ public class DeployGate {
             }
         };
 
+        private void onOneshotLogcat() {
+            if (mLogcatThread == null || !mLogcatThread.isAlive()) {
+                mLogcatWorker = new LogCatTranportWorker(
+                        mApplicationContext.getPackageName(), mRemoteService, true);
+                mLogcatThread = new Thread(mLogcatWorker);
+                mLogcatThread.start();
+            }
+        }
+
         private void onEnableLogcat(boolean isEnabled) {
             if (mRemoteService == null)
                 return;
@@ -114,7 +127,7 @@ public class DeployGate {
             if (isEnabled) {
                 if (mLogcatThread == null || !mLogcatThread.isAlive()) {
                     mLogcatWorker = new LogCatTranportWorker(
-                            mApplicationContext.getPackageName(), mRemoteService);
+                            mApplicationContext.getPackageName(), mRemoteService, false);
                     mLogcatThread = new Thread(mLogcatWorker);
                     mLogcatThread.start();
                 }
@@ -147,6 +160,18 @@ public class DeployGate {
             mIsDeployGateAvailable = true;
             mInitializedLatch.countDown();
         }
+        
+        void callbackDeployGateUnavailable() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (DeployGateCallback callback : mCallbacks) {
+                        callback.onInitialized(false);
+                        callback.onStatusChanged(false, false, null, false);
+                    }
+                }
+            });
+        }
 
         private void onUpdateArrived(final int serial, final String versionName,
                 final int versionCode) throws RemoteException {
@@ -174,21 +199,29 @@ public class DeployGate {
         mHandler = new Handler();
         mApplicationContext = applicationContext;
         mCallbacks = new HashSet<DeployGateCallback>();
-        if (callback != null)
-            mCallbacks.add(callback);
-        mInitializedLatch = new CountDownLatch(1);
 
         prepareBroadcastReceiver();
+
+        if (callback != null)
+            mCallbacks.add(callback);
+        
+        mInitializedLatch = new CountDownLatch(1);
+        if (!initService(true)) {
+            if (callback != null)
+                callback.onInitialized(false);
+        }
+    }
+
+    private boolean initService(boolean isBoot) {
         if (isDeployGateAvailable()) {
             Log.v(TAG, "DeployGate installation detected. Initializing.");
-            bindToService(true);
+            bindToService(isBoot);
+            return true;
         } else {
             Log.v(TAG, "DeployGate is not available on this device.");
             mInitializedLatch.countDown();
             mIsDeployGateAvailable = false;
-
-            if (callback != null)
-                callback.onInitialized(false);
+            return false;
         }
     }
 
@@ -238,6 +271,7 @@ public class DeployGate {
         Bundle args = new Bundle();
         args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
         args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, canLogCat());
+        args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, SDK_VERSION);
         try {
             mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
         } catch (RemoteException e) {
@@ -294,7 +328,7 @@ public class DeployGate {
         if (mInitializedLatch.getCount() == 0) {
             mInitializedLatch = new CountDownLatch(1);
             if (mRemoteService == null) {
-                bindToService(false);
+                initService(false);
             } else {
                 requestServiceInit(false);
             }
@@ -599,16 +633,19 @@ public class DeployGate {
         private final String mPackageName;
         private final IDeployGateSdkService mService;
         private Process mProcess;
+        private boolean mIsOneShot;
 
-        public LogCatTranportWorker(String packageName, IDeployGateSdkService service) {
+        public LogCatTranportWorker(String packageName, IDeployGateSdkService service, boolean isOneshot) {
             mPackageName = packageName;
             mService = service;
+            mIsOneShot = isOneshot;
         }
 
         @Override
         public void run() {
             mProcess = null;
             ArrayList<String> logcatBuf = null;
+            BufferedReader bufferedReader = null;;
             try {
                 ArrayList<String> commandLine = new ArrayList<String>();
                 commandLine.add("logcat");
@@ -620,7 +657,7 @@ public class DeployGate {
 
                 mProcess = Runtime.getRuntime().exec(
                         commandLine.toArray(new String[commandLine.size()]));
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                bufferedReader = new BufferedReader(new InputStreamReader(
                         mProcess.getInputStream()));
 
                 Log.v(TAG, "Start retrieving logcat");
@@ -632,14 +669,22 @@ public class DeployGate {
                             logcatBuf.clear();
                         else
                             return;
+                        if (mIsOneShot)
+                            return;
                     }
                 }
                 // EOF, stop it
             } catch (IOException e) {
                 Log.d(TAG, "Logcat stopped: " + e.getMessage());
             } finally {
-                if (mProcess != null)
-                    mProcess.destroy();
+                if (bufferedReader != null) {
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        // ignored
+                    }
+                }
+                stop();
             }
         }
 
