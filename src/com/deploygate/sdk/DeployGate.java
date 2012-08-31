@@ -13,6 +13,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -161,18 +162,6 @@ public class DeployGate {
             mInitializedLatch.countDown();
         }
         
-        void callbackDeployGateUnavailable() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    for (DeployGateCallback callback : mCallbacks) {
-                        callback.onInitialized(false);
-                        callback.onStatusChanged(false, false, null, false);
-                    }
-                }
-            });
-        }
-
         private void onUpdateArrived(final int serial, final String versionName,
                 final int versionCode) throws RemoteException {
             mAppUpdateAvailable = true;
@@ -190,6 +179,18 @@ public class DeployGate {
             });
         }
     };
+
+    void callbackDeployGateUnavailable() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (DeployGateCallback callback : mCallbacks) {
+                    callback.onInitialized(false);
+                    callback.onStatusChanged(false, false, null, false);
+                }
+            }
+        });
+    }
 
     /**
      * Do not instantiate directly. Call {@link #install(Application)} on your
@@ -221,6 +222,7 @@ public class DeployGate {
             Log.v(TAG, "DeployGate is not available on this device.");
             mInitializedLatch.countDown();
             mIsDeployGateAvailable = false;
+            callbackDeployGateUnavailable();
             return false;
         }
     }
@@ -280,6 +282,8 @@ public class DeployGate {
     }
 
     protected boolean canLogCat() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+            return true;
         return mApplicationContext.getPackageManager().checkPermission(permission.READ_LOGS,
                 mApplicationContext.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
