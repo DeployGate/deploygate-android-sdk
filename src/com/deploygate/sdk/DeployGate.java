@@ -31,6 +31,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -316,6 +317,53 @@ public class DeployGate {
     }
 
     /**
+     * Install DeployGate on your application instance. Call this method inside
+     * of your {@link Application#onCreate()}.
+     * 
+     * @param app Application instance, typically just pass <em>this</em>.
+     */
+    public static void install(Application app) {
+        install(app, null, false);
+    }
+
+    /**
+     * Install DeployGate on your application instance. Call this method inside
+     * of your {@link Application#onCreate()} once. On release build, which has
+     * <tt>android:isDebuggable</tt> set false on AndroidManifest.xml, this
+     * function will do nothing.
+     * 
+     * @param app Application instance, typically just pass <em>this</em>.
+     * @param callback Callback interface to listen events.
+     * @throws IllegalStateException if this called twice
+     */
+    public static void install(Application app, DeployGateCallback callback) {
+        install(app, callback, false);
+    }
+
+    /**
+     * Install DeployGate on your application instance. Call this method inside
+     * of your {@link Application#onCreate()} once.
+     * 
+     * @param app Application instance, typically just pass <em>this</em>.
+     * @param callback Callback interface to listen events.
+     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
+     *            the release build, set this true.
+     * @throws IllegalStateException if this called twice
+     */
+    public static void install(Application app, DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild) {
+        if (sInstance != null)
+            throw new IllegalStateException("install already called");
+
+        if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext()))
+            return;
+
+        Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
+                .getDefaultUncaughtExceptionHandler()));
+        sInstance = new DeployGate(app.getApplicationContext(), callback);
+    }
+
+    /**
      * Request refreshing cached session values (e.g., isAuthorized, etc.) to
      * the DeployGate service. Nothing happens if this called before
      * {@link #install(Application)} or when refreshing is already in progress.
@@ -337,53 +385,6 @@ public class DeployGate {
                 requestServiceInit(false);
             }
         }
-    }
-
-    /**
-     * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()}.
-     * 
-     * @param app Application instance, typically just pass <em>this<em>.
-     */
-    public static void install(Application app) {
-        install(app, null, false);
-    }
-
-    /**
-     * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()} once. On release build, which has
-     * <tt>android:isDebuggable</tt> set false on AndroidManifest.xml, this
-     * function will do nothing.
-     * 
-     * @param app Application instance, typically just pass <em>this<em>.
-     * @param callback Callback interface to listen events.
-     * @throws IllegalStateException if this called twice
-     */
-    public static void install(Application app, DeployGateCallback callback) {
-        install(app, callback, false);
-    }
-
-    /**
-     * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()} once.
-     * 
-     * @param app Application instance, typically just pass <em>this<em>.
-     * @param callback Callback interface to listen events.
-     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
-     *            the release build, set this true.
-     * @throws IllegalStateException if this called twice
-     */
-    public static void install(Application app, DeployGateCallback callback,
-            boolean forceApplyOnReleaseBuild) {
-        if (sInstance != null)
-            throw new IllegalStateException("install already called");
-
-        if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext()))
-            return;
-
-        Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
-                .getDefaultUncaughtExceptionHandler()));
-        sInstance = new DeployGate(app.getApplicationContext(), callback);
     }
 
     /**
@@ -651,10 +652,18 @@ public class DeployGate {
             ArrayList<String> logcatBuf = null;
             BufferedReader bufferedReader = null;;
             try {
-                ArrayList<String> commandLine = new ArrayList<String>();
+                LinkedList<String> commandLine = new LinkedList<String>();
                 commandLine.add("logcat");
                 logcatBuf = new ArrayList<String>();
 
+                int MAX_LINES = 500;
+                if (mIsOneShot) {
+                    commandLine.add("-d");
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+                        commandLine.add("-t");
+                        commandLine.add(String.valueOf(MAX_LINES));
+                    }
+                }
                 commandLine.add("-v");
                 commandLine.add("threadtime");
                 commandLine.add("*:V");
@@ -668,15 +677,20 @@ public class DeployGate {
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     logcatBuf.add(line + "\n");
-                    if (!bufferedReader.ready()) {
-                        if (send(logcatBuf))
-                            logcatBuf.clear();
-                        else
-                            return;
-                        if (mIsOneShot)
-                            return;
+                    if (mIsOneShot) {
+                        if (logcatBuf.size() > MAX_LINES)
+                            logcatBuf.remove(0);
+                    } else {
+                        if (!bufferedReader.ready()) {
+                            if (send(logcatBuf))
+                                logcatBuf.clear();
+                            else
+                                return;
+                        }
                     }
                 }
+                if (!logcatBuf.isEmpty())
+                    send(logcatBuf);
                 // EOF, stop it
             } catch (IOException e) {
                 Log.d(TAG, "Logcat stopped: " + e.getMessage());
@@ -727,6 +741,8 @@ public class DeployGate {
     }
 
     void sendLog(String type, String body) {
+        if (mRemoteService == null)
+            return;
         Bundle extras = new Bundle();
         extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
         extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
