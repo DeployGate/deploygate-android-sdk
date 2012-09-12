@@ -11,6 +11,8 @@ public interface DeployGateEvent {
     public static final String ACTION_SEND_CRASH_REPORT = "reportCrash";
     public static final String ACTION_SEND_CUSTOM_LOG = "customLog";
     
+    public static final String EXTRA_AUTHOR = "author";
+    public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";
     public static final String EXTRA_SDK_VERSION = "sdkVersion";
     public static final String EXTRA_IS_MANAGED = "isManaged";
     public static final String EXTRA_IS_AUTHORIZED = "isAuthorized";
@@ -19,6 +21,7 @@ public interface DeployGateEvent {
     public static final String EXTRA_SERIAL = "serial";
     public static final String EXTRA_VERSION_NAME = "versionName";
     public static final String EXTRA_VERSION_CODE = "versionCode";
+    public static final String EXTRA_SERIAL_MESSAGE = "serialMessage";
     public static final String EXTRA_CAN_LOGCAT = "canLogCat";
     public static final String EXTRA_IS_BOOT = "isBoot";
     public static final String EXTRA_LOG = "log";

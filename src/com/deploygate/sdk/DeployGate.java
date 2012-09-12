@@ -50,7 +50,7 @@ import java.util.concurrent.CountDownLatch;
 public class DeployGate {
 
     private static final String TAG = "DeployGate";
-    private static final int SDK_VERSION = 1;
+    private static final int SDK_VERSION = 2;
 
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
@@ -66,6 +66,8 @@ public class DeployGate {
     private final Context mApplicationContext;
     private final Handler mHandler;
     private final HashSet<DeployGateCallback> mCallbacks;
+    private String mAuthor;
+    private String mExpectedAuthor;
 
     private CountDownLatch mInitializedLatch;
     private boolean mIsDeployGateAvailable;
@@ -95,12 +97,14 @@ public class DeployGate {
                 onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
                         extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false),
                         extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME),
-                        extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false));
+                        extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false),
+                        extras.getString(DeployGateEvent.EXTRA_AUTHOR));
             }
             else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
                 onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL),
                         extras.getString(DeployGateEvent.EXTRA_VERSION_NAME),
-                        extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE));
+                        extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE),
+                        extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE));
             }
             else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
                 onOneshotLogcat();
@@ -142,12 +146,13 @@ public class DeployGate {
         }
 
         private void onInitialized(final boolean isManaged, final boolean isAuthorized,
-                final String loginUsername, final boolean isStopped) throws RemoteException {
+                final String loginUsername, final boolean isStopped, final String author) throws RemoteException {
             Log.v(TAG, "DeployGate service initialized");
             mAppIsManaged = isManaged;
             mAppIsAuthorized = isAuthorized;
             mAppIsStopRequested = isStopped;
             mLoginUsername = loginUsername;
+            mAuthor = author;
 
             mHandler.post(new Runnable() {
                 @Override
@@ -162,9 +167,9 @@ public class DeployGate {
             mIsDeployGateAvailable = true;
             mInitializedLatch.countDown();
         }
-        
+
         private void onUpdateArrived(final int serial, final String versionName,
-                final int versionCode) throws RemoteException {
+                final int versionCode, final String message) throws RemoteException {
             mAppUpdateAvailable = true;
             mAppUpdateRevision = serial;
             mAppUpdateVersionName = versionName;
@@ -197,16 +202,17 @@ public class DeployGate {
      * Do not instantiate directly. Call {@link #install(Application)} on your
      * {@link Application#onCreate()} instead.
      */
-    private DeployGate(Context applicationContext, DeployGateCallback callback) {
+    private DeployGate(Context applicationContext, String author, DeployGateCallback callback) {
         mHandler = new Handler();
         mApplicationContext = applicationContext;
         mCallbacks = new HashSet<DeployGateCallback>();
+        mExpectedAuthor = author;
 
         prepareBroadcastReceiver();
 
         if (callback != null)
             mCallbacks.add(callback);
-        
+
         mInitializedLatch = new CountDownLatch(1);
         if (!initService(true)) {
             if (callback != null)
@@ -274,6 +280,7 @@ public class DeployGate {
         Bundle args = new Bundle();
         args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
         args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, canLogCat());
+        args.putString(DeployGateEvent.EXTRA_EXPECTED_AUTHOR, mExpectedAuthor);
         args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, SDK_VERSION);
         try {
             mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
@@ -318,39 +325,129 @@ public class DeployGate {
 
     /**
      * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()}.
+     * of your {@link Application#onCreate()} once.
+     * <p>
+     * On a release build, which has <tt>android:isDebuggable</tt> set false on
+     * AndroidManifest.xml, this function will do nothing. If you want to enable
+     * DeployGate on a release build, consider using
+     * {@link #install(Application, String, DeployGateCallback, boolean)}
+     * instead.
+     * </p>
+     * <p>
+     * <b>Note:</b> To make {@link #isAuthorized()} more effective, you should
+     * call {@link #install(Application, String)} instead and specify authorId
+     * explicitly to ensure the authority of this app to prevent casual
+     * redistribution via DeployGate.
+     * </p>
      * 
      * @param app Application instance, typically just pass <em>this</em>.
+     * @throws IllegalStateException if this called twice
      */
     public static void install(Application app) {
-        install(app, null, false);
+        install(app, (String) null);
     }
 
     /**
      * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()} once. On release build, which has
-     * <tt>android:isDebuggable</tt> set false on AndroidManifest.xml, this
-     * function will do nothing.
+     * of your {@link Application#onCreate()} once.
+     * <p>
+     * On a release build, which has <tt>android:isDebuggable</tt> set false on
+     * AndroidManifest.xml, this function will do nothing. If you want to enable
+     * DeployGate on a release build, consider using
+     * {@link #install(Application, String[], DeployGateCallback, boolean)}
+     * instead.
+     * </p>
+     * 
+     * @param app Application instance, typically just pass <em>this</em>.
+     * @param author author username of this app.
+     * @throws IllegalStateException if this called twice
+     */
+    public static void install(Application app, String author) {
+        install(app, author, null);
+    }
+
+    /**
+     * Install DeployGate on your application instance and register a callback
+     * listener. Call this method inside of your {@link Application#onCreate()}
+     * once.
+     * <p>
+     * On a release build, which has <tt>android:isDebuggable</tt> set false on
+     * AndroidManifest.xml, this function will do nothing. If you want to enable
+     * DeployGate on a release build, consider using
+     * {@link #install(Application, String, DeployGateCallback, boolean)}
+     * instead.
+     * </p>
+     * <p>
+     * <b>Note:</b> To make {@link #isAuthorized()} more effective, you should
+     * call {@link #install(Application, String)} instead and specify authorId
+     * explicitly to ensure the authority of this app to prevent casual
+     * redistribution via DeployGate.
+     * </p>
      * 
      * @param app Application instance, typically just pass <em>this</em>.
      * @param callback Callback interface to listen events.
      * @throws IllegalStateException if this called twice
      */
     public static void install(Application app, DeployGateCallback callback) {
+        install(app, null, callback);
+    }
+
+    /**
+     * Install DeployGate on your application instance and register a callback
+     * listener. Call this method inside of your {@link Application#onCreate()}
+     * once.
+     * <p>
+     * On a release build, which has <tt>android:isDebuggable</tt> set false on
+     * AndroidManifest.xml, this function will do nothing. If you want to enable
+     * DeployGate on a release build, consider using
+     * {@link #install(Application, String, DeployGateCallback, boolean)}
+     * instead.
+     * </p>
+     * 
+     * @param app Application instance, typically just pass <em>this</em>.
+     * @param author author username of this app.
+     * @param callback Callback interface to listen events.
+     * @throws IllegalStateException if this called twice
+     */
+    public static void install(Application app, String author, DeployGateCallback callback) {
         install(app, callback, false);
     }
 
     /**
-     * Install DeployGate on your application instance. Call this method inside
-     * of your {@link Application#onCreate()} once.
+     * Install DeployGate on your application instance and register a callback
+     * listener. Call this method inside of your {@link Application#onCreate()}
+     * once.
+     * <p>
+     * <b>Note:</b> To make {@link #isAuthorized()} more effective, you should
+     * call {@link #install(Application, String)} instead and specify authorId
+     * explicitly to ensure the authority of this app to prevent casual
+     * redistribution via DeployGate.
+     * </p>
      * 
      * @param app Application instance, typically just pass <em>this</em>.
-     * @param callback Callback interface to listen events.
+     * @param callback Callback interface to listen events. Can be null.
      * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
      *            the release build, set this true.
      * @throws IllegalStateException if this called twice
      */
     public static void install(Application app, DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild) {
+        install(app, null, callback, forceApplyOnReleaseBuild);
+    }
+
+    /**
+     * Install DeployGate on your application instance and register a callback
+     * listener. Call this method inside of your {@link Application#onCreate()}
+     * once.
+     * 
+     * @param app Application instance, typically just pass <em>this</em>.
+     * @param author author username of this app. Can be null.
+     * @param callback Callback interface to listen events. Can be null.
+     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
+     *            the release build, set this true.
+     * @throws IllegalStateException if this called twice
+     */
+    public static void install(Application app, String author, DeployGateCallback callback,
             boolean forceApplyOnReleaseBuild) {
         if (sInstance != null)
             throw new IllegalStateException("install already called");
@@ -360,7 +457,7 @@ public class DeployGate {
 
         Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
                 .getDefaultUncaughtExceptionHandler()));
-        sInstance = new DeployGate(app.getApplicationContext(), callback);
+        sInstance = new DeployGate(app.getApplicationContext(), author, callback);
     }
 
     /**
@@ -402,7 +499,7 @@ public class DeployGate {
             return;
         if (listener == null)
             return;
-        
+
         sInstance.registerCallbackInternal(listener, refreshImmediately);
     }
 
@@ -511,7 +608,8 @@ public class DeployGate {
     }
 
     /**
-     * Get current DeployGate username.
+     * Get current DeployGate username. This function only available when
+     * {@link #isAuthorized()} is true.
      * <p>
      * Note this function will block until SDK get ready after
      * {@link #install(Application)} called. So if you want to call this
@@ -520,14 +618,38 @@ public class DeployGate {
      * {@link DeployGateCallback#onInitialized(boolean)} callback.)
      * </p>
      * 
-     * @return true if current DeployGate user has available list which contains
-     *         this application. false otherwise. If no install() called ever,
-     *         this always returns false.
+     * @return Current user of DeployGate. May be null.
      */
     public static String getLoginUsername() {
         if (sInstance != null) {
             waitForInitialized();
             return sInstance.mLoginUsername;
+        }
+        return null;
+    }
+
+    /**
+     * Get current app's author (i.e. distributor) username on DeployGate. You
+     * may use this value to check the app was distributed by yourself or
+     * someone else.
+     * <p>
+     * <b>Tip:</b> If you want to prevent distributing your app by someone else
+     * on the DeployGate, consider using {@link #install(Application, String)}.
+     * </p>
+     * <p>
+     * Note this function will block until SDK get ready after
+     * {@link #install(Application)} called. So if you want to call this
+     * function from the main thread, you should confirm that
+     * {@link #isInitialized()} is true before calling this. (Or consider using
+     * {@link DeployGateCallback#onInitialized(boolean)} callback.)
+     * </p>
+     * 
+     * @return Author username of current app. May be null.
+     */
+    public static String getAuthorUsername() {
+        if (sInstance != null) {
+            waitForInitialized();
+            return sInstance.mAuthor;
         }
         return null;
     }
@@ -640,7 +762,8 @@ public class DeployGate {
         private Process mProcess;
         private boolean mIsOneShot;
 
-        public LogCatTranportWorker(String packageName, IDeployGateSdkService service, boolean isOneshot) {
+        public LogCatTranportWorker(String packageName, IDeployGateSdkService service,
+                boolean isOneshot) {
             mPackageName = packageName;
             mService = service;
             mIsOneShot = isOneshot;
@@ -650,7 +773,8 @@ public class DeployGate {
         public void run() {
             mProcess = null;
             ArrayList<String> logcatBuf = null;
-            BufferedReader bufferedReader = null;;
+            BufferedReader bufferedReader = null;
+            ;
             try {
                 LinkedList<String> commandLine = new LinkedList<String>();
                 commandLine.add("logcat");
