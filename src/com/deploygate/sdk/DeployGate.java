@@ -146,7 +146,8 @@ public class DeployGate {
         }
 
         private void onInitialized(final boolean isManaged, final boolean isAuthorized,
-                final String loginUsername, final boolean isStopped, final String author) throws RemoteException {
+                final String loginUsername, final boolean isStopped, final String author)
+                throws RemoteException {
             Log.v(TAG, "DeployGate service initialized");
             mAppIsManaged = isManaged;
             mAppIsAuthorized = isAuthorized;
@@ -342,6 +343,7 @@ public class DeployGate {
      * 
      * @param app Application instance, typically just pass <em>this</em>.
      * @throws IllegalStateException if this called twice
+     * @since r1
      */
     public static void install(Application app) {
         install(app, (String) null);
@@ -361,6 +363,7 @@ public class DeployGate {
      * @param app Application instance, typically just pass <em>this</em>.
      * @param author author username of this app.
      * @throws IllegalStateException if this called twice
+     * @since r2
      */
     public static void install(Application app, String author) {
         install(app, author, null);
@@ -387,6 +390,7 @@ public class DeployGate {
      * @param app Application instance, typically just pass <em>this</em>.
      * @param callback Callback interface to listen events.
      * @throws IllegalStateException if this called twice
+     * @since r1
      */
     public static void install(Application app, DeployGateCallback callback) {
         install(app, null, callback);
@@ -408,6 +412,7 @@ public class DeployGate {
      * @param author author username of this app.
      * @param callback Callback interface to listen events.
      * @throws IllegalStateException if this called twice
+     * @since r2
      */
     public static void install(Application app, String author, DeployGateCallback callback) {
         install(app, callback, false);
@@ -429,6 +434,7 @@ public class DeployGate {
      * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
      *            the release build, set this true.
      * @throws IllegalStateException if this called twice
+     * @since r1
      */
     public static void install(Application app, DeployGateCallback callback,
             boolean forceApplyOnReleaseBuild) {
@@ -446,6 +452,7 @@ public class DeployGate {
      * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
      *            the release build, set this true.
      * @throws IllegalStateException if this called twice
+     * @since r2
      */
     public static void install(Application app, String author, DeployGateCallback callback,
             boolean forceApplyOnReleaseBuild) {
@@ -467,6 +474,8 @@ public class DeployGate {
      * Note that after calling this, {@link #isInitialized()} will changed to
      * false immediately and any call to <tt>is*()</tt> will be blocked until
      * refreshing get finished.
+     * 
+     * @since r1
      */
     public static void refresh() {
         if (sInstance != null)
@@ -493,6 +502,7 @@ public class DeployGate {
      * @param listener callback listener
      * @param refreshImmediately if you want to receive current states, set this
      *            true.
+     * @since r1
      */
     public static void registerCallback(DeployGateCallback listener, boolean refreshImmediately) {
         if (sInstance == null)
@@ -514,6 +524,7 @@ public class DeployGate {
      * ignored.
      * 
      * @param listener callback listener to be removed
+     * @since r1
      */
     public static void unregisterCallback(DeployGateCallback listener) {
         if (sInstance == null)
@@ -530,6 +541,7 @@ public class DeployGate {
      * 
      * @return true if SDK is ready. false otherwise. If no install() called
      *         ever, this always returns false.
+     * @since r1
      */
     public static boolean isInitialized() {
         if (sInstance != null) {
@@ -550,6 +562,7 @@ public class DeployGate {
      * 
      * @return true if valid DeployGate client is available. false otherwise. If
      *         no install() called ever, this always returns false.
+     * @since r1
      */
     public static boolean isDeployGateAvaliable() {
         if (sInstance != null) {
@@ -573,6 +586,7 @@ public class DeployGate {
      * @return true if DeployGate knows and manages this package. false
      *         otherwise. If no install() called ever, this always returns
      *         false.
+     * @since r1
      */
     public static boolean isManaged() {
         if (sInstance != null) {
@@ -598,6 +612,7 @@ public class DeployGate {
      * @return true if current DeployGate user has available list which contains
      *         this application. false otherwise. If no install() called ever,
      *         this always returns false.
+     * @since r1
      */
     public static boolean isAuthorized() {
         if (sInstance != null) {
@@ -619,6 +634,7 @@ public class DeployGate {
      * </p>
      * 
      * @return Current user of DeployGate. May be null.
+     * @since r1
      */
     public static String getLoginUsername() {
         if (sInstance != null) {
@@ -645,6 +661,7 @@ public class DeployGate {
      * </p>
      * 
      * @return Author username of current app. May be null.
+     * @since r2
      */
     public static String getAuthorUsername() {
         if (sInstance != null) {
@@ -661,6 +678,7 @@ public class DeployGate {
      * 
      * @param message Message body to be send. May be truncated if it's too
      *            long.
+     * @since r1
      */
     public static void logError(String message) {
         if (sInstance != null) {
@@ -675,6 +693,7 @@ public class DeployGate {
      * 
      * @param message Message body to be send. May be truncated if it's too
      *            long.
+     * @since r1
      */
     public static void logWarn(String message) {
         if (sInstance != null) {
@@ -689,6 +708,7 @@ public class DeployGate {
      * 
      * @param message Message body to be send. May be truncated if it's too
      *            long.
+     * @since r1
      */
     public static void logDebug(String message) {
         if (sInstance != null) {
@@ -703,6 +723,7 @@ public class DeployGate {
      * 
      * @param message Message body to be send. May be truncated if it's too
      *            long.
+     * @since r1
      */
     public static void logInfo(String message) {
         if (sInstance != null) {
@@ -718,6 +739,7 @@ public class DeployGate {
      * 
      * @param message Message body to be send. May be truncated if it's too
      *            long.
+     * @since r1
      */
     public static void logVerbose(String message) {
         if (sInstance != null) {
