@@ -3,7 +3,6 @@ package com.deploygate.sdk;
 
 import android.Manifest.permission;
 import android.app.Application;
-import android.app.ApplicationErrorReport.CrashInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,7 +32,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -785,7 +783,6 @@ public class DeployGate {
         private final IDeployGateSdkService mService;
         private Process mProcess;
         private boolean mIsOneShot;
-        private UUID mCrashId;
 
         public LogCatTranportWorker(String packageName, IDeployGateSdkService service,
                 boolean isOneshot) {
@@ -861,15 +858,8 @@ public class DeployGate {
                 mProcess.destroy();
         }
 
-        public LogCatTranportWorker setCrashId(UUID crashId) {
-            mCrashId = crashId;
-            return this;
-        }
-        
         private boolean send(ArrayList<String> logcatBuf) {
             Bundle bundle = new Bundle();
-            if (mCrashId != null)
-                bundle.putString(DeployGateEvent.EXTRA_CRASH_ID, mCrashId.toString());
             bundle.putStringArrayList(DeployGateEvent.EXTRA_LOG, logcatBuf);
             try {
                 mService.sendEvent(mPackageName, DeployGateEvent.ACTION_SEND_LOGCAT, bundle);
@@ -888,21 +878,13 @@ public class DeployGate {
         if (mRemoteService == null)
             return;
         
-        UUID crashId = UUID.randomUUID();
-        
         Bundle extras = new Bundle();
-        extras.putString(DeployGateEvent.EXTRA_SERIAL, crashId.toString());
         extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex);
         try {
             mRemoteService.sendEvent(mApplicationContext.getPackageName(),
                     DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to send crash report: " + e.getMessage());
-        }
-        
-        if (canLogCat()) {
-            // collect and send logcat synchronously
-            new LogCatTranportWorker(mApplicationContext.getPackageName(), mRemoteService, true).setCrashId(crashId).run();
         }
     }
 

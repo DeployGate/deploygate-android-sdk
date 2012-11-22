@@ -27,5 +27,4 @@ public interface DeployGateEvent {
     public static final String EXTRA_LOG = "log";
     public static final String EXTRA_LOG_TYPE = "logType";
     public static final String EXTRA_EXCEPTION = "exception";
-    public static final String EXTRA_CRASH_ID = "crashId";
 }
