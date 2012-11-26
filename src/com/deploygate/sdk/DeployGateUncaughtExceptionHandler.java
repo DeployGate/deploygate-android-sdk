@@ -21,7 +21,7 @@ class DeployGateUncaughtExceptionHandler implements UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
-        Log.v(TAG, "DeployGate caught exception, trying to send to service");
+        Log.v(TAG, "DeployGate caught an exception, trying to send to the service");
         sendExceptionToService(ex);
 
         if (mParentHandler != null)

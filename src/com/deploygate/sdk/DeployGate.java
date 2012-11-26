@@ -817,7 +817,7 @@ public class DeployGate {
                 mProcess = Runtime.getRuntime().exec(
                         commandLine.toArray(new String[commandLine.size()]));
                 bufferedReader = new BufferedReader(new InputStreamReader(
-                        mProcess.getInputStream()));
+                        mProcess.getInputStream()), 8192);
 
                 Log.v(TAG, "Start retrieving logcat");
                 String line;
