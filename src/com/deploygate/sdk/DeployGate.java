@@ -88,7 +88,7 @@ public class DeployGate {
 
     private IDeployGateSdkService mRemoteService;
     private Thread mLogcatThread;
-    private LogCatTranportWorker mLogcatWorker;
+    private LogCatTransportWorker mLogcatWorker;
 
     private final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
 
@@ -116,34 +116,6 @@ public class DeployGate {
                 onEnableLogcat(false);
             }
         };
-
-        private void onOneshotLogcat() {
-            if (mLogcatThread == null || !mLogcatThread.isAlive()) {
-                mLogcatWorker = new LogCatTranportWorker(
-                        mApplicationContext.getPackageName(), mRemoteService, true);
-                mLogcatThread = new Thread(mLogcatWorker);
-                mLogcatThread.start();
-            }
-        }
-
-        private void onEnableLogcat(boolean isEnabled) {
-            if (mRemoteService == null)
-                return;
-
-            if (isEnabled) {
-                if (mLogcatThread == null || !mLogcatThread.isAlive()) {
-                    mLogcatWorker = new LogCatTranportWorker(
-                            mApplicationContext.getPackageName(), mRemoteService, false);
-                    mLogcatThread = new Thread(mLogcatWorker);
-                    mLogcatThread.start();
-                }
-            } else {
-                if (mLogcatThread != null && mLogcatThread.isAlive()) {
-                    mLogcatWorker.stop();
-                    mLogcatThread.interrupt();
-                }
-            }
-        }
 
         private void onInitialized(final boolean isManaged, final boolean isAuthorized,
                 final String loginUsername, final boolean isStopped, final String author)
@@ -186,6 +158,34 @@ public class DeployGate {
             });
         }
     };
+
+    private void onOneshotLogcat() {
+        if (mLogcatThread == null || !mLogcatThread.isAlive()) {
+            mLogcatWorker = new LogCatTransportWorker(
+                    mApplicationContext.getPackageName(), mRemoteService, true);
+            mLogcatThread = new Thread(mLogcatWorker);
+            mLogcatThread.start();
+        }
+    }
+
+    private void onEnableLogcat(boolean isEnabled) {
+        if (mRemoteService == null)
+            return;
+
+        if (isEnabled) {
+            if (mLogcatThread == null || !mLogcatThread.isAlive()) {
+                mLogcatWorker = new LogCatTransportWorker(
+                        mApplicationContext.getPackageName(), mRemoteService, false);
+                mLogcatThread = new Thread(mLogcatWorker);
+                mLogcatThread.start();
+            }
+        } else {
+            if (mLogcatThread != null && mLogcatThread.isAlive()) {
+                mLogcatWorker.stop();
+                mLogcatThread.interrupt();
+            }
+        }
+    }
 
     void callbackDeployGateUnavailable() {
         mHandler.post(new Runnable() {
@@ -778,13 +778,13 @@ public class DeployGate {
         return false;
     }
 
-    private static class LogCatTranportWorker implements Runnable {
+    private static class LogCatTransportWorker implements Runnable {
         private final String mPackageName;
         private final IDeployGateSdkService mService;
         private Process mProcess;
         private boolean mIsOneShot;
 
-        public LogCatTranportWorker(String packageName, IDeployGateSdkService service,
+        public LogCatTransportWorker(String packageName, IDeployGateSdkService service,
                 boolean isOneshot) {
             mPackageName = packageName;
             mService = service;
@@ -900,5 +900,19 @@ public class DeployGate {
         } catch (RemoteException e) {
             Log.w(TAG, "failed to send custom log: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Capture current LogCat and send it. This call will work asynchronously.
+     * Capturing LogCat requires <code>android.permission.READ_LOGS</code> is
+     * declared on your app AndroidManifest.xml, or your app is running on
+     * Android 4.1 or higher. If LogCat is not available, this function simply
+     * does nothing.
+     * 
+     * @since r3
+     * @see #canLogCat()
+     */
+    public void requestLogCat() {
+        onOneshotLogcat();
     }
 }
