@@ -910,7 +910,6 @@ public class DeployGate {
      * does nothing.
      * 
      * @since r3
-     * @see #canLogCat()
      */
     public void requestLogCat() {
         onOneshotLogcat();
