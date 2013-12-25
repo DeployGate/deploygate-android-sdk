@@ -1,3 +1,9 @@
+apply plugin: 'maven'
+
+group = 'com.deploygate'
+archivesBaseName = 'sdk'
+version = '0.1'
+
 buildscript {
     repositories {
         mavenCentral()
@@ -13,8 +19,8 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 18
-    buildToolsVersion "19.0.0"
+    compileSdkVersion 16
+    buildToolsVersion "18.0.1"
 
     sourceSets {
         main {
@@ -40,3 +46,17 @@ android {
         release.setRoot('build-types/release')
     }
 }
+
+// local upload
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
+        }
+    }
+}
+
+// central upload
+//if(gradle.startParameter.taskNames.contains('uploadArchives')) {
+//    apply from: 'build.publish.gradle'
+//}
