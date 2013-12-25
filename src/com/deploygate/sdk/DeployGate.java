@@ -50,7 +50,7 @@ import java.util.concurrent.CountDownLatch;
 public class DeployGate {
 
     private static final String TAG = "DeployGate";
-    private static final int SDK_VERSION = 2;
+    private static final int SDK_VERSION = 3;
 
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";

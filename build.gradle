@@ -2,7 +2,7 @@ apply plugin: 'maven'
 
 group = 'com.deploygate'
 archivesBaseName = 'sdk'
-version = '0.1'
+version = '3.0'
 
 buildscript {
     repositories {
@@ -48,15 +48,15 @@ android {
 }
 
 // local upload
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
-        }
-    }
-}
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
+//        }
+//    }
+//}
 
 // central upload
-//if(gradle.startParameter.taskNames.contains('uploadArchives')) {
-//    apply from: 'build.publish.gradle'
-//}
+if(gradle.startParameter.taskNames.contains('uploadArchives')) {
+    apply from: 'build.publish.gradle'
+}
