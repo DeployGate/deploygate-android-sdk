@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-      compile 'com.deploygate.sdk:3.0'
+      compile 'com.deploygate:sdk:3.0'
 }
 ```
 
