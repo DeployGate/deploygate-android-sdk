@@ -12,8 +12,12 @@
 bin/
 gen/
 proguard/
+local.properties
 
 # gradle
 build/
 .gradle
 gradle.properties
+
+#idea
+*.iml
