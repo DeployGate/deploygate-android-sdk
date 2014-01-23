@@ -21,3 +21,4 @@ gradle.properties
 
 #idea
 *.iml
+.idea/
