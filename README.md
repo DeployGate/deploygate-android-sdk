@@ -9,7 +9,7 @@ For issue tracking see the GitHub issues page: https://github.com/DeployGate/dep
 ### Download
 
 #### jar
-https://deploygate.com/client/deploygatesdk-r2.zip
+Please download from the link on this [document page](https://deploygate.com/docs/sdk).
 
 #### gradle
 Edit build.gradle
@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-      compile 'com.deploygate:sdk:3.0'
+      compile 'com.deploygate:sdk:3.1'
 }
 ```
 
