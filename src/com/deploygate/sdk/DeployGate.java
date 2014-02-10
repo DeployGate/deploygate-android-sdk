@@ -215,10 +215,7 @@ public class DeployGate {
             mCallbacks.add(callback);
 
         mInitializedLatch = new CountDownLatch(1);
-        if (!initService(true)) {
-            if (callback != null)
-                callback.onInitialized(false);
-        }
+        initService(true);
     }
 
     private boolean initService(boolean isBoot) {
