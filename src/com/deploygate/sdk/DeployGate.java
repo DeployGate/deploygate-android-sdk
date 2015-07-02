@@ -415,7 +415,7 @@ public class DeployGate {
      * @since r2
      */
     public static void install(Application app, String author, DeployGateCallback callback) {
-        install(app, callback, false);
+        install(app, author, callback, false);
     }
 
     /**
