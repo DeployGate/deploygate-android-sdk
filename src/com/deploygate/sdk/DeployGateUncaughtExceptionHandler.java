@@ -12,7 +12,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
  */
 class DeployGateUncaughtExceptionHandler implements UncaughtExceptionHandler {
 
-    private static final String TAG = "DeployGateUncaughtExceptionHandler";
+    private static final String TAG = "DGExceptionHandler";
     private final UncaughtExceptionHandler mParentHandler;
 
     public DeployGateUncaughtExceptionHandler(UncaughtExceptionHandler parentHandler) {
