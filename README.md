@@ -19,12 +19,12 @@ repositories {
 }
 
 dependencies {
-      compile 'com.deploygate:sdk:3.1'
+      compile 'com.deploygate:sdk:3.1.1'
 }
 ```
 
 ## License
-Copyright 2012-2013 DeployGate, tnj, henteko
+Copyright 2012-2015 DeployGate, tnj, henteko
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
