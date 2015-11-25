@@ -9,18 +9,18 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.7.+'
+        classpath 'com.android.tools.build:gradle:1.5.0'
     }
 }
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
 
     sourceSets {
         main {
@@ -49,7 +49,7 @@ android {
 
 android.libraryVariants.all { variant ->
     def name = variant.buildType.name
-        if (name.equals(com.android.builder.BuilderConstants.DEBUG)) {
+        if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
             return; // Skip debug builds.
         }
     def task = project.tasks.create "jar${name.capitalize()}", Jar
@@ -59,7 +59,7 @@ android.libraryVariants.all { variant ->
 }
 
 task androidJar(type: Jar) {
-    from android.sourceSets.main.allJava
+    from android.sourceSets.main.java.srcDirs
 }
 
 // local upload
