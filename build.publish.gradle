@@ -22,7 +22,7 @@ signing {
 
 //Defines JavaDocs JavaDocs
 task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.allJava
+    source = android.sourceSets.main.java.getSrcDirs()
 }
 
 //Compiles JavaDocs to Jar for maven
@@ -36,7 +36,7 @@ task androidJavadocsJar(type: Jar) {
 task androidSourcesJar(type: Jar) {
     classifier = 'sources'
     //basename = artifact_id
-    from android.sourceSets.main.allSource
+    from android.sourceSets.main.java.getSrcDirs()
 }
 
 // Adds the Source and Javadocs to Maven upload task
