@@ -2,6 +2,7 @@ language: android
 android:
   components:
     - build-tools-23.0.1
+    - android-23
 env:
   global:
   - secure: jU0vxLP71wx2qpybrnkbjXNAYF7Igqe7EgPE7uCsykuR0f+rwXJ0YZ9cJVdfCeCg2F309KLbYwA6YFIQw0IJVQPhDeWarxIOoIyU28d/NeKXXigpbFkhmbQH0RMUa0ohOzfGtDeeSc6duO6nY5dGtcdgMLCyU4jWF0nhmw/P8s0=
