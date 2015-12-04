@@ -1,12 +1,13 @@
-language: java
+language: android
+android:
+  components:
+    - build-tools-23.0.1
 env:
   global:
   - secure: jU0vxLP71wx2qpybrnkbjXNAYF7Igqe7EgPE7uCsykuR0f+rwXJ0YZ9cJVdfCeCg2F309KLbYwA6YFIQw0IJVQPhDeWarxIOoIyU28d/NeKXXigpbFkhmbQH0RMUa0ohOzfGtDeeSc6duO6nY5dGtcdgMLCyU4jWF0nhmw/P8s0=
   - secure: UqC6sIBXW88SESXY2vfvQCuajH5XJW06aR+DRTLuBUTLP/LifpbmbSKV3rmmFLcabn+jOt/jOyiqQ7Qb/A1But+nf0ACpNk+zKuCED1jnRkCZUd2zP3BZVxtQcAx6Gumg4TOZYk9SHQ4mE5c6tpkQddjRK3POBdQkjsM2sXmqK0=
   - secure: gCJZTL3KocjHVx0QMh3cHdWOJmT/C+ToqXHuobYDoc1Mbd4GF/8I1iVrD55Su/Imusi7IIKBmhhfunoGeC+ybAKcEi7emKh5QzsTZo7nKUQDhAmth8lvFL4qPhd8lG4NiosWwej05IYdfODd+IkZIkwmg/0DKoRexpK5XpSHAWU=
   - secure: JfTjZTCV9JirOydo2AdZK1D0AIShUKdUZ6WNsdp8bBEUXGltYmiPTqROmqyvZAHm3n5NZXNJWK3koQIjmEO7OgKUjC52nOIU76pTxUkQy1Yt7pqfcuut7jvLcqZzZ4coHCbaj5Z96Hp+oRFOn6rMJmhW/ZhJUSTIXlpvLB68F+8=
-jdk:
-- openjdk7
 script:
 - "./gradlew build test"
 before_deploy:
