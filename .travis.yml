@@ -24,7 +24,5 @@ deploy:
     tags: true
     repo: DeployGate/deploygate-android-sdk
 after_deploy:
-- 'curl -X POST --data-urlencode "payload={\"channel\": \"#devs\", \"username\": \"DG-RELEASE-ANDROID-SDK\",
-  \"text\": \"Released a deploygate-android-sdk in Maven Central! Please check <https://oss.sonatype.org/content/groups/public/com/deploygate/|public>
-  or <https://oss.sonatype.org/index.html#stagingRepositories|stagingRepositories>\",
-  \"icon_emoji\": \":tada:\"}" $SLACK_URL'
+- 'curl -X POST --data-urlencode "payload={\"text\": \"Released a deploygate-android-sdk in Maven Central! Please check <https://oss.sonatype.org/content/groups/public/com/deploygate/|public>
+  or <https://oss.sonatype.org/index.html#stagingRepositories|stagingRepositories>\"}" $SLACK_URL'
