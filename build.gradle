@@ -1,4 +1,6 @@
 apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
 
 group = 'com.deploygate'
 archivesBaseName = 'sdk'
@@ -9,7 +11,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.android.tools.build:gradle:2.1.0'
     }
 }
 apply plugin: 'com.android.library'
@@ -66,6 +68,30 @@ task androidJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.getSrcDirs()
+}
+
+//Compiles JavaDocs to Jar for maven
+task androidJavadocsJar(type: Jar) {
+    classifier = 'javadoc'
+    //basename = artifact_id
+    from androidJavadocs.destinationDir
+}
+
+//Compiles Sources to Jar for maven
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    //basename = artifact_id
+    from android.sourceSets.main.java.getSrcDirs()
+}
+
+// Adds the Source and Javadocs to Maven upload task
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
+
 // local upload
 //uploadArchives {
 //    repositories {
@@ -75,7 +101,64 @@ task androidJar(type: Jar) {
 //    }
 //}
 
-// central upload
-if(gradle.startParameter.taskNames.contains('uploadArchives')) {
-    apply from: 'build.publish.gradle'
+// Release
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name 'DeployGate SDK'
+            packaging 'jar' // We upload an jar as the primarly as you are not defining any resources
+            description 'Android SDK for DeployGate'
+            url 'https://github.com/DeployGate/deploygate-android-sdk'
+            scm {
+                url 'git@github.com:DeployGate/deploygate-android-sdk.git'
+                connection 'scm:git:git@github.com:DeployGate/deploygate-android-sdk.git'
+                developerConnection 'scm:git:git@github.com:DeployGate/deploygate-android-sdk.git'
+            }
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+            developers {
+                developer {
+                    id 'henteko'
+                    name 'deploygate'
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    pkg {
+        repo = 'maven'
+        name = 'com.deploygate:sdk'
+        userOrg = 'deploygate'
+        licenses = ['Apache-2.0']
+        websiteUrl = 'https://github.com/DeployGate/deploygate-android-sdk'
+        issueTrackerUrl = 'https://github.com/DeployGate/deploygate-android-sdk/issues'
+        vcsUrl = 'https://github.com/DeployGate/deploygate-android-sdk.git'
+        githubRepo = 'DeployGate/deploygate-android-sdk'
+        version {
+            name = '3.1.1'
+            released = new Date()
+        }
+    }
+
+    configurations = ['archives']
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+    }
 }
