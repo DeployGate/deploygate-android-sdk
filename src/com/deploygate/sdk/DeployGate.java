@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.deploygate.service.DeployGateEvent;
@@ -50,7 +51,7 @@ import java.util.concurrent.CountDownLatch;
 public class DeployGate {
 
     private static final String TAG = "DeployGate";
-    private static final int SDK_VERSION = 3;
+    private static final int SDK_VERSION = 4;
 
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
@@ -76,6 +77,9 @@ public class DeployGate {
     private boolean mAppIsAuthorized;
     private boolean mAppIsStopRequested;
     private String mLoginUsername;
+    private int mCurrentRevision;
+    private String mDistributionId;
+    private int mDeployGateVersionCode;
 
     @SuppressWarnings("unused")
     private boolean mAppUpdateAvailable;
@@ -94,11 +98,16 @@ public class DeployGate {
 
         public void onEvent(String action, Bundle extras) throws RemoteException {
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
-                onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
-                        extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false),
-                        extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME),
-                        extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false),
-                        extras.getString(DeployGateEvent.EXTRA_AUTHOR));
+                onInitialized(
+                    extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
+                    extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false),
+                    extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME),
+                    extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false),
+                    extras.getString(DeployGateEvent.EXTRA_AUTHOR),
+                    extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0),
+                    extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_ID),
+                    extras.getInt(DeployGateEvent.EXTRA_DEPLOYGATE_VERSION_CODE,0)
+                );
             }
             else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
                 onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL),
@@ -118,7 +127,8 @@ public class DeployGate {
         };
 
         private void onInitialized(final boolean isManaged, final boolean isAuthorized,
-                final String loginUsername, final boolean isStopped, final String author)
+                                   final String loginUsername, final boolean isStopped, final String author,
+                                   int currentRevision, String distributionId, int deployGateVersionCode)
                 throws RemoteException {
             Log.v(TAG, "DeployGate service initialized");
             mAppIsManaged = isManaged;
@@ -126,6 +136,9 @@ public class DeployGate {
             mAppIsStopRequested = isStopped;
             mLoginUsername = loginUsername;
             mAuthor = author;
+            mDeployGateVersionCode = deployGateVersionCode;
+            mCurrentRevision = currentRevision;
+            mDistributionId = distributionId;
 
             mHandler.post(new Runnable() {
                 @Override
@@ -911,4 +924,47 @@ public class DeployGate {
     public void requestLogCat() {
         onOneshotLogcat();
     }
+
+
+    /**
+     * Returns the revision of the app on DeployGate.
+     * The revision number is automatically incremented integer value every time you upload a build to DeployGate,
+     * so you can identify the build explicitly.
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns 0.
+     *
+     * @return revision number of the app, or 0 if DeployGate is older than v1.7.0 (39)
+     * @since r4
+     */
+    public int getCurrentRevision() {
+        return mCurrentRevision;
+    }
+
+    /**
+     * Returns the URL of the distribution if the app was installed through Distribution Page.
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
+     *
+     * @return URL of the distribution page, null if the app was not installed through Distribution Page or DeployGate is older than v1.7.0 (39)
+     * @since r4
+     */
+    public String getDistributionUrl() {
+        if (TextUtils.isEmpty(mDistributionId))
+            return null;
+
+        return "https://deploygate.com/distributions/" + mDistributionId;
+    }
+
+    /**
+     * Returns android:versionCode of DeployGate app.
+     *
+     * @return Version code of DeployGate, or 0 if DeployGate is older than v1.7.0 (39)
+     * @since r4
+     */
+    public int getDeployGateVersionCode() {
+        return mDeployGateVersionCode;
+    }
+
+
+
 }
