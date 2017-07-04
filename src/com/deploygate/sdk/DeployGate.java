@@ -318,7 +318,7 @@ public class DeployGate {
         } catch (NameNotFoundException e) {
             return null;
         }
-        if (info == null || info.signatures.length == 0)
+        if (info == null || info.signatures == null || info.signatures.length == 0)
             return null;
 
         MessageDigest md;
@@ -464,13 +464,14 @@ public class DeployGate {
      * @param callback Callback interface to listen events. Can be null.
      * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
      *            the release build, set this true.
-     * @throws IllegalStateException if this called twice
      * @since r2
      */
     public static void install(Application app, String author, DeployGateCallback callback,
             boolean forceApplyOnReleaseBuild) {
-        if (sInstance != null)
-            throw new IllegalStateException("install already called");
+        if (sInstance != null) {
+            Log.w(TAG, "DeployGate.install was already called. Ignoring.");
+            return;
+        }
 
         if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext()))
             return;
