@@ -77,6 +77,7 @@ public class DeployGate {
     private boolean mAppIsAuthorized;
     private boolean mAppIsStopRequested;
     private String mLoginUsername;
+    private String mDistributionUserName;
     private int mCurrentRevision;
     private String mDistributionId;
     private String mDistributionTitle;
@@ -101,6 +102,7 @@ public class DeployGate {
                     extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
                     extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false),
                     extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME),
+                    extras.getString(DeployGateEvent.EXTRA_DISTRIBUTION_USER_NAME),
                     extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false),
                     extras.getString(DeployGateEvent.EXTRA_AUTHOR),
                     extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0),
@@ -128,7 +130,8 @@ public class DeployGate {
         };
 
         private void onInitialized(final boolean isManaged, final boolean isAuthorized,
-                                   final String loginUsername, final boolean isStopped, final String author,
+                                   final String loginUsername, final String distributionUserName,
+                                   final boolean isStopped, final String author,
                                    int currentRevision, String distributionId, String distributionTitle, int deployGateVersionCode)
                 throws RemoteException {
             Log.v(TAG, "DeployGate service initialized");
@@ -136,6 +139,7 @@ public class DeployGate {
             mAppIsAuthorized = isAuthorized;
             mAppIsStopRequested = isStopped;
             mLoginUsername = loginUsername;
+            mDistributionUserName = distributionUserName;
             mAuthor = author;
             mDeployGateVersionCode = deployGateVersionCode;
             mCurrentRevision = currentRevision;
@@ -1151,5 +1155,17 @@ public class DeployGate {
         } catch (RemoteException e) {
             Log.w(TAG, "failed to invoke " + action + " action: " + e.getMessage());
         }
+    }
+
+    /**
+     * Get current user's name on Distribution Page. Default name is randomly generated string (like "[abcd1234]").
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function returns null.
+     *
+     * @return User's display name on DeployGate. May be null.
+     * @since r4
+     */
+    public static String getDistributionUserName() {
+        return sInstance.mDistributionUserName;
     }
 }

@@ -36,4 +36,5 @@ public interface DeployGateEvent {
     public static final String EXTRA_CURRENT_DISTRIBUTION_TITLE = "currentDistributionTitle";
     public static final String EXTRA_DEPLOYGATE_VERSION_CODE = "deploygateVersionCode";
     public static final String EXTRA_COMMENT = "comment";
+    public static final String EXTRA_DISTRIBUTION_USER_NAME = "distributionUserName";
 }
