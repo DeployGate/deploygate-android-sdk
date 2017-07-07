@@ -1166,6 +1166,9 @@ public class DeployGate {
      * @since r4
      */
     public static String getDistributionUserName() {
+        if (sInstance == null)
+            return null;
+
         return sInstance.mDistributionUserName;
     }
 }
