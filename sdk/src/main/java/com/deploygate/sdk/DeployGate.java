@@ -373,7 +373,7 @@ public class DeployGate {
      * On a release build, which has <tt>android:isDebuggable</tt> set false on
      * AndroidManifest.xml, this function will do nothing. If you want to enable
      * DeployGate on a release build, consider using
-     * {@link #install(Application, String[], DeployGateCallback, boolean)}
+     * {@link #install(Application, String, DeployGateCallback, boolean)}
      * instead.
      * </p>
      * 
@@ -663,7 +663,7 @@ public class DeployGate {
     }
 
     /**
-     * Get current app's author (e.g. User or Organzation) name on DeployGate. You
+     * Get current app's author (e.g., User or Organzation) name on DeployGate. You
      * may use this value to check the app was distributed by yourself or
      * someone else.
      * <p>
@@ -1136,6 +1136,7 @@ public class DeployGate {
      *
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
      *
+     * @param defaultComment Default comment set to the editor
      * @since r4
      */
     public static void composeComment(String defaultComment) {

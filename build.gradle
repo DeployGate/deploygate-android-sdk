@@ -1,164 +1,32 @@
-apply plugin: 'maven'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.github.dcendents.android-maven'
-
-group = 'com.deploygate'
-archivesBaseName = 'sdk'
-version = '3.2.0'
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
-    }
-}
-apply plugin: 'com.android.library'
-
-dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
-}
-
-android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
-
-    sourceSets {
-        main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-            resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
-            res.srcDirs = ['res']
-            assets.srcDirs = ['assets']
-        }
-
-        // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
-
-        // Move the build types to build-types/<type>
-        // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
-        // This moves them out of them default location under src/<type>/... which would
-        // conflict with src/ being used by the main source set.
-        // Adding new build types or product flavors should be accompanied
-        // by a similar customization.
-        debug.setRoot('build-types/debug')
-        release.setRoot('build-types/release')
-
-        lintOptions {
-            abortOnError false
-        }
-    }
-}
-
-android.libraryVariants.all { variant ->
-    def name = variant.buildType.name
-        if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
-            return; // Skip debug builds.
-        }
-    def task = project.tasks.create "jar${name.capitalize()}", Jar
-    task.dependsOn variant.javaCompile
-    task.from variant.javaCompile.destinationDir
-    artifacts.add('archives', task)
-}
-
-task androidJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-}
-
-task androidJavadocs(type: Javadoc) {
-    source = android.sourceSets.main.java.getSrcDirs()
-}
-
-//Compiles JavaDocs to Jar for maven
-task androidJavadocsJar(type: Jar) {
-    classifier = 'javadoc'
-    //basename = artifact_id
-    from androidJavadocs.destinationDir
-}
-
-//Compiles Sources to Jar for maven
-task androidSourcesJar(type: Jar) {
-    classifier = 'sources'
-    //basename = artifact_id
-    from android.sourceSets.main.java.getSrcDirs()
-}
-
-// Adds the Source and Javadocs to Maven upload task
-artifacts {
-    archives androidSourcesJar
-    archives androidJavadocsJar
-}
-
-// local upload
-//uploadArchives {
-//    repositories {
-//        mavenDeployer {
-//            repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
-//        }
-//    }
-//}
-
-// Release
-
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            name 'DeployGate SDK'
-            packaging 'jar' // We upload an jar as the primarly as you are not defining any resources
-            description 'Android SDK for DeployGate'
-            url 'https://github.com/DeployGate/deploygate-android-sdk'
-            scm {
-                url 'git@github.com:DeployGate/deploygate-android-sdk.git'
-                connection 'scm:git:git@github.com:DeployGate/deploygate-android-sdk.git'
-                developerConnection 'scm:git:git@github.com:DeployGate/deploygate-android-sdk.git'
-            }
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
-                }
-            }
-            developers {
-                developer {
-                    id 'henteko'
-                    name 'deploygate'
-                }
-            }
-        }
-    }
-}
-
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    pkg {
-        repo = 'maven'
-        name = 'com.deploygate:sdk'
-        userOrg = 'deploygate'
-        licenses = ['Apache-2.0']
-        websiteUrl = 'https://github.com/DeployGate/deploygate-android-sdk'
-        issueTrackerUrl = 'https://github.com/DeployGate/deploygate-android-sdk/issues'
-        vcsUrl = 'https://github.com/DeployGate/deploygate-android-sdk.git'
-        githubRepo = 'DeployGate/deploygate-android-sdk'
-        version {
-            name = project.version
-            released = new Date()
-        }
-    }
-
-    configurations = ['archives']
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+ext {
+    releaseVersion = '4.0.0'
 }
 
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url 'https://maven.google.com'
+        }
     }
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+        classpath 'com.android.tools.build:gradle:3.0.0-alpha9'
+
+        classpath 'com.novoda:bintray-release:0.5.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3' // 1.7.1+ is required for Java 7
     }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url 'https://maven.google.com'
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
