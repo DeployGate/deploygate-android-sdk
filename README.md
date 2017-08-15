@@ -64,7 +64,9 @@ to reduce your app's footprint.
 For your convenience, we provide "Mock" SDK that replaces every function call
 to empty implementation so you don't have to modify your code to switch the builds.
 
-To use it, simply replace the dependency from `sdk` to `sdk-mock`. You can use it with conjunction of `productFlavors` and `buildConfig` of Gradle like following example:
+To use it, simply replace the dependency from `sdk` to `sdk-mock`.
+You can use it with a conjunction of `productFlavors` and `buildConfig` of Gradle
+like the following example:
 
 ```gradle
 dependencies {
