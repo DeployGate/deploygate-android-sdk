@@ -4,8 +4,24 @@ android:
   components:
     - build-tools-23.0.1
     - android-23
+jdk:
+  - oraclejdk8
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+    - $ANDROID_HOME/build-tools/25.0.2
+    - $ANDROID_HOME/platforms/android-25
+before_install:
+  - mkdir -p "$ANDROID_HOME/licenses"
+  - echo $ANDROID_SDK_LICENSE > $ANDROID_HOME/licenses/android-sdk-license
+  - echo $ANDROID_SDK_PREVIEW_LICENSE > $ANDROID_HOME/licenses/android-sdk-preview-license
 script:
-- "./gradlew build test"
+  - "./gradlew build test"
 deploy:
   provider: script
   script: "./release.sh"
@@ -13,5 +29,4 @@ deploy:
     tags: true
     repo: DeployGate/deploygate-android-sdk
 after_deploy:
-- 'curl -X POST --data-urlencode "payload={\"text\": \"Released a deploygate-android-sdk in Maven Central! Please check <https://oss.sonatype.org/content/groups/public/com/deploygate/|public>
-  or <https://oss.sonatype.org/index.html#stagingRepositories|stagingRepositories>\"}" $SLACK_URL'
+  - 'curl -X POST --data-urlencode "payload={\"text\": \"Just released new deploygate-android-sdk on <https://bintray.com/deploygate/maven/com.deploygate%3Asdk|Bintray>!\"}" $SLACK_URL'

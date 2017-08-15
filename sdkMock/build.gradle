@@ -1,0 +1,42 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+version = rootProject.ext.releaseVersion
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 25
+        versionCode 1
+        versionName project.version
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+publish {
+    userOrg = 'deploygate'
+    repoName = 'maven'
+    groupId = 'com.deploygate'
+    artifactId = 'sdk-mock'
+    publishVersion = project.version
+    licences = ['Apache-2.0']
+    uploadName = 'DeployGate SDK (Mock)'
+    desc = 'Mocked dummy Android SDK for DeployGate to reduce footprint of your release version app without code modification'
+    website = 'https://github.com/DeployGate/deploygate-android-sdk'
+
+    publications = ['release']
+}

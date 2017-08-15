@@ -1,0 +1,9 @@
+<manifest package="com.deploygate.sdk"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <provider
+            android:authorities="${applicationId}.deploygateprovider"
+            android:name=".DeployGateProvider"
+            android:exported="false" />
+    </application>
+</manifest>

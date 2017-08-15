@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.deploygate.service.DeployGateEvent;
@@ -50,7 +51,7 @@ import java.util.concurrent.CountDownLatch;
 public class DeployGate {
 
     private static final String TAG = "DeployGate";
-    private static final int SDK_VERSION = 3;
+    private static final int SDK_VERSION = 4;
 
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
@@ -76,35 +77,46 @@ public class DeployGate {
     private boolean mAppIsAuthorized;
     private boolean mAppIsStopRequested;
     private String mLoginUsername;
+    private String mDistributionUserName;
+    private int mCurrentRevision;
+    private String mDistributionId;
+    private String mDistributionTitle;
+    private int mDeployGateVersionCode;
 
-    @SuppressWarnings("unused")
     private boolean mAppUpdateAvailable;
-    @SuppressWarnings("unused")
     private int mAppUpdateRevision;
-    @SuppressWarnings("unused")
     private String mAppUpdateVersionName;
-    @SuppressWarnings("unused")
     private int mAppUpdateVersionCode;
+    private String mAppUpdateMessage;
 
     private IDeployGateSdkService mRemoteService;
     private Thread mLogcatThread;
     private LogCatTransportWorker mLogcatWorker;
 
+
     private final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
 
         public void onEvent(String action, Bundle extras) throws RemoteException {
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
-                onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
-                        extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false),
-                        extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME),
-                        extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false),
-                        extras.getString(DeployGateEvent.EXTRA_AUTHOR));
+                onInitialized(
+                    extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
+                    extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false),
+                    extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME),
+                    extras.getString(DeployGateEvent.EXTRA_DISTRIBUTION_USER_NAME),
+                    extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false),
+                    extras.getString(DeployGateEvent.EXTRA_AUTHOR),
+                    extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0),
+                    extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_ID),
+                    extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_TITLE),
+                    extras.getInt(DeployGateEvent.EXTRA_DEPLOYGATE_VERSION_CODE,0)
+                );
             }
             else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
                 onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL),
                         extras.getString(DeployGateEvent.EXTRA_VERSION_NAME),
                         extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE),
-                        extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE));
+                        extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE)
+                    );
             }
             else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
                 onOneshotLogcat();
@@ -118,14 +130,21 @@ public class DeployGate {
         };
 
         private void onInitialized(final boolean isManaged, final boolean isAuthorized,
-                final String loginUsername, final boolean isStopped, final String author)
+                                   final String loginUsername, final String distributionUserName,
+                                   final boolean isStopped, final String author,
+                                   int currentRevision, String distributionId, String distributionTitle, int deployGateVersionCode)
                 throws RemoteException {
             Log.v(TAG, "DeployGate service initialized");
             mAppIsManaged = isManaged;
             mAppIsAuthorized = isAuthorized;
             mAppIsStopRequested = isStopped;
             mLoginUsername = loginUsername;
+            mDistributionUserName = distributionUserName;
             mAuthor = author;
+            mDeployGateVersionCode = deployGateVersionCode;
+            mCurrentRevision = currentRevision;
+            mDistributionId = distributionId;
+            mDistributionTitle = distributionTitle;
 
             mHandler.post(new Runnable() {
                 @Override
@@ -142,11 +161,12 @@ public class DeployGate {
         }
 
         private void onUpdateArrived(final int serial, final String versionName,
-                final int versionCode, final String message) throws RemoteException {
+                                     final int versionCode, final String message) throws RemoteException {
             mAppUpdateAvailable = true;
             mAppUpdateRevision = serial;
             mAppUpdateVersionName = versionName;
             mAppUpdateVersionCode = versionCode;
+            mAppUpdateMessage = message;
 
             mHandler.post(new Runnable() {
                 @Override
@@ -302,7 +322,7 @@ public class DeployGate {
         } catch (NameNotFoundException e) {
             return null;
         }
-        if (info == null || info.signatures.length == 0)
+        if (info == null || info.signatures == null || info.signatures.length == 0)
             return null;
 
         MessageDigest md;
@@ -353,7 +373,7 @@ public class DeployGate {
      * On a release build, which has <tt>android:isDebuggable</tt> set false on
      * AndroidManifest.xml, this function will do nothing. If you want to enable
      * DeployGate on a release build, consider using
-     * {@link #install(Application, String[], DeployGateCallback, boolean)}
+     * {@link #install(Application, String, DeployGateCallback, boolean)}
      * instead.
      * </p>
      * 
@@ -448,13 +468,14 @@ public class DeployGate {
      * @param callback Callback interface to listen events. Can be null.
      * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
      *            the release build, set this true.
-     * @throws IllegalStateException if this called twice
      * @since r2
      */
     public static void install(Application app, String author, DeployGateCallback callback,
             boolean forceApplyOnReleaseBuild) {
-        if (sInstance != null)
-            throw new IllegalStateException("install already called");
+        if (sInstance != null) {
+            Log.w(TAG, "DeployGate.install was already called. Ignoring.");
+            return;
+        }
 
         if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext()))
             return;
@@ -642,7 +663,7 @@ public class DeployGate {
     }
 
     /**
-     * Get current app's author (i.e. distributor) username on DeployGate. You
+     * Get current app's author (e.g., User or Organzation) name on DeployGate. You
      * may use this value to check the app was distributed by yourself or
      * someone else.
      * <p>
@@ -657,7 +678,7 @@ public class DeployGate {
      * {@link DeployGateCallback#onInitialized(boolean)} callback.)
      * </p>
      * 
-     * @return Author username of current app. May be null.
+     * @return Owner User or Organization of current app. May be null.
      * @since r2
      */
     public static String getAuthorUsername() {
@@ -908,7 +929,247 @@ public class DeployGate {
      * 
      * @since r3
      */
-    public void requestLogCat() {
-        onOneshotLogcat();
+    public static void requestLogCat() {
+        if (sInstance != null)
+            sInstance.onOneshotLogcat();
+    }
+
+
+    /**
+     * Returns the revision of the app on DeployGate.
+     * The revision number is automatically incremented integer value every time you upload a build to DeployGate,
+     * so you can identify the build explicitly.
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns 0.
+     *
+     * @return revision number of the app, or 0 if DeployGate is older than v1.7.0 (39)
+     * @since r4
+     */
+    public static int getCurrentRevision() {
+        if (sInstance != null)
+            return sInstance.mCurrentRevision;
+        return 0;
+    }
+
+    /**
+     * Returns the URL of the distribution if the app was installed through Distribution Page.
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
+     *
+     * @return URL of the distribution page, null if the app was not installed through Distribution Page or DeployGate is older than v1.7.0 (39)
+     * @since r4
+     */
+    public static String getDistributionUrl() {
+        if (sInstance == null)
+            return null;
+
+        if (TextUtils.isEmpty(sInstance.mDistributionId))
+            return null;
+
+        return "https://deploygate.com/distributions/" + sInstance.mDistributionId;
+    }
+
+    /**
+     * Returns the ID (40 digits hex string appears in URL) of the distribution if the app was installed through Distribution Page.
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
+     *
+     * @return ID of the distribution page, null if the app was not installed through Distribution Page or DeployGate is older than v1.7.0 (39)
+     * @since r4
+     */
+    public static String getDistributionId() {
+        if (sInstance == null)
+            return null;
+
+        if (TextUtils.isEmpty(sInstance.mDistributionId))
+            return null;
+
+        return sInstance.mDistributionId;
+    }
+
+    /**
+     * Returns the title of the distribution if the app was installed through Distribution Page.
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
+     *
+     * @return Title of the distribution page, null if the app was not installed through Distribution Page or DeployGate is older than v1.7.0 (39)
+     * @since r4
+     */
+    public static String getDistributionTitle() {
+        if (sInstance == null)
+            return null;
+
+        if (TextUtils.isEmpty(sInstance.mDistributionTitle))
+            return null;
+
+        return sInstance.mDistributionTitle;
+    }
+
+    /**
+     * Returns android:versionCode of DeployGate app.
+     *
+     * @return Version code of DeployGate, or 0 if DeployGate is older than v1.7.0 (39)
+     * @since r4
+     */
+    public static int getDeployGateVersionCode() {
+        if (sInstance == null)
+            return 0;
+
+        return sInstance.mDeployGateVersionCode;
+    }
+
+    /**
+     * Check whether there's update of the app.
+     * You can get detailed information via {@link #getUpdateRevision()}, {@link #getUpdateVersionCode()}, {@link #getUpdateVersionName()}, and {@link #getUpdateMessage()}.
+     *
+     * @return true if there's an update, false otherwise.
+     * @since r4
+     */
+    public boolean hasUpdate() {
+        if (sInstance == null)
+            return false;
+
+        return sInstance.mAppUpdateAvailable;
+    }
+
+    /**
+     * Returns the revision number of the update. The value is only valid when {@link #hasUpdate()} is true.
+     *
+     * @return Revision number of the update.
+     * @since r4
+     */
+    public int getUpdateRevision() {
+        if (sInstance == null)
+            return 0;
+
+        return sInstance.mAppUpdateRevision;
+    }
+
+    /**
+     * Returns the android:versionCode of the update. The value is only valid when {@link #hasUpdate()} is true.
+     *
+     * @return Revision number of the update.
+     * @since r4
+     */
+    public int getUpdateVersionCode() {
+        if (sInstance == null)
+            return 0;
+
+        return sInstance.mAppUpdateVersionCode;
+    }
+
+    /**
+     * Returns the android:versionName of the update. The value is only valid when {@link #hasUpdate()} is true.
+     *
+     * @return Revision number of the update.
+     * @since r4
+     */
+    public String getUpdateVersionName() {
+        if (sInstance == null)
+            return null;
+
+        return sInstance.mAppUpdateVersionName;
+    }
+
+    /**
+     * Returns the message attached to the build.
+     * If the app was installed via Distribution Page (i.e. {@link #getDistributionUrl() is not null,}
+     * this method returns Release Note that was entered when you published a new version on the page.
+     * Otherwise this method returns the message that was entered when you upload a new build to DeployGate.
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
+     *
+     * @return The message attached to the build
+     * @since r4
+     */
+    public static String getUpdateMessage() {
+        if (sInstance == null || sInstance.mDeployGateVersionCode < 39)
+            return null;
+
+        return sInstance.mAppUpdateMessage;
+    }
+
+    /**
+     * Start the installation of the latest version of the app if available. No effects if there's no update.
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
+     *
+     * @since r4
+     */
+    public static void installUpdate() {
+        if (sInstance == null)
+            return;
+
+        sInstance.invokeAction(DeployGateEvent.ACTION_INSTALL_UPDATE, null);
+    }
+
+    /**
+     * Open comments screen for the distribution of the app installed.
+     * No effect if the app was installed via Distribution Page (i.e. {@link #getDistributionUrl() is null.}
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
+     *
+     * @since r4
+     */
+    public static void openComments() {
+        if (sInstance == null || sInstance.mDistributionId == null)
+            return;
+
+        sInstance.invokeAction(DeployGateEvent.ACTION_OPEN_COMMENTS, null);
+    }
+
+    /**
+     * Open comment composer screen for the distribution of the app installed.
+     * No effect if the app was installed via Distribution Page (i.e. {@link #getDistributionUrl() is null.}
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
+     *
+     * @since r4
+     */
+    public static void composeComment() {
+        composeComment(null);
+    }
+
+    /**
+     * Open comment composer screen for the distribution of the app installed with pre filled string.
+     * No effect if the app was installed via Distribution Page (i.e. {@link #getDistributionUrl() is null.}
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
+     *
+     * @param defaultComment Default comment set to the editor
+     * @since r4
+     */
+    public static void composeComment(String defaultComment) {
+        if (sInstance == null || sInstance.mDistributionId == null)
+            return;
+
+        Bundle extras = new Bundle();
+        extras.putString(DeployGateEvent.EXTRA_COMMENT, defaultComment);
+        sInstance.invokeAction(DeployGateEvent.ACTION_COMPOSE_COMMENT, extras);
+    }
+
+    private void invokeAction(String action, Bundle extras) {
+        if (mRemoteService == null)
+            return;
+        try {
+            mRemoteService.sendEvent(mApplicationContext.getPackageName(), action, extras);
+        } catch (RemoteException e) {
+            Log.w(TAG, "failed to invoke " + action + " action: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get current user's name on Distribution Page. Default name is randomly generated string (like "[abcd1234]").
+     *
+     * Requires DeployGate v1.7.0 or higher installed, otherwise this function returns null.
+     *
+     * @return User's display name on DeployGate. May be null.
+     * @since r4
+     */
+    public static String getDistributionUserName() {
+        if (sInstance == null)
+            return null;
+
+        return sInstance.mDistributionUserName;
     }
 }
