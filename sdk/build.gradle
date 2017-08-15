@@ -36,7 +36,6 @@ publish {
     artifactId = 'sdk'
     publishVersion = project.version
     licences = ['Apache-2.0']
-    uploadName = 'DeployGate SDK'
     desc = 'Android SDK for DeployGate'
     website = 'https://github.com/DeployGate/deploygate-android-sdk'
 

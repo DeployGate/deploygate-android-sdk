@@ -34,7 +34,6 @@ publish {
     artifactId = 'sdk-mock'
     publishVersion = project.version
     licences = ['Apache-2.0']
-    uploadName = 'DeployGate SDK (Mock)'
     desc = 'Mocked dummy Android SDK for DeployGate to reduce footprint of your release version app without code modification'
     website = 'https://github.com/DeployGate/deploygate-android-sdk'
 
