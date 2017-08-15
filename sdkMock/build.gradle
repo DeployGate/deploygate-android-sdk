@@ -31,7 +31,7 @@ publish {
     userOrg = 'deploygate'
     repoName = 'maven'
     groupId = 'com.deploygate'
-    artifactId = 'sdk-mock'
+    artifactId = 'com.deploygate:sdk-mock'
     publishVersion = project.version
     licences = ['Apache-2.0']
     desc = 'Mocked dummy Android SDK for DeployGate to reduce footprint of your release version app without code modification'
