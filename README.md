@@ -1,6 +1,9 @@
 # DeployGate SDK for Android
 
-You can integrate DeployGate's realtime remote logging & crash reporting with a single line of code in your apps in development.
+[![Build Status](https://travis-ci.org/DeployGate/deploygate-android-sdk.svg?branch=master)](https://travis-ci.org/DeployGate/deploygate-android-sdk)
+[ ![Download](https://api.bintray.com/packages/deploygate/maven/com.deploygate%3Asdk/images/download.svg) ](https://bintray.com/deploygate/maven/com.deploygate%3Asdk/_latestVersion)
+
+You can integrate DeployGate's realtime remote logging & crash reporting without code modification on your apps in development.
 
 ## Install
 
@@ -19,7 +22,7 @@ dependencies {
 
 Then synchronize, build and upload your app to DeployGate. With Gradle DeployGate Plugin, it can be done by running `uploadDeployGateDebug` task.
 
-Since 4.0.0, you don't need to add `DeployGate.install(this)` in your `Application#onCreate`. It is automatically called when your application process starts.
+Since 4.0.0, you don't need to add `DeployGate.install(this)` in your `Application#onCreate` except you have multiple processes. It is automatically called when your application process starts.
 
 ## Usage
 
