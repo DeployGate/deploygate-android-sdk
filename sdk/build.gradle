@@ -33,10 +33,10 @@ publish {
     userOrg = 'deploygate'
     repoName = 'maven'
     groupId = 'com.deploygate'
-    artifactId = 'com.deploygate:sdk'
+    artifactId = 'sdk'
     publishVersion = project.version
     licences = ['Apache-2.0']
-    desc = 'Android SDK for DeployGate'
+    desc = 'DeployGate SDK for Android'
     website = 'https://github.com/DeployGate/deploygate-android-sdk'
 
     publications = ['release']
