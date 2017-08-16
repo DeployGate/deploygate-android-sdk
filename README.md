@@ -1,7 +1,7 @@
 # DeployGate SDK for Android
 
 [![Build Status](https://travis-ci.org/DeployGate/deploygate-android-sdk.svg?branch=master)](https://travis-ci.org/DeployGate/deploygate-android-sdk)
-[ ![Download](https://api.bintray.com/packages/deploygate/maven/com.deploygate%3Asdk/images/download.svg) ](https://bintray.com/deploygate/maven/com.deploygate%3Asdk/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/deploygate/maven/sdk/images/download.svg) ](https://bintray.com/deploygate/maven/sdk/_latestVersion)
 
 You can integrate DeployGate's realtime remote logging & crash reporting without code modification on your apps in development.
 
