@@ -16,6 +16,8 @@ cache:
     - $HOME/.android/build-cache
     - $ANDROID_HOME/build-tools/25.0.2
     - $ANDROID_HOME/platforms/android-25
+    - $ANDROID_HOME/extras/android/m2repository
+    - $ANDROID_HOME/extras/google/m2repository
 before_install:
   - mkdir -p "$ANDROID_HOME/licenses"
   - echo $ANDROID_SDK_LICENSE > $ANDROID_HOME/licenses/android-sdk-license
