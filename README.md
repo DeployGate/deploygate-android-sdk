@@ -11,7 +11,7 @@ In your build.gradle of `app` module:
 
 ```gradle
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
