@@ -84,7 +84,7 @@ dependencies {
  * [SDK Document](https://deploygate.com/docs/sdk)
  * [SDK Sample](https://github.com/deploygate/deploygate-android-sdk-sample)
  * [Reference (Javadoc)](https://deploygate.com/javadoc)
- * [Previous releases, download JAR/AARs (Bintray)](https://bintray.com/deploygate/maven/com.deploygate%3Asdk)
+ * [Previous releases, download JAR/AARs (Bintray)](https://bintray.com/deploygate/maven/sdk)
  * [Issues](https://github.com/deploygate/deploygate-android-sdk/issues)
 
 
