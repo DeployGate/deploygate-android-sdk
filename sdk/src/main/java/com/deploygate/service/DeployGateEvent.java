@@ -31,6 +31,9 @@ public interface DeployGateEvent {
     public static final String EXTRA_LOG = "log";
     public static final String EXTRA_LOG_TYPE = "logType";
     public static final String EXTRA_EXCEPTION = "exception";
+    public static final String EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME = "exceptionRootCauseClassName";
+    public static final String EXTRA_EXCEPTION_ROOT_CAUSE_MESSAGE = "exceptionRootCauseMessage";
+    public static final String EXTRA_EXCEPTION_STACKTRACES = "exceptionStackTraces";
     public static final String EXTRA_CURRENT_REVISION = "currentRevision";
     public static final String EXTRA_CURRENT_DISTRIBUTION_ID = "currentDistributionId";
     public static final String EXTRA_CURRENT_DISTRIBUTION_TITLE = "currentDistributionTitle";
