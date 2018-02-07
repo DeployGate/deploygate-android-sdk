@@ -28,11 +28,15 @@ import com.deploygate.service.IDeployGateSdkServiceCallback;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -892,18 +896,44 @@ public class DeployGate {
         return sInstance;
     }
 
-    void sendCrashReport(Throwable ex) {
+    void sendCrashReport(/* non-null */ Throwable ex) {
         if (mRemoteService == null)
             return;
         
         Bundle extras = new Bundle();
-        extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex);
         try {
+            if (getDeployGateVersionCode() > 41 /*todo*/) {
+                Throwable rootCause = getRootCause(ex);
+                String msg = rootCause.getMessage();
+                extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME, ex.getClass().getName());
+                extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_MESSAGE, msg != null ? msg : "");
+                extras.putString(DeployGateEvent.EXTRA_EXCEPTION_STACKTRACES, Log.getStackTraceString(ex));
+            } else {
+                extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex);
+            }
+
             mRemoteService.sendEvent(mApplicationContext.getPackageName(),
                     DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to send crash report: " + e.getMessage());
         }
+    }
+
+    /* non-null */
+    private static Throwable getRootCause(/* non-null */ Throwable ex) {
+        List<Throwable> throwables = new ArrayList<>(Collections.singleton(ex));
+        Throwable rootCause = ex;
+        while (true) {
+            Throwable cause = ex.getCause();
+
+            if (cause != null && !throwables.contains(cause)) {
+                throwables.add(rootCause = cause);
+            } else {
+                break;
+            }
+        }
+
+        return rootCause;
     }
 
     void sendLog(String type, String body) {
