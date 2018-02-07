@@ -902,10 +902,10 @@ public class DeployGate {
         
         Bundle extras = new Bundle();
         try {
-            if (getDeployGateVersionCode() > 41 /*todo*/) {
+            if (getDeployGateVersionCode() > 42 /*todo*/) {
                 Throwable rootCause = getRootCause(ex);
                 String msg = rootCause.getMessage();
-                extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME, ex.getClass().getName());
+                extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME, rootCause.getClass().getName());
                 extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_MESSAGE, msg != null ? msg : "");
                 extras.putString(DeployGateEvent.EXTRA_EXCEPTION_STACKTRACES, Log.getStackTraceString(ex));
             } else {
