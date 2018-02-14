@@ -921,10 +921,14 @@ public class DeployGate {
 
     /* non-null */
     private static Throwable getRootCause(/* non-null */ Throwable ex) {
-        List<Throwable> throwables = new ArrayList<>(Collections.singleton(ex));
-        Throwable rootCause = ex;
+        Throwable cause = ex;
+
+        List<Throwable> throwables = new ArrayList<>(Collections.singleton(cause));
+
+        Throwable rootCause = cause;
+
         while (true) {
-            Throwable cause = ex.getCause();
+            cause = cause.getCause();
 
             if (cause != null && !throwables.contains(cause)) {
                 throwables.add(rootCause = cause);
