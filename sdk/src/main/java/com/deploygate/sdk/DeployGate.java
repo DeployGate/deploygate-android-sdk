@@ -924,22 +924,18 @@ public class DeployGate {
     /* non-null */
     private static Throwable getRootCause(/* non-null */ Throwable ex) {
         Throwable cause = ex;
-
-        List<Throwable> throwables = new ArrayList<>(Collections.singleton(cause));
-
-        Throwable rootCause = cause;
+        LinkedList<Throwable> throwables = new LinkedList<>();
 
         while (true) {
-            cause = cause.getCause();
-
             if (cause != null && !throwables.contains(cause)) {
-                throwables.add(rootCause = cause);
+                throwables.add(cause);
+                cause = cause.getCause();
             } else {
                 break;
             }
         }
 
-        return rootCause;
+        return throwables.getLast();
     }
 
     void sendLog(String type, String body) {
