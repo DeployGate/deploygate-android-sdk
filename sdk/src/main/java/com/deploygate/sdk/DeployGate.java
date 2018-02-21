@@ -66,6 +66,8 @@ public class DeployGate {
             "234eff4a1600a7aa78bf68adfbb15786e886ae1a", // jenkins debug
     };
 
+    private static final int SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION = 42;
+
     private static DeployGate sInstance;
 
     private final Context mApplicationContext;
@@ -902,7 +904,7 @@ public class DeployGate {
         
         Bundle extras = new Bundle();
         try {
-            if (getDeployGateVersionCode() > 41 /* greater than ver 1.7.2 */) {
+            if (getDeployGateVersionCode() >= SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION) {
                 Throwable rootCause = getRootCause(ex);
                 String msg = rootCause.getMessage();
                 extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME, rootCause.getClass().getName());
