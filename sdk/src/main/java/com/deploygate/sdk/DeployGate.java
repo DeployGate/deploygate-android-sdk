@@ -926,13 +926,9 @@ public class DeployGate {
         Throwable cause = ex;
         LinkedList<Throwable> throwables = new LinkedList<>();
 
-        while (true) {
-            if (cause != null && !throwables.contains(cause)) {
-                throwables.add(cause);
-                cause = cause.getCause();
-            } else {
-                break;
-            }
+        while (cause != null && !throwables.contains(cause)) {
+            throwables.add(cause);
+            cause = cause.getCause();
         }
 
         return throwables.getLast();
