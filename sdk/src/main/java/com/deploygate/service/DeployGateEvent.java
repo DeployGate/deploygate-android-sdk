@@ -34,7 +34,7 @@ public interface DeployGateEvent {
     /**
      * this key shouldn't be used
      *
-     * {@see com.deploygate.sdk.DeployGate#SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION}
+     * @see com.deploygate.sdk.DeployGate#SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION
      */
     @Deprecated
     public static final String EXTRA_EXCEPTION = "exception";
