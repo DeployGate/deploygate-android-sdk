@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     // use `compile` instead of `implementation` for Android Build Tools < 3.0
-    implementation 'com.deploygate:sdk:4.0.0'
+    implementation 'com.deploygate:sdk:4.1.0'
 }
 ```
 
@@ -71,10 +71,10 @@ like the following example:
 ```gradle
 dependencies {
     // use full implementation for debug builds
-    debugImplementation 'com.deploygate:sdk:4.0.0'
+    debugImplementation 'com.deploygate:sdk:4.1.0'
 
     // use mocked implementation for release builds
-    releaseImplementation 'com.deploygate:sdk-mock:4.0.0'
+    releaseImplementation 'com.deploygate:sdk-mock:4.1.0'
 }
 ```
 
