@@ -2,8 +2,8 @@ language: android
 sudo: false
 android:
   components:
-    - build-tools-25.0.2
-    - android-25
+    - build-tools-27.0.3
+    - android-27
 jdk:
   - oraclejdk8
 before_cache:
@@ -14,8 +14,8 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
-    - $ANDROID_HOME/build-tools/25.0.2
-    - $ANDROID_HOME/platforms/android-25
+    - $ANDROID_HOME/build-tools/27.0.3
+    - $ANDROID_HOME/platforms/android-27
     - $ANDROID_HOME/extras/android/m2repository
     - $ANDROID_HOME/extras/google/m2repository
 before_install:
