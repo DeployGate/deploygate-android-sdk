@@ -28,11 +28,15 @@ import com.deploygate.service.IDeployGateSdkServiceCallback;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -61,6 +65,8 @@ public class DeployGate {
             "c1f285f69cc02a397135ed182aa79af53d5d20a1", // mba debug
             "234eff4a1600a7aa78bf68adfbb15786e886ae1a", // jenkins debug
     };
+
+    private static final int SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION = 42;
 
     private static DeployGate sInstance;
 
@@ -892,18 +898,40 @@ public class DeployGate {
         return sInstance;
     }
 
-    void sendCrashReport(Throwable ex) {
+    void sendCrashReport(/* non-null */ Throwable ex) {
         if (mRemoteService == null)
             return;
         
         Bundle extras = new Bundle();
-        extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex);
         try {
+            if (getDeployGateVersionCode() >= SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION) {
+                Throwable rootCause = getRootCause(ex);
+                String msg = rootCause.getMessage();
+                extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME, rootCause.getClass().getName());
+                extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_MESSAGE, msg != null ? msg : "");
+                extras.putString(DeployGateEvent.EXTRA_EXCEPTION_STACKTRACES, Log.getStackTraceString(ex));
+            } else {
+                extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex);
+            }
+
             mRemoteService.sendEvent(mApplicationContext.getPackageName(),
                     DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to send crash report: " + e.getMessage());
         }
+    }
+
+    /* non-null */
+    private static Throwable getRootCause(/* non-null */ Throwable ex) {
+        Throwable cause = ex;
+        LinkedList<Throwable> throwables = new LinkedList<>();
+
+        while (cause != null && !throwables.contains(cause)) {
+            throwables.add(cause);
+            cause = cause.getCause();
+        }
+
+        return throwables.getLast();
     }
 
     void sendLog(String type, String body) {
