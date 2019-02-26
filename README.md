@@ -15,18 +15,18 @@ repositories {
 }
 
 dependencies {
-    // use `compile` instead of `implementation` for Android Build Tools < 3.0
+    // use `compile` instead of `implementation` for Android Gradle for Plugin < 3.0
     implementation 'com.deploygate:sdk:4.1.0'
 }
 ```
 
-Then synchronize, build and upload your app to DeployGate. With Gradle DeployGate Plugin, it can be done by running `uploadDeployGateDebug` task.
+Then synchronize, build and upload your app to DeployGate. With [Gradle DeployGate Plugin](https://github.com/DeployGate/gradle-deploygate-plugin/), it can be done by running `uploadDeployGateDebug` task.
 
-Since 4.0.0, you don't need to add `DeployGate.install(this)` in your `Application#onCreate` except you have multiple processes. It is automatically called when your application process starts.
+Since 4.0.0, you don't need to add `DeployGate.install(this)` to your `Application#onCreate` except you have multiple processes. It is automatically called when your application process starts.
 
 ## Usage
 
-You can retrieve detailed information on current running build and status change events via functions and callback listeners.
+You can retrieve detailed information on current running build and status change events through functions and callback listeners.
 
 For example, you can prevent your application running on unauthorized devices by putting the following code in your main Activity's `Activity#onCreate`.
 
@@ -90,7 +90,7 @@ dependencies {
 
 ## License
 
-Copyright © 2017 DeployGate
+Copyright © 2017- DeployGate
 
 Licensed under [the Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0) (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 http://www.apache.org/licenses/LICENSE-2.0
