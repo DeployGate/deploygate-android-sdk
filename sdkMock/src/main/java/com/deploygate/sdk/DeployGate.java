@@ -94,19 +94,19 @@ public class DeployGate {
         return 0;
     }
 
-    public boolean hasUpdate() {
+    public static boolean hasUpdate() {
         return false;
     }
 
-    public int getUpdateRevision() {
+    public static int getUpdateRevision() {
         return 0;
     }
 
-    public int getUpdateVersionCode() {
+    public static int getUpdateVersionCode() {
         return 0;
     }
 
-    public String getUpdateVersionName() {
+    public static String getUpdateVersionName() {
         return null;
     }
 

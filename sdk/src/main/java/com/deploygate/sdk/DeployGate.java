@@ -313,7 +313,7 @@ public class DeployGate {
         }
     }
 
-    protected boolean canLogCat() {
+    private boolean canLogCat() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
             return true;
         return mApplicationContext.getPackageManager().checkPermission(permission.READ_LOGS,
@@ -1053,7 +1053,7 @@ public class DeployGate {
      * @return true if there's an update, false otherwise.
      * @since r4
      */
-    public boolean hasUpdate() {
+    public static boolean hasUpdate() {
         if (sInstance == null)
             return false;
 
@@ -1066,7 +1066,7 @@ public class DeployGate {
      * @return Revision number of the update.
      * @since r4
      */
-    public int getUpdateRevision() {
+    public static int getUpdateRevision() {
         if (sInstance == null)
             return 0;
 
@@ -1079,7 +1079,7 @@ public class DeployGate {
      * @return Revision number of the update.
      * @since r4
      */
-    public int getUpdateVersionCode() {
+    public static int getUpdateVersionCode() {
         if (sInstance == null)
             return 0;
 
@@ -1092,7 +1092,7 @@ public class DeployGate {
      * @return Revision number of the update.
      * @since r4
      */
-    public String getUpdateVersionName() {
+    public static String getUpdateVersionName() {
         if (sInstance == null)
             return null;
 
