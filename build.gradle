@@ -6,12 +6,12 @@ ext {
 buildscript {
     repositories {
         jcenter()
-        mavenCentral()
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.5.3'
 
+        classpath 'com.deploygate:gradle:1.1.4'
         classpath 'com.novoda:bintray-release:0.5.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3' // 1.7.1+ is required for Java 7
     }

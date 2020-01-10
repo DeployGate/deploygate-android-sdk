@@ -1,0 +1,30 @@
+<resources>
+
+    <string name="app_name">Sample</string>
+    <string name="menu_settings">Settings</string>
+    
+    <string name="hello">This is a sample app of DeployGate SDK.</string>
+    <string name="logo_content_description">DeployGate Logo</string>
+    
+    <string name="question_available">Is the DeployGate available on this device?</string>
+    <string name="available_yes">YES, versionCode %1$d is running.</string>
+    <string name="available_no">NO.</string>
+    <string name="question_managed">Is this app managed under DeployGate?</string>
+    <string name="managed_yes">YES, the build revision is #%1$d.</string>
+    <string name="managed_distribution">YES, the build #%1$d distributed via &lt;a href="%3$s"&gt;%2$s&lt;/a&gt;.</string>
+    <string name="managed_no">NO.</string>
+    <string name="question_authorized">Is the user authorized to use this app?</string>
+    <string name="authorized_yes">YES, hello %1$s!</string>
+    <string name="authorized_no">NO.</string>
+    
+    <string name="crash_button">Crash this app!</string>
+    
+    <string name="send_custom_log">Send custom log</string>
+    <string name="custom_log_default">Hello!</string>
+    <string name="logcat_button">Capture and send LogCat</string>
+    <string name="logcat_toast">LogCat is being captured and sent. Check out LogCat tab on the device detail page on deploygate.com.</string>
+    <string name="update_button">Update</string>
+    <string name="update_available">Update is Available: #%1$d, %2$s(%3$d) %4$s</string>
+    <string name="comments">Comments</string>
+    <string name="composeComment">Compose</string>
+</resources>
