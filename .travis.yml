@@ -23,7 +23,7 @@ before_install:
   - echo $ANDROID_SDK_LICENSE > $ANDROID_HOME/licenses/android-sdk-license
   - echo $ANDROID_SDK_PREVIEW_LICENSE > $ANDROID_HOME/licenses/android-sdk-preview-license
 script:
-  - "./gradlew build test"
+  - "./gradlew sdk:build sdk:test sdkMock:build sdkMock:test --continue"
 deploy:
   provider: script
   script: "./release.sh"
