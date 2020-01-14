@@ -443,7 +443,7 @@ public class DeployGate {
      * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
      *            the release build, set this true.
      * @throws IllegalStateException if this called twice
-     * @since r4.1
+     * @since r4.2
      */
     public static void install(Application app, boolean forceApplyOnReleaseBuild) {
         install(app, null, null, forceApplyOnReleaseBuild);
@@ -1081,7 +1081,7 @@ public class DeployGate {
      * You can get detailed information via {@link #getUpdateRevision()}, {@link #getUpdateVersionCode()}, {@link #getUpdateVersionName()}, and {@link #getUpdateMessage()}.
      *
      * @return true if there's an update, false otherwise.
-     * @since r4
+     * @since r4.2
      */
     public static boolean hasUpdate() {
         if (sInstance == null)
@@ -1094,7 +1094,7 @@ public class DeployGate {
      * Returns the revision number of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
-     * @since r4
+     * @since r4.2
      */
     public static int getUpdateRevision() {
         if (sInstance == null)
@@ -1107,7 +1107,7 @@ public class DeployGate {
      * Returns the android:versionCode of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
-     * @since r4
+     * @since r4.2
      */
     public static int getUpdateVersionCode() {
         if (sInstance == null)
@@ -1120,7 +1120,7 @@ public class DeployGate {
      * Returns the android:versionName of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
-     * @since r4
+     * @since r4.2
      */
     public static String getUpdateVersionName() {
         if (sInstance == null)
