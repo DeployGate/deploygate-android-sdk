@@ -1,28 +1,6 @@
-apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
+apply from: '../sdk.build.gradle'
 
-version = rootProject.ext.releaseVersion
-
-android {
-    compileSdkVersion 28
-
-    defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 28
-        versionCode 1
-        versionName project.version
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-        }
-    }
-
-    lintOptions {
-        abortOnError false
-    }
-}
+android.sourceSets.test.java.srcDirs += [rootProject.file('sdk/src/test/java')]
 
 publish {
     userOrg = 'deploygate'

@@ -348,6 +348,15 @@ public class DeployGate {
     }
 
     /**
+     * Clear the initiated DeployGate instance.
+     *
+     * This method is only for testing so breaking changes would may happen.
+     */
+    static void clear() {
+        sInstance = null;
+    }
+
+    /**
      * Install DeployGate on your application instance. Call this method inside
      * of your {@link Application#onCreate()} once.
      * <p>
@@ -417,6 +426,27 @@ public class DeployGate {
      */
     public static void install(Application app, DeployGateCallback callback) {
         install(app, null, callback);
+    }
+
+    /**
+     * Install DeployGate on your application instance and register a callback
+     * listener. Call this method inside of your {@link Application#onCreate()}
+     * once.
+     * <p>
+     * <b>Note:</b> To make {@link #isAuthorized()} more effective, you should
+     * call {@link #install(Application, String)} instead and specify authorId
+     * explicitly to ensure the authority of this app to prevent casual
+     * redistribution via DeployGate.
+     * </p>
+     *
+     * @param app Application instance, typically just pass <em>this</em>.
+     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
+     *            the release build, set this true.
+     * @throws IllegalStateException if this called twice
+     * @since r4.1
+     */
+    public static void install(Application app, boolean forceApplyOnReleaseBuild) {
+        install(app, null, null, forceApplyOnReleaseBuild);
     }
 
     /**
