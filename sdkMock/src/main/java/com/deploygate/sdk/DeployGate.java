@@ -5,6 +5,9 @@ import android.app.Application;
 
 public class DeployGate {
 
+    static void clear() {
+    }
+
     public static void install(Application app) {
     }
 
@@ -12,6 +15,9 @@ public class DeployGate {
     }
 
     public static void install(Application app, DeployGateCallback callback) {
+    }
+
+    public static void install(Application app, boolean forceApplyOnReleaseBuild) {
     }
 
     public static void install(Application app, String author, DeployGateCallback callback) {

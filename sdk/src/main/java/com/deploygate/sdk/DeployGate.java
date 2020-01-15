@@ -348,6 +348,15 @@ public class DeployGate {
     }
 
     /**
+     * Clear the initiated DeployGate instance.
+     *
+     * This method is only for testing so breaking changes would may happen.
+     */
+    static void clear() {
+        sInstance = null;
+    }
+
+    /**
      * Install DeployGate on your application instance. Call this method inside
      * of your {@link Application#onCreate()} once.
      * <p>
@@ -417,6 +426,27 @@ public class DeployGate {
      */
     public static void install(Application app, DeployGateCallback callback) {
         install(app, null, callback);
+    }
+
+    /**
+     * Install DeployGate on your application instance and register a callback
+     * listener. Call this method inside of your {@link Application#onCreate()}
+     * once.
+     * <p>
+     * <b>Note:</b> To make {@link #isAuthorized()} more effective, you should
+     * call {@link #install(Application, String)} instead and specify authorId
+     * explicitly to ensure the authority of this app to prevent casual
+     * redistribution via DeployGate.
+     * </p>
+     *
+     * @param app Application instance, typically just pass <em>this</em>.
+     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
+     *            the release build, set this true.
+     * @throws IllegalStateException if this called twice
+     * @since r4.2
+     */
+    public static void install(Application app, boolean forceApplyOnReleaseBuild) {
+        install(app, null, null, forceApplyOnReleaseBuild);
     }
 
     /**
@@ -1051,7 +1081,7 @@ public class DeployGate {
      * You can get detailed information via {@link #getUpdateRevision()}, {@link #getUpdateVersionCode()}, {@link #getUpdateVersionName()}, and {@link #getUpdateMessage()}.
      *
      * @return true if there's an update, false otherwise.
-     * @since r4
+     * @since r4.2
      */
     public static boolean hasUpdate() {
         if (sInstance == null)
@@ -1064,7 +1094,7 @@ public class DeployGate {
      * Returns the revision number of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
-     * @since r4
+     * @since r4.2
      */
     public static int getUpdateRevision() {
         if (sInstance == null)
@@ -1077,7 +1107,7 @@ public class DeployGate {
      * Returns the android:versionCode of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
-     * @since r4
+     * @since r4.2
      */
     public static int getUpdateVersionCode() {
         if (sInstance == null)
@@ -1090,7 +1120,7 @@ public class DeployGate {
      * Returns the android:versionName of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
-     * @since r4
+     * @since r4.2
      */
     public static String getUpdateVersionName() {
         if (sInstance == null)

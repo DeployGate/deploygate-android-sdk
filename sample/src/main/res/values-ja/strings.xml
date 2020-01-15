@@ -1,0 +1,30 @@
+<resources>
+
+    <string name="app_name">サンプル</string>
+    <string name="menu_settings">設定</string>
+    
+    <string name="hello">これはDeployGate SDKのサンプルです。</string>
+    <string name="logo_content_description">DeployGateロゴ</string>
+    
+    <string name="question_available">DeployGateはこの端末上に</string>
+    <string name="available_yes">versionCode %1$dがインストールされています</string>
+    <string name="available_no">インストールされてません</string>
+    <string name="question_managed">このアプリはDeployGateで</string>
+    <string name="managed_yes">リビジョン#%1$dとして管理されています</string>
+    <string name="managed_distribution">リビジョン#%1$dが&lt;a href="%3$s"&gt;%2$s&lt;/a&gt;から配布されています</string>
+    <string name="managed_no">管理されていません</string>
+    <string name="question_authorized">このアプリの利用</string>
+    <string name="authorized_yes">%1$s が利用しています</string>
+    <string name="authorized_no">ログインユーザーが不明のため利用できません</string>
+    
+    <string name="crash_button">アプリをクラッシュさせる</string>
+    <string name="send_custom_log">カスタムログの送信</string>
+    <string name="custom_log_default">これはテストです</string>
+    <string name="logcat_button">LogCatを取得して送信</string>
+    <string name="logcat_toast">LogCatを取得して送信しています。deploygate.comの端末の詳細ページのLogCatタブをご確認ください。</string>
+    <string name="update_button">アップデート</string>
+    <string name="update_available">アップデートがあります: #%1$d, %2$s(%3$d) %4$s</string>
+    <string name="comments">コメント一覧</string>
+    <string name="composeComment">投稿する</string>
+
+</resources>

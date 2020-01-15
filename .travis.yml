@@ -2,8 +2,8 @@ language: android
 sudo: false
 android:
   components:
-    - build-tools-27.0.3
-    - android-27
+    - build-tools-28.0.3
+    - android-28
 jdk:
   - oraclejdk8
 before_cache:
@@ -23,7 +23,7 @@ before_install:
   - echo $ANDROID_SDK_LICENSE > $ANDROID_HOME/licenses/android-sdk-license
   - echo $ANDROID_SDK_PREVIEW_LICENSE > $ANDROID_HOME/licenses/android-sdk-preview-license
 script:
-  - "./gradlew build test"
+  - "./gradlew sdk:build sdk:test sdkMock:build sdkMock:test --continue"
 deploy:
   provider: script
   script: "./release.sh"
