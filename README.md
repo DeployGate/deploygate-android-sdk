@@ -54,7 +54,7 @@ DeployGate.registerCallback(new DeployGateCallback() {
 ```
 
 
-See [SDK Sample](https://github.com/deploygate/deploygate-android-sdk-sample) for more examples and [Javadoc](https://deploygate.com/javadoc) for all available methods.
+See [SDK Sample](./sample) for more examples.
 
 ## Mock
 
