@@ -32,3 +32,37 @@ dependencies {
     testImplementation 'androidx.test:rules:1.2.0'
     testImplementation 'com.google.truth:truth:1.0'
 }
+
+project.plugins.withType(MavenPublishPlugin) {
+    def pomConfig = {
+        name project.ext.displayName
+        description project.publish.desc
+        url project.publish.website
+        licenses {
+            license {
+                name "The Apache Software License, Version 2.0"
+                url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution "repo"
+            }
+        }
+        developers {
+            developer {
+                name "DeployGate"
+            }
+        }
+
+        scm {
+            url 'https://github.com/DeployGate/deploygate-android-sdk'
+        }
+    }
+
+    def publishingExtension = project.extensions.findByType(PublishingExtension)
+
+    publishingExtension.publications.withType(MavenPublication).whenObjectAdded {
+        if (project.publish.publications.contains(name)) {
+            pom.withXml {
+                asNode().children().last() + pomConfig
+            }
+        }
+    }
+}

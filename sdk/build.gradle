@@ -2,6 +2,10 @@ apply from: '../sdk.build.gradle'
 
 android.defaultConfig.consumerProguardFiles 'deploygate-sdk-proguard-rules.txt'
 
+ext {
+    displayName = "DeployGate SDK"
+}
+
 publish {
     userOrg = 'deploygate'
     repoName = 'maven'
