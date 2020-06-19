@@ -15,14 +15,26 @@ repositories {
 }
 
 dependencies {
-    // use `compile` instead of `implementation` for Android Gradle for Plugin < 3.0
     implementation 'com.deploygate:sdk:4.1.0'
 }
 ```
 
-Then synchronize, build and upload your app to DeployGate. With [Gradle DeployGate Plugin](https://github.com/DeployGate/gradle-deploygate-plugin/), it can be done by running `uploadDeployGateDebug` task.
+Then synchronize, build and upload your app to DeployGate. [Gradle DeployGate Plugin](https://github.com/DeployGate/gradle-deploygate-plugin/) will be your help.
 
 Since 4.0.0, you don't need to add `DeployGate.install(this)` to your `Application#onCreate` except you have multiple processes. It is automatically called when your application process starts.
+
+### For AppStartup users or those who would like to initialize SDK manually
+
+DeployGate SDK uses `ContentProvider` to initialize itself so you need to remove the provider from your manifest file.
+
+```AndroidManifest.xml
+<application>
+    <provider
+        android:name="com.deploygate.sdk.DeployGateProvider"
+        tools:node="remove"
+        />
+</application>
+```
 
 ## Usage
 
@@ -54,7 +66,7 @@ DeployGate.registerCallback(new DeployGateCallback() {
 ```
 
 
-See [SDK Sample](https://github.com/deploygate/deploygate-android-sdk-sample) for more examples and [Javadoc](https://deploygate.com/javadoc) for all available methods.
+See [SDK Sample](./sample) for more examples.
 
 ## Mock
 
