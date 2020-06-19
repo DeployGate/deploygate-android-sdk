@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+while read path; do
+    md5sum $path
+done < <(find . -name "build.gradle" | sort)
+
+while read path; do
+    md5sum $path
+done < <(find . -name "*.build.gradle" | sort)
