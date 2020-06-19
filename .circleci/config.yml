@@ -1,0 +1,80 @@
+version: 2.1
+
+executors:
+  android:
+    docker:
+      - image: circleci/android:api-29
+    working_directory: ~/deploygate-android-sdk
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxPermSize=512m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
+
+commands:
+  restore_gradle_cache:
+    parameters: &gradle_cache_parameters
+      cache_version:
+        type: string
+        default: v1
+    steps:
+      - run: .circleci/generate_checksum > gradle.checksum
+      - restore_cache:
+          keys:
+            - gradle-<< parameters.cache_version >>-{{ checksum "gradle.checksum" }}
+  save_gradle_cache:
+    parameters: *gradle_cache_parameters
+    steps:
+      - save_cache:
+          paths:
+            - ~/.android
+            - ~/.gradle
+            - .gradle
+            - ~/.m2
+          key: gradle-<< parameters.cache_version >>-{{ checksum "gradle.checksum" }}
+
+orbs:
+  slack: circleci/slack@3.4.2
+
+jobs:
+  build:
+    executor: android
+    steps:
+      - checkout
+      - restore_gradle_cache
+      - run: ./gradlew sdk:build sdkMock:build --continue
+      - save_gradle_cache
+  test:
+    executor: android
+    steps:
+      - checkout
+      - restore_gradle_cache
+      - run: ./gradlew sdk:test sdkMock:test --continue
+      - save_gradle_cache
+      - store_test_results:
+          path: sdk/build/test-results
+          when: always
+      - store_test_results:
+          path: sdkMock/build/test-results
+          when: always
+  release:
+    executor: android
+    steps:
+      - checkout
+      - run: ./release.sh
+      - slack/notify:
+          message: Just released new deploygate-android-sdk on <https://bintray.com/deploygate/maven/com.deploygate%3Asdk|Bintray>!
+    environment:
+      DRY_RUN_RELEASE: false
+
+workflows:
+  version: 2
+  on_commit:
+    jobs:
+      - build
+      - test
+  deployment:
+    jobs:
+      - release:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /\d\.\d\.\d/
