@@ -66,3 +66,12 @@ project.plugins.withType(MavenPublishPlugin) {
         }
     }
 }
+
+afterEvaluate {
+    android.libraryVariants.configureEach { variant ->
+        tasks.findByName("javadoc${variant.name.capitalize()}").configure {
+            // android classpath is required since AGP 3.6
+            classpath += files(android.getBootClasspath())
+        }
+    }
+}
