@@ -77,4 +77,6 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /\d\.\d\.\d/
+              only:
+                - /\d\.\d\.\d/
+                - /\d\.\d\.\d-(alpha|rc)\d/
