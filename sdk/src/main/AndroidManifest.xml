@@ -6,4 +6,7 @@
             android:name=".DeployGateProvider"
             android:exported="false" />
     </application>
+    <queries>
+        <package android:name="com.deploygate" />
+    </queries>
 </manifest>
