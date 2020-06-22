@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.deploygate:sdk:4.1.0'
+    implementation 'com.deploygate:sdk:<latest version>'
 }
 ```
 
@@ -23,7 +23,7 @@ Then synchronize, build and upload your app to DeployGate. [Gradle DeployGate Pl
 
 Since 4.0.0, you don't need to add `DeployGate.install(this)` to your `Application#onCreate` except you have multiple processes. It is automatically called when your application process starts.
 
-### For AppStartup users or those who would like to initialize SDK manually
+### For Jetpack App Startup users or those who would like to initialize SDK manually
 
 DeployGate SDK uses `ContentProvider` to initialize itself so you need to remove the provider from your manifest file.
 
@@ -83,10 +83,10 @@ like the following example:
 ```gradle
 dependencies {
     // use full implementation for debug builds
-    debugImplementation 'com.deploygate:sdk:4.1.0'
+    debugImplementation 'com.deploygate:sdk:<latest version>'
 
     // use mocked implementation for release builds
-    releaseImplementation 'com.deploygate:sdk-mock:4.1.0'
+    releaseImplementation 'com.deploygate:sdk-mock:<latest version>'
 }
 ```
 
