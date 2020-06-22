@@ -78,5 +78,5 @@ workflows:
               ignore: /.*/
             tags:
               only:
-                - /\d\.\d\.\d/
-                - /\d\.\d\.\d-(alpha|rc)\d/
+                - /\d+\.\d+\.\d+/
+                - /\d+\.\d+\.\d+-(alpha|rc)\d+/
