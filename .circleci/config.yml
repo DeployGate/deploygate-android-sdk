@@ -60,7 +60,7 @@ jobs:
       - checkout
       - run: ./release.sh
       - slack/notify:
-          message: Just released new deploygate-android-sdk on <https://bintray.com/deploygate/maven/com.deploygate%3Asdk|Bintray>!
+          message: Just released new deploygate-android-sdk on <https://bintray.com/beta/#/deploygate/maven/sdk?tab=overview|Bintray>!
     environment:
       DRY_RUN_RELEASE: false
 
