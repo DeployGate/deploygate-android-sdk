@@ -5,6 +5,9 @@
 
 You can integrate DeployGate's realtime remote logging & crash reporting without code modification on your apps in development.
 
+> 4.3.0 alphas and 4.3.0 will require updating Android Studio to the latest patch version of 3.3 or above.
+> For the more details, please see https://developer.android.com/studio/releases/gradle-plugin#4.0.1
+
 ## Install
 
 In your build.gradle of `app` module:
