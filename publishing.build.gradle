@@ -21,8 +21,8 @@ bintray {
 println("bintray dryRun : ${bintray.dryRun}")
 println("bintray publish : ${bintray.publish}")
 
-afterEvaluate {
-    android.libraryVariants.configureEach { variant ->
+android.libraryVariants.configureEach { variant ->
+    if (bintray.publications.contains(variant.name)) {
         project.task("generateJavadocFor${variant.name.capitalize()}Publication", type: Javadoc) {
             source = variant.getJavaCompileProvider().get().source
             classpath = variant.getJavaCompileProvider().get().classpath + files(project.android.getBootClasspath())
@@ -45,7 +45,9 @@ afterEvaluate {
                 "generatePomFileFor${variant.name.capitalize()}Publication"
         )
     }
+}
 
+afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
