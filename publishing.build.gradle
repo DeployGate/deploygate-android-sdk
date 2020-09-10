@@ -13,7 +13,13 @@ bintray {
     }
 
     publications = ['release']
+
+    dryRun = project.getProperties().get("bintrayDryRun") != "false"
+    publish = project.getProperties().get("bintrayPublish") == "true"
 }
+
+println("bintray dryRun : ${bintray.dryRun}")
+println("bintray publish : ${bintray.publish}")
 
 afterEvaluate {
     android.libraryVariants.configureEach { variant ->
@@ -35,34 +41,13 @@ afterEvaluate {
 
         project.tasks.findByName("assemble${variant.name.capitalize()}").dependsOn(
                 "generateSourcesJarFor${variant.name.capitalize()}Publication",
-                "generateJavadocsJarFor${variant.name.capitalize()}Publication"
+                "generateJavadocsJarFor${variant.name.capitalize()}Publication",
+                "generatePomFileFor${variant.name.capitalize()}Publication"
         )
     }
 
     publishing {
         publications {
-            def pomConfig = {
-                name project.ext.displayName
-                description project.ext.desc
-                url 'https://github.com/DeployGate/deploygate-android-sdk'
-                licenses {
-                    license {
-                        name "The Apache Software License, Version 2.0"
-                        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                        distribution "repo"
-                    }
-                }
-                developers {
-                    developer {
-                        name "DeployGate"
-                    }
-                }
-
-                scm {
-                    url 'https://github.com/DeployGate/deploygate-android-sdk'
-                }
-            }
-
             release(MavenPublication) {
                 from components.release
                 artifact generateSourcesJarForReleasePublication
@@ -72,8 +57,25 @@ afterEvaluate {
                 artifactId = project.ext.artifactId
                 version = project.version
 
-                pom.withXml {
-                    asNode().children().last() + pomConfig
+                pom {
+                    name = project.ext.displayName
+                    description = project.ext.desc
+                    url = 'https://github.com/DeployGate/deploygate-android-sdk'
+                    licenses {
+                        license {
+                            name =  "The Apache Software License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                            distribution = "repo"
+                        }
+                    }
+                    developers {
+                        developer {
+                            name = "DeployGate"
+                        }
+                    }
+                    scm {
+                        url = 'https://github.com/DeployGate/deploygate-android-sdk'
+                    }
                 }
             }
         }
