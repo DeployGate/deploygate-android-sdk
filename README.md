@@ -24,7 +24,7 @@ dependencies {
 
 Then synchronize, build and upload your app to DeployGate. [Gradle DeployGate Plugin](https://github.com/DeployGate/gradle-deploygate-plugin/) will be your help.
 
-> Since 4.0.0, you don't need to add `DeployGate.install(this)` to your `Application#onCreate` except you have multiple processes. It is automatically called when your application process starts.
+> Since 4.0.0, you don't need to add `DeployGate.install(this)` to your `Application#onCreate` except you have multiple processes. It is automatically called when your application process starts through the ContentProvider initialization.
 
 ### For Jetpack App Startup users or those who would like to initialize SDK manually
 
