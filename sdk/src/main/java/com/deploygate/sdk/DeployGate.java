@@ -360,7 +360,7 @@ public class DeployGate {
      * Install DeployGate on your application instance. Call this method inside
      * of your {@link Application#onCreate()} once.
      * <p>
-     * On a release build, which has <tt>android:isDebuggable</tt> set false on
+     * On a release build, which has <code>android:isDebuggable</code> set false on
      * AndroidManifest.xml, this function will do nothing. If you want to enable
      * DeployGate on a release build, consider using
      * {@link #install(Application, String, DeployGateCallback, boolean)}
@@ -385,7 +385,7 @@ public class DeployGate {
      * Install DeployGate on your application instance. Call this method inside
      * of your {@link Application#onCreate()} once.
      * <p>
-     * On a release build, which has <tt>android:isDebuggable</tt> set false on
+     * On a release build, which has <code>android:isDebuggable</code> set false on
      * AndroidManifest.xml, this function will do nothing. If you want to enable
      * DeployGate on a release build, consider using
      * {@link #install(Application, String, DeployGateCallback, boolean)}
@@ -406,7 +406,7 @@ public class DeployGate {
      * listener. Call this method inside of your {@link Application#onCreate()}
      * once.
      * <p>
-     * On a release build, which has <tt>android:isDebuggable</tt> set false on
+     * On a release build, which has <code>android:isDebuggable</code> set false on
      * AndroidManifest.xml, this function will do nothing. If you want to enable
      * DeployGate on a release build, consider using
      * {@link #install(Application, String, DeployGateCallback, boolean)}
@@ -454,7 +454,7 @@ public class DeployGate {
      * listener. Call this method inside of your {@link Application#onCreate()}
      * once.
      * <p>
-     * On a release build, which has <tt>android:isDebuggable</tt> set false on
+     * On a release build, which has <code>android:isDebuggable</code> set false on
      * AndroidManifest.xml, this function will do nothing. If you want to enable
      * DeployGate on a release build, consider using
      * {@link #install(Application, String, DeployGateCallback, boolean)}
@@ -526,7 +526,7 @@ public class DeployGate {
      * the DeployGate service. Nothing happens if this called before
      * {@link #install(Application)} or when refreshing is already in progress.
      * Note that after calling this, {@link #isInitialized()} will changed to
-     * false immediately and any call to <tt>is*()</tt> will be blocked until
+     * false immediately and any call to <code>is*()</code> will be blocked until
      * refreshing get finished.
      * 
      * @since r1
