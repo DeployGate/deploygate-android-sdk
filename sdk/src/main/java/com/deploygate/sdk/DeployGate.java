@@ -28,15 +28,11 @@ import com.deploygate.service.IDeployGateSdkServiceCallback;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -103,6 +99,7 @@ public class DeployGate {
     private final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
 
         public void onEvent(String action, Bundle extras) throws RemoteException {
+            Log.d(TAG, "onEvent " + action);
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
                 onInitialized(
                     extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
@@ -158,6 +155,7 @@ public class DeployGate {
                     for (DeployGateCallback callback : mCallbacks) {
                         callback.onInitialized(true);
                         callback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
+                        // Don't notify the current state
                     }
                 }
             });
@@ -310,6 +308,34 @@ public class DeployGate {
             mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
+        }
+    }
+
+    private void onCurrentStateRequested() {
+
+        if (isDeployGateAvailable()) {
+            final boolean isManaged = mAppIsManaged;
+            final boolean isAuthorized = mAppIsAuthorized;
+            final String loginUsername = mLoginUsername;
+            final boolean isStopped = mAppIsStopRequested;
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (DeployGateCallback callback : mCallbacks) {
+                        callback.onCurrentStateNotified(true, isManaged, isAuthorized, loginUsername, isStopped);
+                    }
+                }
+            });
+        } else {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (DeployGateCallback callback : mCallbacks) {
+                        callback.onCurrentStateNotified(true, false, false, null, false);
+                    }
+                }
+            });
         }
     }
 
@@ -538,11 +564,11 @@ public class DeployGate {
 
     private void refreshInternal() {
         if (mInitializedLatch.getCount() == 0) {
-            mInitializedLatch = new CountDownLatch(1);
             if (mRemoteService == null) {
+                mInitializedLatch = new CountDownLatch(1);
                 initService(false);
             } else {
-                requestServiceInit(false);
+                onCurrentStateRequested();
             }
         }
     }
