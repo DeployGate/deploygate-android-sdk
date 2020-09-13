@@ -34,6 +34,7 @@ DeployGate SDK uses `ContentProvider` to initialize itself so you need to remove
 <application>
     <provider
         android:name="com.deploygate.sdk.DeployGateProvider"
+        android:authorities="${applicationId}.deploygateprovider"
         tools:node="remove"
         />
 </application>
