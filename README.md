@@ -22,7 +22,7 @@ dependencies {
 }
 ```
 
-Then synchronize, build and upload your app to DeployGate. [Gradle DeployGate Plugin](https://github.com/DeployGate/gradle-deploygate-plugin/) will be your help.
+Then synchronize, build and upload your app to DeployGate. 
 
 > Since 4.0.0, you don't need to add `DeployGate.install(this)` to your `Application#onCreate` except you have multiple processes. It is automatically called when your application process starts through the ContentProvider initialization.
 
@@ -94,6 +94,9 @@ dependencies {
 }
 ```
 
+## Upload your app to DeployGate
+
+[Gradle DeployGate Plugin](https://github.com/DeployGate/gradle-deploygate-plugin/) will be your help. Please note that the SDK works without the Gradle plugin and vice versa. 
 
 ## Links
 
