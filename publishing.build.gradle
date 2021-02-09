@@ -77,6 +77,7 @@ afterEvaluate {
                     }
                     developers {
                         developer {
+                            id = "deploygate"
                             name = "DeployGate"
                         }
                     }
@@ -89,7 +90,7 @@ afterEvaluate {
     }
 
     signing {
-        required { gradle.taskGraph.hasTask("uploadArchives") }
+        required { isRelease() && gradle.taskGraph.hasTask("publishToMavenRepository") }
 
         def signingKey = findProperty("signingKey")
         def signingPassword = findProperty("signingPassword")
