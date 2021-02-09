@@ -1,7 +1,8 @@
 # DeployGate SDK for Android
 
 [![Build Status](https://travis-ci.org/DeployGate/deploygate-android-sdk.svg?branch=master)](https://travis-ci.org/DeployGate/deploygate-android-sdk)
-[ ![Download](https://api.bintray.com/packages/deploygate/maven/sdk/images/download.svg) ](https://bintray.com/deploygate/maven/sdk/_latestVersion)
+[![Download](https://img.shields.io/maven-central/v/com.deploygate/sdk)](https://ossindex.sonatype.org/component/pkg:maven/com.deploygate/sdk)
+[![Download](https://img.shields.io/maven-central/v/com.deploygate/sdk-mock)](https://ossindex.sonatype.org/component/pkg:maven/com.deploygate/sdk-mock)
 
 You can integrate DeployGate's realtime remote logging & crash reporting without code modification on your apps in development.
 
@@ -14,7 +15,7 @@ In your build.gradle of `app` module:
 
 ```gradle
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -103,7 +104,7 @@ dependencies {
  * [SDK Document](https://deploygate.com/docs/sdk)
  * [SDK Sample](https://github.com/deploygate/deploygate-android-sdk-sample)
  * [Reference (Javadoc)](https://deploygate.com/javadoc)
- * [Previous releases, download JAR/AARs (Bintray)](https://bintray.com/deploygate/maven/sdk)
+ * [Previous releases, download JAR/AARs](https://search.maven.org/artifact/com.deploygate/sdk)
  * [Issues](https://github.com/deploygate/deploygate-android-sdk/issues)
 
 
