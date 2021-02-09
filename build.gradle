@@ -5,21 +5,30 @@ ext {
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         google()
+        jcenter {
+            content {
+                includeModule("org.jetbrains.trove4j", "trove4j")
+                includeModule("com.deploygate", "gradle")
+            }
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.1'
-
         classpath 'com.deploygate:gradle:2.3.0'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
         google()
+        jcenter {
+            content {
+                includeModule("org.jetbrains.trove4j", "trove4j")
+            }
+        }
     }
 }
 

@@ -30,9 +30,6 @@ commands:
             - ~/.m2
           key: gradle-<< parameters.cache_version >>-{{ checksum "gradle.checksum" }}
 
-orbs:
-  slack: circleci/slack@3.4.2
-
 jobs:
   build:
     executor: android
@@ -54,16 +51,6 @@ jobs:
       - store_test_results:
           path: sdkMock/build/test-results
           when: always
-  release:
-    executor: android
-    steps:
-      - checkout
-      - run: ./release.sh
-      - slack/notify:
-          message: Just released new deploygate-android-sdk on <https://bintray.com/beta/#/deploygate/maven/sdk?tab=overview|Bintray>!
-    environment:
-      BINTRAY_DRY_RUN: false
-      BINTRAY_PUBLISH: true
 
 workflows:
   version: 2
@@ -71,13 +58,3 @@ workflows:
     jobs:
       - build
       - test
-  deployment:
-    jobs:
-      - release:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only:
-                - /\d+\.\d+\.\d+/
-                - /\d+\.\d+\.\d+-(alpha|rc)\d+/
