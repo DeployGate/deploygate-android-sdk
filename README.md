@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/DeployGate/deploygate-android-sdk.svg?branch=master)](https://travis-ci.org/DeployGate/deploygate-android-sdk)
 [![Download](https://img.shields.io/maven-central/v/com.deploygate/sdk)](https://ossindex.sonatype.org/component/pkg:maven/com.deploygate/sdk)
-[![Download](https://img.shields.io/maven-central/v/com.deploygate/sdk-mock)](https://ossindex.sonatype.org/component/pkg:maven/com.deploygate/sdk-mock)
 
 You can integrate DeployGate's realtime remote logging & crash reporting without code modification on your apps in development.
 
