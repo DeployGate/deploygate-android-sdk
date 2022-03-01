@@ -46,7 +46,7 @@ jobs:
         with:
           ref: gh-pages
       - id: download-javadoc
-        if: ${{ needs.check-new-release.outputs.has-new-release == "true" }}
+        if: ${{ needs.check-new-release.outputs.has-new-release == 'true' }}
         run: |
           readonly version='${{ needs.check-new-release.outputs.latest-version }}'
           readonly url="https://repo1.maven.org/maven2/com/deploygate/sdk/${version}/sdk-${version}-javadoc.jar"
