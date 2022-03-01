@@ -40,14 +40,13 @@ jobs:
   deploy-new-javadoc:
     needs:
       - check-new-release
-    if: ${{ needs.check-new-release.outputs.has-new-release }}
     runs-on: ubuntu-latest
     steps:
-      - run: ${{ toJSON(needs.check-new-release.outputs) }}
       - uses: actions/checkout@v2
         with:
           ref: gh-pages
       - id: download-javadoc
+        if: ${{ needs.check-new-release.outputs.has-new-release == "true" }}
         run: |
           readonly version='${{ needs.check-new-release.outputs.latest-version }}'
           readonly url="https://repo1.maven.org/maven2/com/deploygate/sdk/${version}/sdk-${version}-javadoc.jar"
