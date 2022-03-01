@@ -60,6 +60,7 @@ jobs:
               --url "$url" \
               -o javadoc.jar
             unzip javadoc.jar -d "$dist/"
+            rm javadoc.jar
           fi
       - name: "commit and push if needed"
         run: |
