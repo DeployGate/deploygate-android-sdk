@@ -21,11 +21,10 @@ jobs:
         with:
           result-encoding: string
           script: |
-            const release = await github.rest.repos.getLatestRelease({
+            const { data: release } = await github.rest.repos.getLatestRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
-            console.log(release)
 
             return release.tag_name
       - id: has-new-release
