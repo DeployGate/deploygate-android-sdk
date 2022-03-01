@@ -67,5 +67,9 @@ jobs:
           git config --local user.name "github pages automation"
           git add .
           if git commit -m ":rocket: ${{ needs.check-new-release.outputs.latest-version }} javadoc"; then
-            git push origin gh-pages
+            if [[ "${{ github.event_name" = "push" ]]; then
+              echo 'git push origin gh-pages (dry-run)'
+            else
+              git push origin gh-pages
+            fi
           fi
