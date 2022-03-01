@@ -48,7 +48,12 @@
             releases.forEach((release) => {
                 let row = $(template.html());
                 row.children('.version').text(release.version);
-                row.children('.link').html(`<a href="https://github.com/DeployGate/deploygate-android-sdk/releases/tag/${release.version}">GitHub Release</a>, <a href="./${release.version}">Javadoc</a>`);
+                if (release.javadoc_link) {
+                    row.children('.link').html(`<a href="${release.release_link}">GitHub Release</a>, <a href="./${release.javadoc_link}">Javadoc</a>`);
+                } else {
+                    row.children('.link').html(`<a href="${release.release_link}">GitHub Release</a>, Javadoc is unavailable`);
+                }
+              
                 row.children('.released-at').text(release.release_at);
                 tbody.append(row);
             });
