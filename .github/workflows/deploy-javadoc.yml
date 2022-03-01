@@ -4,6 +4,10 @@ on:
   schedule:
     - cron:  '0 0 * * *'
   workflow_dispatch:
+  push:
+    branches:
+      - '*javadoc*'
+
 
 jobs:
   check-new-release:
@@ -21,6 +25,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
+            console.log(release)
 
             return release.tag_name
       - id: has-new-release
