@@ -60,8 +60,48 @@ jobs:
               --url "$url" \
               -o javadoc.jar
             unzip javadoc.jar -d "$dist/"
+
+            if [[ ! -d "$dist/index.html" ]]; then
+              rm -fr "$dist"
+            fi
+
             rm javadoc.jar
           fi
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const opts = github.rest.repos.listReleases.endpoint.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const releases = await github.paginate(opts)
+            const metadata = []
+
+            for (const release of releases) {
+              if (release.draft || release.pre_release) {
+                continue
+              }
+
+              fs.mkdir(release.tag_name, function(err) {
+                if (err) {
+                  metadata.push({
+                    version: release.tag_name,
+                    release_link: release.html_url
+                    released_at: release.created_at
+                  })
+                } else {
+                  metadata.push({
+                    version: release.tag_name,
+                    javadoc_link: release.tag_name,
+                    release_link: release.html_url
+                    released_at: release.created_at
+                  })
+                }
+              });
+            }
+
+            fs.writeFileSync('releases.json', JSON.stringify(metadata))
       - name: "commit and push if needed"
         run: |
           git config --local user.email "no-reply@deploygate.com"
