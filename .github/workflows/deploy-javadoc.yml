@@ -43,6 +43,7 @@ jobs:
     if: ${{ needs.check-new-release.outputs.has-new-release }}
     runs-on: ubuntu-latest
     steps:
+      - run: ${{ toJSON(needs.check-new-release.outputs) }}
       - uses: actions/checkout@v2
         with:
           ref: gh-pages
@@ -79,7 +80,7 @@ jobs:
             const metadata = []
 
             for (const release of releases) {
-              if (release.draft || release.pre_release) {
+              if (release.draft || release.prerelease) {
                 continue
               }
 
@@ -88,14 +89,14 @@ jobs:
                   metadata.push({
                     version: release.tag_name,
                     release_link: release.html_url
-                    released_at: release.created_at
+                    released_at: release.published_at
                   })
                 } else {
                   metadata.push({
                     version: release.tag_name,
                     javadoc_link: release.tag_name,
                     release_link: release.html_url
-                    released_at: release.created_at
+                    released_at: release.published_at
                   })
                 }
               });
