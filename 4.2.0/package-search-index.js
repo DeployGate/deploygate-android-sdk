@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.deploygate.sdk"},{"l":"com.deploygate.service"}]
