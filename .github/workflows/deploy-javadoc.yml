@@ -83,18 +83,18 @@ jobs:
                 continue;
               }
 
-              fs.mkdir(release.tag_name, function(err) {
+              fs.mkdir(release.tag_name, (err) => {
                 if (err) {
                   metadata.push({
                     version: release.tag_name,
-                    release_link: release.html_url
+                    release_link: release.html_url,
                     released_at: release.published_at
                   });
                 } else {
                   metadata.push({
                     version: release.tag_name,
                     javadoc_link: release.tag_name,
-                    release_link: release.html_url
+                    release_link: release.html_url,
                     released_at: release.published_at
                   });
                 }
