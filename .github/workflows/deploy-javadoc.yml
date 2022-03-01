@@ -38,7 +38,7 @@ jobs:
       - check-new-release
     if: ${{ needs.check-new-release.outputs.has-new-release }}
     runs-on: ubuntu-latest
-    stpes:
+    steps:
       - uses: actions/checkout@v2
         with:
           ref: gh-pages
