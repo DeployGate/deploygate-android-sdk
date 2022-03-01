@@ -1,0 +1,67 @@
+name: Deploy Javadoc
+
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-new-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+      - uses: actions/github-script@v6
+        id: latest-version
+        with:
+          result-encoding: string
+          script: |
+            const release = await github.rest.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            return release.tag_name
+      - id: has-new-release
+        run: |
+          if [[ -d "${{ steps.latest-release.outputs.result }}" ]]; then
+            echo '::set-output name=result::false'
+          else
+            echo '::set-output name=result::true'
+          fi
+    outputs:
+      has-new-release: ${{ steps.new-release.outputs.result }}
+      latest-version: ${{ steps.latest-release.outputs.result }}
+  deploy-new-javadoc:
+    needs:
+      - check-new-release
+    if: ${{ needs.check-new-release.outputs.has-new-release }}
+    runs-on: ubuntu-latest
+    stpes:
+      - uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+      - id: download-javadoc
+        run: |
+          readonly version='${{ needs.check-new-release.outputs.latest-version }}'
+          readonly url="https://repo1.maven.org/maven2/com/deploygate/sdk/${version}/sdk-${version}-javadoc.jar"
+          readonly dist="$version"
+
+          mkdir -p "$dist"
+
+          if curl -sSfL -I --url "$url"; then
+            curl -sSfL \
+              -X GET \
+              --url "$url" \
+              -o javadoc.jar
+            unzip javadoc.jar -d "$dist/"
+          fi
+      - name: "commit and push if needed"
+        run: |
+          git config --local user.email "no-reply@deploygate.com"
+          git config --local user.name "github pages automation"
+          git add .
+          if git commit -m ":rocket: ${{ needs.check-new-release.outputs.latest-version }} javadoc"; then
+            git push origin gh-pages
+          fi
