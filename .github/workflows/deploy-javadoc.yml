@@ -83,22 +83,23 @@ jobs:
                 continue;
               }
 
-              fs.mkdir(release.tag_name, (err) => {
-                if (err) {
-                  metadata.push({
-                    version: release.tag_name,
-                    release_link: release.html_url,
-                    released_at: release.published_at
-                  });
-                } else {
-                  metadata.push({
-                    version: release.tag_name,
-                    javadoc_link: release.tag_name,
-                    release_link: release.html_url,
-                    released_at: release.published_at
-                  });
-                }
-              });
+              try {
+                fs.mkdirSync(release.tag_name);
+                console.log(`javadocs of ${release.tag_name} are not found`);
+                metadata.push({
+                  version: release.tag_name,
+                  release_link: release.html_url,
+                  released_at: release.published_at
+                });
+              } catch (e) {
+                console.log(`javadocs of ${release.tag_name} are found`);
+                metadata.push({
+                  version: release.tag_name,
+                  javadoc_link: release.tag_name,
+                  release_link: release.html_url,
+                  released_at: release.published_at
+                });
+              }
             }
 
             fs.writeFileSync('releases.json', JSON.stringify(metadata));
