@@ -7,16 +7,10 @@ buildscript {
     repositories {
         mavenCentral()
         google()
-        jcenter {
-            content {
-                includeModule("org.jetbrains.trove4j", "trove4j")
-                includeModule("com.deploygate", "gradle")
-            }
-        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
-        classpath 'com.deploygate:gradle:2.3.0'
+        classpath 'com.android.tools.build:gradle:4.2.2'
+        classpath 'com.deploygate:gradle:2.4.0'
     }
 }
 
@@ -24,11 +18,6 @@ allprojects {
     repositories {
         mavenCentral()
         google()
-        jcenter {
-            content {
-                includeModule("org.jetbrains.trove4j", "trove4j")
-            }
-        }
     }
 }
 
