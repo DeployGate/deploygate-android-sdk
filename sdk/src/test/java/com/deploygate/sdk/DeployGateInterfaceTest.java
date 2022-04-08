@@ -2,21 +2,21 @@ package com.deploygate.sdk;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
 import com.google.common.truth.Truth;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import androidx.annotation.NonNull;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
 
 /**
  * This test class will make sure all *public* interfaces are defined as expected
- *
+ * <p>
  * The result depends on the situation that no DeployGate app is found anyway.
  * It means that this class does not cover several important situations.
  */
@@ -38,12 +38,21 @@ public class DeployGateInterfaceTest {
             }
 
             @Override
-            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+            public void onStatusChanged(
+                    boolean isManaged,
+                    boolean isAuthorized,
+                    String loginUsername,
+                    boolean isStopped
+            ) {
 
             }
 
             @Override
-            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+            public void onUpdateAvailable(
+                    int revision,
+                    String versionName,
+                    int versionCode
+            ) {
 
             }
         };
@@ -99,12 +108,21 @@ public class DeployGateInterfaceTest {
             }
 
             @Override
-            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+            public void onStatusChanged(
+                    boolean isManaged,
+                    boolean isAuthorized,
+                    String loginUsername,
+                    boolean isStopped
+            ) {
 
             }
 
             @Override
-            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+            public void onUpdateAvailable(
+                    int revision,
+                    String versionName,
+                    int versionCode
+            ) {
 
             }
         }, true);
@@ -115,12 +133,21 @@ public class DeployGateInterfaceTest {
             }
 
             @Override
-            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+            public void onStatusChanged(
+                    boolean isManaged,
+                    boolean isAuthorized,
+                    String loginUsername,
+                    boolean isStopped
+            ) {
 
             }
 
             @Override
-            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+            public void onUpdateAvailable(
+                    int revision,
+                    String versionName,
+                    int versionCode
+            ) {
 
             }
         }, false);
@@ -136,12 +163,21 @@ public class DeployGateInterfaceTest {
             }
 
             @Override
-            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+            public void onStatusChanged(
+                    boolean isManaged,
+                    boolean isAuthorized,
+                    String loginUsername,
+                    boolean isStopped
+            ) {
 
             }
 
             @Override
-            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+            public void onUpdateAvailable(
+                    int revision,
+                    String versionName,
+                    int versionCode
+            ) {
 
             }
         });

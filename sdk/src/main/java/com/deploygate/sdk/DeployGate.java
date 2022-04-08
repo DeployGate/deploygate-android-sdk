@@ -1,4 +1,3 @@
-
 package com.deploygate.sdk;
 
 import android.Manifest.permission;
@@ -28,15 +27,11 @@ import com.deploygate.service.IDeployGateSdkServiceCallback;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -49,7 +44,7 @@ import java.util.concurrent.CountDownLatch;
  * <code>&lt;uses-permission android:name="android.permission.READ_LOGS" /&gt;</code>
  * in AndroidManifest.xml of your application.
  * </p>
- * 
+ *
  * @author tnj
  */
 public class DeployGate {
@@ -60,11 +55,14 @@ public class DeployGate {
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
 
-    private static final String[] DEPLOYGATE_FINGERPRINTS = new String[] {
-            "2f97f647645cb762bf5fc1445599a954e6ad76e7", // deploygate release
-            "c1f285f69cc02a397135ed182aa79af53d5d20a1", // mba debug
-            "234eff4a1600a7aa78bf68adfbb15786e886ae1a", // jenkins debug
-    };
+    private static final String[] DEPLOYGATE_FINGERPRINTS = new String[]{
+            // deploygate release
+            "2f97f647645cb762bf5fc1445599a954e6ad76e7",
+            // mba debug
+            "c1f285f69cc02a397135ed182aa79af53d5d20a1",
+            // jenkins debug
+            "234eff4a1600a7aa78bf68adfbb15786e886ae1a",
+            };
 
     private static final int SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION = 42;
 
@@ -73,8 +71,8 @@ public class DeployGate {
     private final Context mApplicationContext;
     private final Handler mHandler;
     private final HashSet<DeployGateCallback> mCallbacks;
+    private final String mExpectedAuthor;
     private String mAuthor;
-    private String mExpectedAuthor;
 
     private CountDownLatch mInitializedLatch;
     private boolean mIsDeployGateAvailable;
@@ -99,47 +97,39 @@ public class DeployGate {
     private Thread mLogcatThread;
     private LogCatTransportWorker mLogcatWorker;
 
-
     private final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
 
-        public void onEvent(String action, Bundle extras) throws RemoteException {
+        public void onEvent(
+                String action,
+                Bundle extras
+        ) throws RemoteException {
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
-                onInitialized(
-                    extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false),
-                    extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false),
-                    extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME),
-                    extras.getString(DeployGateEvent.EXTRA_DISTRIBUTION_USER_NAME),
-                    extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false),
-                    extras.getString(DeployGateEvent.EXTRA_AUTHOR),
-                    extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0),
-                    extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_ID),
-                    extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_TITLE),
-                    extras.getInt(DeployGateEvent.EXTRA_DEPLOYGATE_VERSION_CODE,0)
-                );
-            }
-            else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
-                onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL),
-                        extras.getString(DeployGateEvent.EXTRA_VERSION_NAME),
-                        extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE),
-                        extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE)
-                    );
-            }
-            else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
+                onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false), extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false), extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME), extras.getString(DeployGateEvent.EXTRA_DISTRIBUTION_USER_NAME), extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false), extras.getString(DeployGateEvent.EXTRA_AUTHOR), extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_ID), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_TITLE), extras.getInt(DeployGateEvent.EXTRA_DEPLOYGATE_VERSION_CODE, 0));
+            } else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
+                onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL), extras.getString(DeployGateEvent.EXTRA_VERSION_NAME), extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE), extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE));
+            } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
                 onOneshotLogcat();
-            }
-            else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
+            } else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
                 onEnableLogcat(true);
-            }
-            else if (DeployGateEvent.ACTION_DISABLE_LOGCAT.equals(action)) {
+            } else if (DeployGateEvent.ACTION_DISABLE_LOGCAT.equals(action)) {
                 onEnableLogcat(false);
             }
-        };
+        }
 
-        private void onInitialized(final boolean isManaged, final boolean isAuthorized,
-                                   final String loginUsername, final String distributionUserName,
-                                   final boolean isStopped, final String author,
-                                   int currentRevision, String distributionId, String distributionTitle, int deployGateVersionCode)
-                throws RemoteException {
+        ;
+
+        private void onInitialized(
+                final boolean isManaged,
+                final boolean isAuthorized,
+                final String loginUsername,
+                final String distributionUserName,
+                final boolean isStopped,
+                final String author,
+                int currentRevision,
+                String distributionId,
+                String distributionTitle,
+                int deployGateVersionCode
+        ) throws RemoteException {
             Log.v(TAG, "DeployGate service initialized");
             mAppIsManaged = isManaged;
             mAppIsAuthorized = isAuthorized;
@@ -166,8 +156,12 @@ public class DeployGate {
             mInitializedLatch.countDown();
         }
 
-        private void onUpdateArrived(final int serial, final String versionName,
-                                     final int versionCode, final String message) throws RemoteException {
+        private void onUpdateArrived(
+                final int serial,
+                final String versionName,
+                final int versionCode,
+                final String message
+        ) throws RemoteException {
             mAppUpdateAvailable = true;
             mAppUpdateRevision = serial;
             mAppUpdateVersionName = versionName;
@@ -187,21 +181,20 @@ public class DeployGate {
 
     private void onOneshotLogcat() {
         if (mLogcatThread == null || !mLogcatThread.isAlive()) {
-            mLogcatWorker = new LogCatTransportWorker(
-                    mApplicationContext.getPackageName(), mRemoteService, true);
+            mLogcatWorker = new LogCatTransportWorker(mApplicationContext.getPackageName(), mRemoteService, true);
             mLogcatThread = new Thread(mLogcatWorker);
             mLogcatThread.start();
         }
     }
 
     private void onEnableLogcat(boolean isEnabled) {
-        if (mRemoteService == null)
+        if (mRemoteService == null) {
             return;
+        }
 
         if (isEnabled) {
             if (mLogcatThread == null || !mLogcatThread.isAlive()) {
-                mLogcatWorker = new LogCatTransportWorker(
-                        mApplicationContext.getPackageName(), mRemoteService, false);
+                mLogcatWorker = new LogCatTransportWorker(mApplicationContext.getPackageName(), mRemoteService, false);
                 mLogcatThread = new Thread(mLogcatWorker);
                 mLogcatThread.start();
             }
@@ -225,11 +218,16 @@ public class DeployGate {
         });
     }
 
+
     /**
      * Do not instantiate directly. Call {@link #install(Application)} on your
      * {@link Application#onCreate()} instead.
      */
-    private DeployGate(Context applicationContext, String author, DeployGateCallback callback) {
+    private DeployGate(
+            Context applicationContext,
+            String author,
+            DeployGateCallback callback
+    ) {
         mHandler = new Handler();
         mApplicationContext = applicationContext;
         mCallbacks = new HashSet<DeployGateCallback>();
@@ -237,8 +235,9 @@ public class DeployGate {
 
         prepareBroadcastReceiver();
 
-        if (callback != null)
+        if (callback != null) {
             mCallbacks.add(callback);
+        }
 
         mInitializedLatch = new CountDownLatch(1);
         initService(true);
@@ -260,11 +259,14 @@ public class DeployGate {
 
     private boolean isDeployGateAvailable() {
         String sig = getDeployGatePackageSignature();
-        if (sig == null)
+        if (sig == null) {
             return false;
-        for (String value : DEPLOYGATE_FINGERPRINTS)
-            if (value.equals(sig))
+        }
+        for (String value : DEPLOYGATE_FINGERPRINTS) {
+            if (value.equals(sig)) {
                 return true;
+            }
+        }
         return false;
     }
 
@@ -272,9 +274,13 @@ public class DeployGate {
         IntentFilter filter = new IntentFilter(ACTION_DEPLOYGATE_STARTED);
         mApplicationContext.registerReceiver(new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent == null)
+            public void onReceive(
+                    Context context,
+                    Intent intent
+            ) {
+                if (intent == null) {
                     return;
+                }
                 if (isDeployGateAvailable()) {
                     bindToService(false);
                 }
@@ -286,7 +292,10 @@ public class DeployGate {
         Intent service = new Intent(IDeployGateSdkService.class.getName());
         service.setPackage(DEPLOYGATE_PACKAGE);
         mApplicationContext.bindService(service, new ServiceConnection() {
-            public void onServiceConnected(ComponentName name, IBinder service) {
+            public void onServiceConnected(
+                    ComponentName name,
+                    IBinder service
+            ) {
                 Log.v(TAG, "DeployGate service connected");
                 mRemoteService = IDeployGateSdkService.Stub.asInterface(service);
                 requestServiceInit(isBoot);
@@ -314,22 +323,22 @@ public class DeployGate {
     }
 
     private boolean canLogCat() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             return true;
-        return mApplicationContext.getPackageManager().checkPermission(permission.READ_LOGS,
-                mApplicationContext.getPackageName()) == PackageManager.PERMISSION_GRANTED;
+        }
+        return mApplicationContext.getPackageManager().checkPermission(permission.READ_LOGS, mApplicationContext.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
 
     private String getDeployGatePackageSignature() {
         PackageInfo info;
         try {
-            info = mApplicationContext.getPackageManager().getPackageInfo(
-                    DEPLOYGATE_PACKAGE, PackageManager.GET_SIGNATURES);
+            info = mApplicationContext.getPackageManager().getPackageInfo(DEPLOYGATE_PACKAGE, PackageManager.GET_SIGNATURES);
         } catch (NameNotFoundException e) {
             return null;
         }
-        if (info == null || info.signatures == null || info.signatures.length == 0)
+        if (info == null || info.signatures == null || info.signatures.length == 0) {
             return null;
+        }
 
         MessageDigest md;
         try {
@@ -349,7 +358,7 @@ public class DeployGate {
 
     /**
      * Clear the initiated DeployGate instance.
-     *
+     * <p>
      * This method is only for testing so breaking changes would may happen.
      */
     static void clear() {
@@ -372,9 +381,12 @@ public class DeployGate {
      * explicitly to ensure the authority of this app to prevent casual
      * redistribution via DeployGate.
      * </p>
-     * 
-     * @param app Application instance, typically just pass <em>this</em>.
-     * @throws IllegalStateException if this called twice
+     *
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     *
+     * @throws IllegalStateException
+     *         if this called twice
      * @since r1
      */
     public static void install(Application app) {
@@ -391,13 +403,20 @@ public class DeployGate {
      * {@link #install(Application, String, DeployGateCallback, boolean)}
      * instead.
      * </p>
-     * 
-     * @param app Application instance, typically just pass <em>this</em>.
-     * @param author author username of this app.
-     * @throws IllegalStateException if this called twice
+     *
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     * @param author
+     *         author username of this app.
+     *
+     * @throws IllegalStateException
+     *         if this called twice
      * @since r2
      */
-    public static void install(Application app, String author) {
+    public static void install(
+            Application app,
+            String author
+    ) {
         install(app, author, null);
     }
 
@@ -418,13 +437,20 @@ public class DeployGate {
      * explicitly to ensure the authority of this app to prevent casual
      * redistribution via DeployGate.
      * </p>
-     * 
-     * @param app Application instance, typically just pass <em>this</em>.
-     * @param callback Callback interface to listen events.
-     * @throws IllegalStateException if this called twice
+     *
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     * @param callback
+     *         Callback interface to listen events.
+     *
+     * @throws IllegalStateException
+     *         if this called twice
      * @since r1
      */
-    public static void install(Application app, DeployGateCallback callback) {
+    public static void install(
+            Application app,
+            DeployGateCallback callback
+    ) {
         install(app, null, callback);
     }
 
@@ -439,13 +465,20 @@ public class DeployGate {
      * redistribution via DeployGate.
      * </p>
      *
-     * @param app Application instance, typically just pass <em>this</em>.
-     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
-     *            the release build, set this true.
-     * @throws IllegalStateException if this called twice
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     * @param forceApplyOnReleaseBuild
+     *         if you want to keep DeployGate alive on
+     *         the release build, set this true.
+     *
+     * @throws IllegalStateException
+     *         if this called twice
      * @since r4.2
      */
-    public static void install(Application app, boolean forceApplyOnReleaseBuild) {
+    public static void install(
+            Application app,
+            boolean forceApplyOnReleaseBuild
+    ) {
         install(app, null, null, forceApplyOnReleaseBuild);
     }
 
@@ -460,14 +493,23 @@ public class DeployGate {
      * {@link #install(Application, String, DeployGateCallback, boolean)}
      * instead.
      * </p>
-     * 
-     * @param app Application instance, typically just pass <em>this</em>.
-     * @param author author username of this app.
-     * @param callback Callback interface to listen events.
-     * @throws IllegalStateException if this called twice
+     *
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     * @param author
+     *         author username of this app.
+     * @param callback
+     *         Callback interface to listen events.
+     *
+     * @throws IllegalStateException
+     *         if this called twice
      * @since r2
      */
-    public static void install(Application app, String author, DeployGateCallback callback) {
+    public static void install(
+            Application app,
+            String author,
+            DeployGateCallback callback
+    ) {
         install(app, author, callback, false);
     }
 
@@ -481,16 +523,24 @@ public class DeployGate {
      * explicitly to ensure the authority of this app to prevent casual
      * redistribution via DeployGate.
      * </p>
-     * 
-     * @param app Application instance, typically just pass <em>this</em>.
-     * @param callback Callback interface to listen events. Can be null.
-     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
-     *            the release build, set this true.
-     * @throws IllegalStateException if this called twice
+     *
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     * @param callback
+     *         Callback interface to listen events. Can be null.
+     * @param forceApplyOnReleaseBuild
+     *         if you want to keep DeployGate alive on
+     *         the release build, set this true.
+     *
+     * @throws IllegalStateException
+     *         if this called twice
      * @since r1
      */
-    public static void install(Application app, DeployGateCallback callback,
-            boolean forceApplyOnReleaseBuild) {
+    public static void install(
+            Application app,
+            DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild
+    ) {
         install(app, null, callback, forceApplyOnReleaseBuild);
     }
 
@@ -498,26 +548,35 @@ public class DeployGate {
      * Install DeployGate on your application instance and register a callback
      * listener. Call this method inside of your {@link Application#onCreate()}
      * once.
-     * 
-     * @param app Application instance, typically just pass <em>this</em>.
-     * @param author author username of this app. Can be null.
-     * @param callback Callback interface to listen events. Can be null.
-     * @param forceApplyOnReleaseBuild if you want to keep DeployGate alive on
-     *            the release build, set this true.
+     *
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     * @param author
+     *         author username of this app. Can be null.
+     * @param callback
+     *         Callback interface to listen events. Can be null.
+     * @param forceApplyOnReleaseBuild
+     *         if you want to keep DeployGate alive on
+     *         the release build, set this true.
+     *
      * @since r2
      */
-    public static void install(Application app, String author, DeployGateCallback callback,
-            boolean forceApplyOnReleaseBuild) {
+    public static void install(
+            Application app,
+            String author,
+            DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild
+    ) {
         if (sInstance != null) {
             Log.w(TAG, "DeployGate.install was already called. Ignoring.");
             return;
         }
 
-        if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext()))
+        if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext())) {
             return;
+        }
 
-        Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread
-                .getDefaultUncaughtExceptionHandler()));
+        Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread.getDefaultUncaughtExceptionHandler()));
         sInstance = new DeployGate(app.getApplicationContext(), author, callback);
     }
 
@@ -528,12 +587,13 @@ public class DeployGate {
      * Note that after calling this, {@link #isInitialized()} will changed to
      * false immediately and any call to <code>is*()</code> will be blocked until
      * refreshing get finished.
-     * 
+     *
      * @since r1
      */
     public static void refresh() {
-        if (sInstance != null)
+        if (sInstance != null) {
             sInstance.refreshInternal();
+        }
     }
 
     private void refreshInternal() {
@@ -552,39 +612,55 @@ public class DeployGate {
      * {@link #unregisterCallback(DeployGateCallback)} when the callback is no
      * longer needed (e.g., on destroying an activity.) If the listener has
      * already in the callback list, just ignored.
-     * 
-     * @param listener callback listener
-     * @param refreshImmediately if you want to receive current states, set this
-     *            true.
+     *
+     * @param listener
+     *         callback listener
+     * @param refreshImmediately
+     *         if you want to receive current states, set this
+     *         true.
+     *
      * @since r1
      */
-    public static void registerCallback(DeployGateCallback listener, boolean refreshImmediately) {
-        if (sInstance == null)
+    public static void registerCallback(
+            DeployGateCallback listener,
+            boolean refreshImmediately
+    ) {
+        if (sInstance == null) {
             return;
-        if (listener == null)
+        }
+        if (listener == null) {
             return;
+        }
 
         sInstance.registerCallbackInternal(listener, refreshImmediately);
     }
 
-    private void registerCallbackInternal(DeployGateCallback listener, boolean callbackImmediately) {
+    private void registerCallbackInternal(
+            DeployGateCallback listener,
+            boolean callbackImmediately
+    ) {
         mCallbacks.add(listener);
-        if (callbackImmediately)
+        if (callbackImmediately) {
             refresh();
+        }
     }
 
     /**
      * Unregister a callback listener. If the listener was not registered, just
      * ignored.
-     * 
-     * @param listener callback listener to be removed
+     *
+     * @param listener
+     *         callback listener to be removed
+     *
      * @since r1
      */
     public static void unregisterCallback(DeployGateCallback listener) {
-        if (sInstance == null)
+        if (sInstance == null) {
             return;
-        if (listener == null)
+        }
+        if (listener == null) {
             return;
+        }
 
         sInstance.mCallbacks.remove(listener);
     }
@@ -592,9 +668,10 @@ public class DeployGate {
     /**
      * Get whether SDK is completed its intialization process and ready after
      * {@link #install(Application)}. This call will never blocked.
-     * 
+     *
      * @return true if SDK is ready. false otherwise. If no install() called
-     *         ever, this always returns false.
+     * ever, this always returns false.
+     *
      * @since r1
      */
     public static boolean isInitialized() {
@@ -613,9 +690,10 @@ public class DeployGate {
      * {@link #isInitialized()} is true before calling this. (Or consider using
      * {@link DeployGateCallback#onInitialized(boolean)} callback.)
      * </p>
-     * 
+     *
      * @return true if valid DeployGate client is available. false otherwise. If
-     *         no install() called ever, this always returns false.
+     * no install() called ever, this always returns false.
+     *
      * @since r1
      */
     public static boolean isDeployGateAvaliable() {
@@ -636,10 +714,11 @@ public class DeployGate {
      * {@link #isInitialized()} is true before calling this. (Or consider using
      * {@link DeployGateCallback#onInitialized(boolean)} callback.)
      * </p>
-     * 
+     *
      * @return true if DeployGate knows and manages this package. false
-     *         otherwise. If no install() called ever, this always returns
-     *         false.
+     * otherwise. If no install() called ever, this always returns
+     * false.
+     *
      * @since r1
      */
     public static boolean isManaged() {
@@ -662,10 +741,11 @@ public class DeployGate {
      * {@link #isInitialized()} is true before calling this. (Or consider using
      * {@link DeployGateCallback#onInitialized(boolean)} callback.)
      * </p>
-     * 
+     *
      * @return true if current DeployGate user has available list which contains
-     *         this application. false otherwise. If no install() called ever,
-     *         this always returns false.
+     * this application. false otherwise. If no install() called ever,
+     * this always returns false.
+     *
      * @since r1
      */
     public static boolean isAuthorized() {
@@ -686,8 +766,9 @@ public class DeployGate {
      * {@link #isInitialized()} is true before calling this. (Or consider using
      * {@link DeployGateCallback#onInitialized(boolean)} callback.)
      * </p>
-     * 
+     *
      * @return Current user of DeployGate. May be null.
+     *
      * @since r1
      */
     public static String getLoginUsername() {
@@ -713,8 +794,9 @@ public class DeployGate {
      * {@link #isInitialized()} is true before calling this. (Or consider using
      * {@link DeployGateCallback#onInitialized(boolean)} callback.)
      * </p>
-     * 
+     *
      * @return Owner User or Organization of current app. May be null.
+     *
      * @since r2
      */
     public static String getAuthorUsername() {
@@ -729,9 +811,11 @@ public class DeployGate {
      * Record ERROR level event on DeployGate. Log message will immediately send
      * to the server so you may see it on your dashboard. Nothing happen when
      * DeployGate is not available, i.e. {@link #isAuthorized()} is not true.
-     * 
-     * @param message Message body to be send. May be truncated if it's too
-     *            long.
+     *
+     * @param message
+     *         Message body to be send. May be truncated if it's too
+     *         long.
+     *
      * @since r1
      */
     public static void logError(String message) {
@@ -744,9 +828,11 @@ public class DeployGate {
      * Record WARN level event on DeployGate. Log message will immediately send
      * to the server so you may see it on your dashboard. Nothing happen when
      * DeployGate is not available, i.e. {@link #isAuthorized()} is not true.
-     * 
-     * @param message Message body to be send. May be truncated if it's too
-     *            long.
+     *
+     * @param message
+     *         Message body to be send. May be truncated if it's too
+     *         long.
+     *
      * @since r1
      */
     public static void logWarn(String message) {
@@ -759,9 +845,11 @@ public class DeployGate {
      * Record DEBUG level event on DeployGate. Log message will immediately send
      * to the server so you may see it on your dashboard. Nothing happen when
      * DeployGate is not available, i.e. {@link #isAuthorized()} is not true.
-     * 
-     * @param message Message body to be send. May be truncated if it's too
-     *            long.
+     *
+     * @param message
+     *         Message body to be send. May be truncated if it's too
+     *         long.
+     *
      * @since r1
      */
     public static void logDebug(String message) {
@@ -774,9 +862,11 @@ public class DeployGate {
      * Record INFO level event on DeployGate. Log message will immediately send
      * to the server so you may see it on your dashboard. Nothing happen when
      * DeployGate is not available, i.e. {@link #isAuthorized()} is not true.
-     * 
-     * @param message Message body to be send. May be truncated if it's too
-     *            long.
+     *
+     * @param message
+     *         Message body to be send. May be truncated if it's too
+     *         long.
+     *
      * @since r1
      */
     public static void logInfo(String message) {
@@ -790,9 +880,11 @@ public class DeployGate {
      * send to the server so you may see it on your dashboard. Nothing happen
      * when DeployGate is not available, i.e. {@link #isAuthorized()} is not
      * true.
-     * 
-     * @param message Message body to be send. May be truncated if it's too
-     *            long.
+     *
+     * @param message
+     *         Message body to be send. May be truncated if it's too
+     *         long.
+     *
      * @since r1
      */
     public static void logVerbose(String message) {
@@ -802,7 +894,7 @@ public class DeployGate {
     }
 
     @SuppressWarnings("unused")
-    private/* public */static boolean isStopRequested() {
+    private/* public */ static boolean isStopRequested() {
         if (sInstance != null) {
             waitForInitialized();
             return sInstance.mAppIsStopRequested;
@@ -838,8 +930,11 @@ public class DeployGate {
         private Process mProcess;
         private boolean mIsOneShot;
 
-        public LogCatTransportWorker(String packageName, IDeployGateSdkService service,
-                boolean isOneshot) {
+        public LogCatTransportWorker(
+                String packageName,
+                IDeployGateSdkService service,
+                boolean isOneshot
+        ) {
             mPackageName = packageName;
             mService = service;
             mIsOneShot = isOneshot;
@@ -868,30 +963,31 @@ public class DeployGate {
                 commandLine.add("threadtime");
                 commandLine.add("*:V");
 
-                mProcess = Runtime.getRuntime().exec(
-                        commandLine.toArray(new String[commandLine.size()]));
-                bufferedReader = new BufferedReader(new InputStreamReader(
-                        mProcess.getInputStream()), 8192);
+                mProcess = Runtime.getRuntime().exec(commandLine.toArray(new String[commandLine.size()]));
+                bufferedReader = new BufferedReader(new InputStreamReader(mProcess.getInputStream()), 8192);
 
                 Log.v(TAG, "Start retrieving logcat");
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     logcatBuf.add(line + "\n");
                     if (mIsOneShot) {
-                        if (logcatBuf.size() > MAX_LINES)
+                        if (logcatBuf.size() > MAX_LINES) {
                             logcatBuf.remove(0);
+                        }
                     } else {
                         if (!bufferedReader.ready()) {
-                            if (send(logcatBuf))
+                            if (send(logcatBuf)) {
                                 logcatBuf.clear();
-                            else
+                            } else {
                                 return;
+                            }
                         }
                     }
                 }
-                
-                if (!logcatBuf.isEmpty())
+
+                if (!logcatBuf.isEmpty()) {
                     send(logcatBuf);
+                }
                 // EOF, stop it
             } catch (IOException e) {
                 Log.d(TAG, "Logcat stopped: " + e.getMessage());
@@ -908,8 +1004,9 @@ public class DeployGate {
         }
 
         public void stop() {
-            if (mProcess != null)
+            if (mProcess != null) {
                 mProcess.destroy();
+            }
         }
 
         private boolean send(ArrayList<String> logcatBuf) {
@@ -929,9 +1026,10 @@ public class DeployGate {
     }
 
     void sendCrashReport(/* non-null */ Throwable ex) {
-        if (mRemoteService == null)
+        if (mRemoteService == null) {
             return;
-        
+        }
+
         Bundle extras = new Bundle();
         try {
             if (getDeployGateVersionCode() >= SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION) {
@@ -944,8 +1042,7 @@ public class DeployGate {
                 extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex);
             }
 
-            mRemoteService.sendEvent(mApplicationContext.getPackageName(),
-                    DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
+            mRemoteService.sendEvent(mApplicationContext.getPackageName(), DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to send crash report: " + e.getMessage());
         }
@@ -964,32 +1061,34 @@ public class DeployGate {
         return throwables.getLast();
     }
 
-    void sendLog(String type, String body) {
-        if (mRemoteService == null)
-            return;
+    void sendLog(
+            String type,
+            String body
+    ) {
         Bundle extras = new Bundle();
         extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
         extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
+
         try {
-            mRemoteService.sendEvent(mApplicationContext.getPackageName(),
-                    DeployGateEvent.ACTION_SEND_CUSTOM_LOG, extras);
+            mRemoteService.sendEvent(mApplicationContext.getPackageName(), DeployGateEvent.ACTION_SEND_CUSTOM_LOG, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to send custom log: " + e.getMessage());
         }
     }
-    
+
     /**
      * Capture current LogCat and send it. This call will work asynchronously.
      * Capturing LogCat requires <code>android.permission.READ_LOGS</code> is
      * declared on your app AndroidManifest.xml, or your app is running on
      * Android 4.1 or higher. If LogCat is not available, this function simply
      * does nothing.
-     * 
+     *
      * @since r3
      */
     public static void requestLogCat() {
-        if (sInstance != null)
+        if (sInstance != null) {
             sInstance.onOneshotLogcat();
+        }
     }
 
 
@@ -997,68 +1096,79 @@ public class DeployGate {
      * Returns the revision of the app on DeployGate.
      * The revision number is automatically incremented integer value every time you upload a build to DeployGate,
      * so you can identify the build explicitly.
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns 0.
      *
      * @return revision number of the app, or 0 if DeployGate is older than v1.7.0 (39)
+     *
      * @since r4
      */
     public static int getCurrentRevision() {
-        if (sInstance != null)
+        if (sInstance != null) {
             return sInstance.mCurrentRevision;
+        }
         return 0;
     }
 
     /**
      * Returns the URL of the distribution if the app was installed through Distribution Page.
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
      *
      * @return URL of the distribution page, null if the app was not installed through Distribution Page or DeployGate is older than v1.7.0 (39)
+     *
      * @since r4
      */
     public static String getDistributionUrl() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return null;
+        }
 
-        if (TextUtils.isEmpty(sInstance.mDistributionId))
+        if (TextUtils.isEmpty(sInstance.mDistributionId)) {
             return null;
+        }
 
         return "https://deploygate.com/distributions/" + sInstance.mDistributionId;
     }
 
     /**
      * Returns the ID (40 digits hex string appears in URL) of the distribution if the app was installed through Distribution Page.
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
      *
      * @return ID of the distribution page, null if the app was not installed through Distribution Page or DeployGate is older than v1.7.0 (39)
+     *
      * @since r4
      */
     public static String getDistributionId() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return null;
+        }
 
-        if (TextUtils.isEmpty(sInstance.mDistributionId))
+        if (TextUtils.isEmpty(sInstance.mDistributionId)) {
             return null;
+        }
 
         return sInstance.mDistributionId;
     }
 
     /**
      * Returns the title of the distribution if the app was installed through Distribution Page.
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
      *
      * @return Title of the distribution page, null if the app was not installed through Distribution Page or DeployGate is older than v1.7.0 (39)
+     *
      * @since r4
      */
     public static String getDistributionTitle() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return null;
+        }
 
-        if (TextUtils.isEmpty(sInstance.mDistributionTitle))
+        if (TextUtils.isEmpty(sInstance.mDistributionTitle)) {
             return null;
+        }
 
         return sInstance.mDistributionTitle;
     }
@@ -1067,11 +1177,13 @@ public class DeployGate {
      * Returns android:versionCode of DeployGate app.
      *
      * @return Version code of DeployGate, or 0 if DeployGate is older than v1.7.0 (39)
+     *
      * @since r4
      */
     public static int getDeployGateVersionCode() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return 0;
+        }
 
         return sInstance.mDeployGateVersionCode;
     }
@@ -1081,11 +1193,13 @@ public class DeployGate {
      * You can get detailed information via {@link #getUpdateRevision()}, {@link #getUpdateVersionCode()}, {@link #getUpdateVersionName()}, and {@link #getUpdateMessage()}.
      *
      * @return true if there's an update, false otherwise.
+     *
      * @since r4.2
      */
     public static boolean hasUpdate() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return false;
+        }
 
         return sInstance.mAppUpdateAvailable;
     }
@@ -1094,11 +1208,13 @@ public class DeployGate {
      * Returns the revision number of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
+     *
      * @since r4.2
      */
     public static int getUpdateRevision() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return 0;
+        }
 
         return sInstance.mAppUpdateRevision;
     }
@@ -1107,11 +1223,13 @@ public class DeployGate {
      * Returns the android:versionCode of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
+     *
      * @since r4.2
      */
     public static int getUpdateVersionCode() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return 0;
+        }
 
         return sInstance.mAppUpdateVersionCode;
     }
@@ -1120,11 +1238,13 @@ public class DeployGate {
      * Returns the android:versionName of the update. The value is only valid when {@link #hasUpdate()} is true.
      *
      * @return Revision number of the update.
+     *
      * @since r4.2
      */
     public static String getUpdateVersionName() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return null;
+        }
 
         return sInstance.mAppUpdateVersionName;
     }
@@ -1134,29 +1254,32 @@ public class DeployGate {
      * If the app was installed via Distribution Page (i.e. {@link #getDistributionUrl() is not null,}
      * this method returns Release Note that was entered when you published a new version on the page.
      * Otherwise this method returns the message that was entered when you upload a new build to DeployGate.
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.
      *
      * @return The message attached to the build
+     *
      * @since r4
      */
     public static String getUpdateMessage() {
-        if (sInstance == null || sInstance.mDeployGateVersionCode < 39)
+        if (sInstance == null || sInstance.mDeployGateVersionCode < 39) {
             return null;
+        }
 
         return sInstance.mAppUpdateMessage;
     }
 
     /**
      * Start the installation of the latest version of the app if available. No effects if there's no update.
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
      *
      * @since r4
      */
     public static void installUpdate() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return;
+        }
 
         sInstance.invokeAction(DeployGateEvent.ACTION_INSTALL_UPDATE, null);
     }
@@ -1164,14 +1287,15 @@ public class DeployGate {
     /**
      * Open comments screen for the distribution of the app installed.
      * No effect if the app was installed via Distribution Page (i.e. {@link #getDistributionUrl() is null.}
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
      *
      * @since r4
      */
     public static void openComments() {
-        if (sInstance == null || sInstance.mDistributionId == null)
+        if (sInstance == null || sInstance.mDistributionId == null) {
             return;
+        }
 
         sInstance.invokeAction(DeployGateEvent.ACTION_OPEN_COMMENTS, null);
     }
@@ -1179,7 +1303,7 @@ public class DeployGate {
     /**
      * Open comment composer screen for the distribution of the app installed.
      * No effect if the app was installed via Distribution Page (i.e. {@link #getDistributionUrl() is null.}
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
      *
      * @since r4
@@ -1191,24 +1315,31 @@ public class DeployGate {
     /**
      * Open comment composer screen for the distribution of the app installed with pre filled string.
      * No effect if the app was installed via Distribution Page (i.e. {@link #getDistributionUrl() is null.}
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.
      *
-     * @param defaultComment Default comment set to the editor
+     * @param defaultComment
+     *         Default comment set to the editor
+     *
      * @since r4
      */
     public static void composeComment(String defaultComment) {
-        if (sInstance == null || sInstance.mDistributionId == null)
+        if (sInstance == null || sInstance.mDistributionId == null) {
             return;
+        }
 
         Bundle extras = new Bundle();
         extras.putString(DeployGateEvent.EXTRA_COMMENT, defaultComment);
         sInstance.invokeAction(DeployGateEvent.ACTION_COMPOSE_COMMENT, extras);
     }
 
-    private void invokeAction(String action, Bundle extras) {
-        if (mRemoteService == null)
+    private void invokeAction(
+            String action,
+            Bundle extras
+    ) {
+        if (mRemoteService == null) {
             return;
+        }
         try {
             mRemoteService.sendEvent(mApplicationContext.getPackageName(), action, extras);
         } catch (RemoteException e) {
@@ -1218,15 +1349,17 @@ public class DeployGate {
 
     /**
      * Get current user's name on Distribution Page. Default name is randomly generated string (like "[abcd1234]").
-     *
+     * <p>
      * Requires DeployGate v1.7.0 or higher installed, otherwise this function returns null.
      *
      * @return User's display name on DeployGate. May be null.
+     *
      * @since r4
      */
     public static String getDistributionUserName() {
-        if (sInstance == null)
+        if (sInstance == null) {
             return null;
+        }
 
         return sInstance.mDistributionUserName;
     }

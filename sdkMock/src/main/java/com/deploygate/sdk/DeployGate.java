@@ -1,4 +1,3 @@
-
 package com.deploygate.sdk;
 
 import android.app.Application;
@@ -11,28 +10,53 @@ public class DeployGate {
     public static void install(Application app) {
     }
 
-    public static void install(Application app, String author) {
+    public static void install(
+            Application app,
+            String author
+    ) {
     }
 
-    public static void install(Application app, DeployGateCallback callback) {
+    public static void install(
+            Application app,
+            DeployGateCallback callback
+    ) {
     }
 
-    public static void install(Application app, boolean forceApplyOnReleaseBuild) {
+    public static void install(
+            Application app,
+            boolean forceApplyOnReleaseBuild
+    ) {
     }
 
-    public static void install(Application app, String author, DeployGateCallback callback) {
+    public static void install(
+            Application app,
+            String author,
+            DeployGateCallback callback
+    ) {
     }
 
-    public static void install(Application app, DeployGateCallback callback, boolean forceApplyOnReleaseBuild) {
+    public static void install(
+            Application app,
+            DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild
+    ) {
     }
 
-    public static void install(Application app, String author, DeployGateCallback callback, boolean forceApplyOnReleaseBuild) {
+    public static void install(
+            Application app,
+            String author,
+            DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild
+    ) {
     }
 
     public static void refresh() {
     }
 
-    public static void registerCallback(DeployGateCallback listener, boolean refreshImmediately) {
+    public static void registerCallback(
+            DeployGateCallback listener,
+            boolean refreshImmediately
+    ) {
     }
 
     public static void unregisterCallback(DeployGateCallback listener) {

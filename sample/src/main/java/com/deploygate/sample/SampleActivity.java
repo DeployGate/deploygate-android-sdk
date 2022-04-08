@@ -1,4 +1,3 @@
-
 package com.deploygate.sample;
 
 import android.app.Activity;
@@ -18,8 +17,7 @@ import android.widget.Toast;
 import com.deploygate.sdk.DeployGate;
 import com.deploygate.sdk.DeployGateCallback;
 
-public class SampleActivity extends Activity
-        implements DeployGateCallback {
+public class SampleActivity extends Activity implements DeployGateCallback {
 
     private static final String TAG = "SampleActivity";
 
@@ -33,8 +31,12 @@ public class SampleActivity extends Activity
     private Button mUpdateButton;
     private LinearLayout mDistributionComments;
 
-    private static final int[] sLogButtonIds = new int[] {
-        R.id.logError, R.id.logWarn, R.id.logDebug, R.id.logInfo, R.id.logVerbose
+    private static final int[] sLogButtonIds = new int[]{
+            R.id.logError,
+            R.id.logWarn,
+            R.id.logDebug,
+            R.id.logInfo,
+            R.id.logVerbose
     };
 
     @Override
@@ -73,8 +75,9 @@ public class SampleActivity extends Activity
     /**
      * Called when the log buttons clicked. Each button has ID that can be used
      * to change log level.
-     * 
-     * @param v View instance of the button
+     *
+     * @param v
+     *         View instance of the button
      */
     public void onLogClick(View v) {
         String text = mLogMessage.getText().toString();
@@ -101,8 +104,9 @@ public class SampleActivity extends Activity
 
     /**
      * Called when the crash button clicked
-     * 
-     * @param v View instance of the button
+     *
+     * @param v
+     *         View instance of the button
      */
     public void onCrashMeClick(View v) {
         // let's throw!
@@ -112,7 +116,8 @@ public class SampleActivity extends Activity
     /**
      * Called when Capture and send LogCat button clicked
      *
-     * @param v View instance of the button
+     * @param v
+     *         View instance of the button
      */
     public void onLogCatClick(View v) {
         DeployGate.requestLogCat();
@@ -122,7 +127,8 @@ public class SampleActivity extends Activity
     /**
      * Called when Capture and send LogCat button clicked
      *
-     * @param v View instance of the button
+     * @param v
+     *         View instance of the button
      */
     public void onUpdateClick(View v) {
         DeployGate.installUpdate();
@@ -132,7 +138,8 @@ public class SampleActivity extends Activity
     /**
      * Called when Comments button clicked
      *
-     * @param view View instance of the button
+     * @param view
+     *         View instance of the button
      */
     public void onCommentsClick(View view) {
         DeployGate.openComments();
@@ -141,7 +148,8 @@ public class SampleActivity extends Activity
     /**
      * Called when Compose button clicked
      *
-     * @param view View instance of the button
+     * @param view
+     *         View instance of the button
      */
     public void onComposeCommentClick(View view) {
         DeployGate.composeComment("Hi from DeployGate SDK Sample");
@@ -151,31 +159,22 @@ public class SampleActivity extends Activity
     public void onInitialized(boolean isServiceAvailable) {
         // will be called to notify DeployGate SDK has initialized
         Log.d(TAG, "DeployGate SDK initialized, is DeployGate available? : " + isServiceAvailable);
-        mAvailableText.setText(
-            isServiceAvailable
-                ? getString(R.string.available_yes, DeployGate.getDeployGateVersionCode())
-                : getString(R.string.available_no)
-        );
+        mAvailableText.setText(isServiceAvailable ? getString(R.string.available_yes, DeployGate.getDeployGateVersionCode()) : getString(R.string.available_no));
     }
 
     @Override
-    public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername,
-            boolean isStopped) {
+    public void onStatusChanged(
+            boolean isManaged,
+            boolean isAuthorized,
+            String loginUsername,
+            boolean isStopped
+    ) {
         // will be called when DeployGate status has changed, including this
         // activity starting and resuming.
         if (isManaged) {
             String distributionUrl = DeployGate.getDistributionUrl();
-            if (! TextUtils.isEmpty(distributionUrl)) {
-                mManagedText.setText(
-                    Html.fromHtml(
-                        getString(
-                            R.string.managed_distribution,
-                            DeployGate.getCurrentRevision(),
-                            DeployGate.getDistributionTitle(),
-                            distributionUrl
-                        )
-                    )
-                );
+            if (!TextUtils.isEmpty(distributionUrl)) {
+                mManagedText.setText(Html.fromHtml(getString(R.string.managed_distribution, DeployGate.getCurrentRevision(), DeployGate.getDistributionTitle(), distributionUrl)));
                 mManagedText.setMovementMethod(LinkMovementMethod.getInstance());
                 mDistributionComments.setVisibility(View.VISIBLE);
             } else {
@@ -188,15 +187,12 @@ public class SampleActivity extends Activity
         }
 
         String username = DeployGate.getDistributionUserName();
-        if (username == null)
+        if (username == null) {
             username = loginUsername;
+        }
 
-        mAuthorizedText.setText(
-            isAuthorized
-            ? getString(R.string.authorized_yes, username)
-            : getString(R.string.authorized_no)
-        );
-        
+        mAuthorizedText.setText(isAuthorized ? getString(R.string.authorized_yes, username) : getString(R.string.authorized_no));
+
         mCrashButton.setEnabled(isAuthorized);
         mLogCatButton.setEnabled(isAuthorized);
         mLogMessage.setEnabled(isAuthorized);
@@ -206,20 +202,20 @@ public class SampleActivity extends Activity
     }
 
     @Override
-    public void onUpdateAvailable(int serial, String versionName, int versionCode) {
+    public void onUpdateAvailable(
+            int serial,
+            String versionName,
+            int versionCode
+    ) {
         // will be called on app update is available.
         mTitleText.setTextColor(Color.GREEN);
 
         String message = DeployGate.getUpdateMessage();
-        if (message == null)
+        if (message == null) {
             message = "";
+        }
 
-        mTitleText.setText(getString(
-            R.string.update_available,
-            serial,
-            versionName,
-            versionCode,
-            message));
+        mTitleText.setText(getString(R.string.update_available, serial, versionName, versionCode, message));
         mUpdateButton.setVisibility(View.VISIBLE);
     }
 }

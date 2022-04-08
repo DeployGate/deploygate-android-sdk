@@ -1,4 +1,3 @@
-
 package com.deploygate.sample;
 
 import android.app.Application;
