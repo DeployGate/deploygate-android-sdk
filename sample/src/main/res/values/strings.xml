@@ -2,10 +2,10 @@
 
     <string name="app_name">Sample</string>
     <string name="menu_settings">Settings</string>
-    
+
     <string name="hello">This is a sample app of DeployGate SDK.</string>
     <string name="logo_content_description">DeployGate Logo</string>
-    
+
     <string name="question_available">Is the DeployGate available on this device?</string>
     <string name="available_yes">YES, versionCode %1$d is running.</string>
     <string name="available_no">NO.</string>
@@ -16,9 +16,9 @@
     <string name="question_authorized">Is the user authorized to use this app?</string>
     <string name="authorized_yes">YES, hello %1$s!</string>
     <string name="authorized_no">NO.</string>
-    
+
     <string name="crash_button">Crash this app!</string>
-    
+
     <string name="send_custom_log">Send custom log</string>
     <string name="custom_log_default">Hello!</string>
     <string name="logcat_button">Capture and send LogCat</string>

@@ -1,14 +1,16 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        tools:context=".SampleActivity">
+        tools:context=".SampleActivity"
+        >
 
         <ImageView
             android:layout_width="match_parent"
@@ -18,21 +20,23 @@
             android:minHeight="64dp"
             android:paddingBottom="4dp"
             android:scaleType="center"
-            android:src="@drawable/logo_w"/>
+            android:src="@drawable/logo_w"
+            />
 
         <TextView
             android:id="@+id/title"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:minHeight="32dp"
             android:layout_marginBottom="@dimen/padding_small"
             android:layout_weight="1"
-            android:lines="1"
             android:ellipsize="end"
             android:gravity="center_horizontal"
+            android:lines="1"
+            android:minHeight="32dp"
             android:text="@string/hello"
             android:textColor="@android:color/primary_text_dark"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            />
 
         <Button
             android:id="@+id/updateButton"
@@ -42,15 +46,17 @@
             android:layout_marginBottom="@dimen/padding_small"
             android:onClick="onUpdateClick"
             android:text="@string/update_button"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            />
 
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
             android:layout_marginTop="@dimen/padding_small"
+            android:gravity="center_horizontal"
             android:text="@string/question_available"
-            android:textColor="@android:color/secondary_text_dark"/>
+            android:textColor="@android:color/secondary_text_dark"
+            />
 
         <TextView
             android:id="@+id/available"
@@ -58,51 +64,56 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/padding_large"
             android:gravity="center_horizontal"
-            android:textColor="@android:color/primary_text_dark"/>
+            android:textColor="@android:color/primary_text_dark"
+            />
 
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:text="@string/question_managed"
-            android:textColor="@android:color/secondary_text_dark"/>
+            android:textColor="@android:color/secondary_text_dark"
+            />
 
         <TextView
             android:id="@+id/managed"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/padding_large"
             android:layout_marginLeft="@dimen/padding_large"
             android:layout_marginRight="@dimen/padding_large"
+            android:layout_marginBottom="@dimen/padding_large"
             android:gravity="center_horizontal"
-            android:textColor="@android:color/background_light"/> <!-- == @android:color/bright_foregrund_dark -->
+            android:textColor="@android:color/background_light"
+            /> <!-- == @android:color/bright_foregrund_dark -->
 
         <LinearLayout
             android:id="@+id/distributionComments"
-            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/padding_large"
             android:layout_marginLeft="@dimen/padding_large"
             android:layout_marginRight="@dimen/padding_large"
+            android:layout_marginBottom="@dimen/padding_large"
             android:orientation="horizontal"
+            android:visibility="gone"
             >
 
             <Button
                 android:id="@+id/comments"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="onCommentsClick"
-                android:text="@string/comments"/>
+                android:text="@string/comments"
+                />
 
             <Button
                 android:id="@+id/composeComment"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="onComposeCommentClick"
-                android:text="@string/composeComment"/>
+                android:text="@string/composeComment"
+                />
 
         </LinearLayout>
 
@@ -111,20 +122,23 @@
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:text="@string/question_authorized"
-            android:textColor="@android:color/secondary_text_dark"/>
+            android:textColor="@android:color/secondary_text_dark"
+            />
 
         <TextView
             android:id="@+id/authorized"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:textColor="@android:color/primary_text_dark"/>
+            android:textColor="@android:color/primary_text_dark"
+            />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:minHeight="@dimen/padding_large"/>
+            android:minHeight="@dimen/padding_large"
+            />
 
         <TextView
             android:layout_width="fill_parent"
@@ -134,7 +148,8 @@
             android:gravity="center_horizontal"
             android:text="@string/send_custom_log"
             android:textColor="@android:color/secondary_text_dark"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            />
 
         <EditText
             android:id="@+id/message"
@@ -144,14 +159,16 @@
             android:layout_marginRight="@dimen/padding_large"
             android:inputType="textShortMessage"
             android:singleLine="true"
-            android:text="@string/custom_log_default"/>
+            android:text="@string/custom_log_default"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/padding_large"
             android:layout_marginRight="@dimen/padding_large"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            >
 
             <Button
                 android:id="@+id/logError"
@@ -161,7 +178,8 @@
                 android:onClick="onLogClick"
                 android:text="E"
                 android:textColor="#900"
-                tools:ignore="HardcodedText"/>
+                tools:ignore="HardcodedText"
+                />
 
             <Button
                 android:id="@+id/logWarn"
@@ -171,7 +189,8 @@
                 android:onClick="onLogClick"
                 android:text="W"
                 android:textColor="#990"
-                tools:ignore="HardcodedText"/>
+                tools:ignore="HardcodedText"
+                />
 
             <Button
                 android:id="@+id/logDebug"
@@ -181,7 +200,8 @@
                 android:onClick="onLogClick"
                 android:text="D"
                 android:textColor="#009"
-                tools:ignore="HardcodedText"/>
+                tools:ignore="HardcodedText"
+                />
 
             <Button
                 android:id="@+id/logInfo"
@@ -191,7 +211,8 @@
                 android:onClick="onLogClick"
                 android:text="I"
                 android:textColor="#090"
-                tools:ignore="HardcodedText"/>
+                tools:ignore="HardcodedText"
+                />
 
             <Button
                 android:id="@+id/logVerbose"
@@ -200,7 +221,8 @@
                 android:layout_weight="1"
                 android:onClick="onLogClick"
                 android:text="V"
-                tools:ignore="HardcodedText"/>
+                tools:ignore="HardcodedText"
+                />
         </LinearLayout>
 
         <Button
@@ -208,11 +230,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/padding_large"
-            android:layout_marginRight="@dimen/padding_large"
             android:layout_marginTop="@dimen/padding_large"
+            android:layout_marginRight="@dimen/padding_large"
             android:drawableLeft="@android:drawable/ic_dialog_alert"
             android:onClick="onCrashMeClick"
-            android:text="@string/crash_button"/>
+            android:text="@string/crash_button"
+            />
 
         <Button
             android:id="@+id/logcat"
@@ -220,7 +243,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/padding_large"
             android:onClick="onLogCatClick"
-            android:text="@string/logcat_button"/>
+            android:text="@string/logcat_button"
+            />
     </LinearLayout>
 
 </ScrollView>
