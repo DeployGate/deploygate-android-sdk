@@ -1,7 +1,5 @@
 apply from: rootProject.file('sdk.build.gradle')
 
-android.sourceSets.test.java.srcDirs += [rootProject.file('sdk/src/test/java')]
-
 ext {
     displayName = "DeployGate SDK Mock"
     artifactId = 'sdk-mock'

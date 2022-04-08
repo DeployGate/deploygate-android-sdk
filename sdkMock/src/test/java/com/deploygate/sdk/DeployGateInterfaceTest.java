@@ -1,0 +1,1 @@
+../../../../../../../sdk/src/test/java/com/deploygate/sdk/DeployGateInterfaceTest.java
