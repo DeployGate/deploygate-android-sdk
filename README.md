@@ -102,10 +102,10 @@ dependencies {
 
  * [SDK Document](https://deploygate.com/docs/sdk)
  * [SDK Sample](https://github.com/deploygate/deploygate-android-sdk-sample)
- * [Reference (Javadoc)](https://deploygate.com/javadoc)
+ * [Reference (Javadoc)](https://deploygate.github.io/deploygate-android-sdk/)
+   * Javadoc hosting is currently in beta.
  * [Previous releases, download JAR/AARs](https://search.maven.org/artifact/com.deploygate/sdk)
  * [Issues](https://github.com/deploygate/deploygate-android-sdk/issues)
-
 
 ## License
 
@@ -115,3 +115,25 @@ Licensed under [the Apache License, Version 2.0](http://www.apache.org/licenses/
 http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+## Development
+
+- Clone this repo and open by Android Studio.
+  - See the `/build.gradle` for the version of AGP.
+- Import `/CodeStyle.xml`
+- Modify java or required files
+- Add new tests for your changes
+- Make sure all tests are passed
+
+### sdk
+
+- Consider if we should use external libraries carefully
+- Allow users to opt out non-required features
+- Minimize the impact of proguard rules
+
+### sdkMock
+
+sdkMock must be No-Op implementation.
+
+- Do not have any permission
+- In the same version, the public API of sdkMock and sdk must have no difference
