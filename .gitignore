@@ -21,3 +21,5 @@ build/
 #idea
 *.iml
 .idea/
+
+.DS_Store
