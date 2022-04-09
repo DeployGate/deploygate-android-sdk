@@ -13,19 +13,19 @@ import com.deploygate.service.IDeployGateSdkService;
 
 import java.util.LinkedList;
 
-class EventLogTransmitter {
+class CustomLogTransmitter {
     private final String packageName;
-    private final EventLogConfiguration configuration;
+    private final CustomLogConfiguration configuration;
 
     @SuppressWarnings("FieldCanBeLocal")
     private final HandlerThread thread;
-    private EventLogHandler handler;
+    private CustomLogHandler handler;
 
     private volatile IDeployGateSdkService service;
 
-    EventLogTransmitter(
+    CustomLogTransmitter(
             String packageName,
-            EventLogConfiguration configuration
+            CustomLogConfiguration configuration
     ) {
         this.packageName = packageName;
         this.configuration = configuration;
@@ -55,11 +55,24 @@ class EventLogTransmitter {
     ) {
         ensureHandlerInitialized();
 
-        EventLog log = new EventLog(type, body);
+        CustomLog log = new CustomLog(type, body);
         handler.enqueueNewLog(log);
     }
 
-    private boolean sendLog(EventLog log) {
+    /**
+     * @return
+     *
+     * @hide Only for testing.
+     */
+    Looper getLooper() {
+        return handler.getLooper();
+    }
+
+    int getPendingCount() {
+        return handler.customLogs.size();
+    }
+
+    private boolean sendLog(CustomLog log) {
         IDeployGateSdkService service = this.service;
 
         if (service == null) {
@@ -79,6 +92,10 @@ class EventLogTransmitter {
         }
     }
 
+    private boolean isConnected() {
+        return service != null;
+    }
+
     private void ensureHandlerInitialized() {
         if (handler != null) {
             return;
@@ -89,23 +106,23 @@ class EventLogTransmitter {
                 return;
             }
 
-            handler = new EventLogHandler(thread.getLooper(), this, configuration.backpressure, configuration.bufferSize);
+            handler = new CustomLogHandler(thread.getLooper(), this, configuration.backpressure, configuration.bufferSize);
         }
     }
 
-    static class EventLogHandler extends Handler {
-        private static final int WHAT_EXTRUDE_ALL_BUFFER = 0x30;
-        private static final int WHAT_PUSH_LOG = 0x100;
+    static class CustomLogHandler extends Handler {
+        static final int WHAT_EXTRUDE_ALL_BUFFER = 0x30;
+        static final int WHAT_PUSH_LOG = 0x100;
 
-        private final EventLogTransmitter extruder;
+        private final CustomLogTransmitter extruder;
         private final Backpressure backpressure;
         private final int bufferSize;
-        private final LinkedList<EventLog> eventLogs;
+        private final LinkedList<CustomLog> customLogs;
         private int pushWhatOffset = 0;
 
-        EventLogHandler(
+        CustomLogHandler(
                 Looper looper,
-                EventLogTransmitter extruder,
+                CustomLogTransmitter extruder,
                 Backpressure backpressure,
                 int bufferSize
         ) {
@@ -113,7 +130,7 @@ class EventLogTransmitter {
             this.extruder = extruder;
             this.backpressure = backpressure;
             this.bufferSize = bufferSize;
-            this.eventLogs = new LinkedList<>();
+            this.customLogs = new LinkedList<>();
         }
 
         void cancelExtruding() {
@@ -128,18 +145,18 @@ class EventLogTransmitter {
             sendEmptyMessage(WHAT_EXTRUDE_ALL_BUFFER);
         }
 
-        void enqueueNewLog(EventLog log) {
+        void enqueueNewLog(CustomLog log) {
             Message msg = obtainMessage(WHAT_PUSH_LOG + getAndIncrementPushWhatOffset(), log);
             sendMessage(msg);
         }
 
-        void addLogToLast(EventLog log) {
+        void addLogToLast(CustomLog log) {
             boolean dropFirst = backpressure == Backpressure.DROP_OLDEST;
             int droppedCount = 0;
 
-            while (eventLogs.size() >= bufferSize) {
+            while (customLogs.size() >= bufferSize) {
                 if (dropFirst) {
-                    eventLogs.poll();
+                    customLogs.poll();
                     droppedCount++;
                 } else {
                     Logger.d("the queue is already full and reject the new element.");
@@ -149,22 +166,23 @@ class EventLogTransmitter {
 
             Logger.d("filtered out %d overflowed old elements.", droppedCount);
 
-            eventLogs.addLast(log);
+            customLogs.addLast(log);
+
+            if (extruder.isConnected()) {
+                extrudeAllInBuffer();
+            }
         }
 
         void extrudeAllInBuffer() {
-            while (!eventLogs.isEmpty()) {
-                EventLog log = eventLogs.poll();
+            while (!customLogs.isEmpty()) {
+                CustomLog log = customLogs.poll();
 
                 if (!extruder.sendLog(log)) {
                     // push back
-                    eventLogs.addFirst(log);
+                    customLogs.addFirst(log);
+                    sendEmptyMessageDelayed(WHAT_EXTRUDE_ALL_BUFFER, 1000L);
                     break;
                 }
-            }
-
-            if (!eventLogs.isEmpty()) {
-                sendEmptyMessageDelayed(WHAT_EXTRUDE_ALL_BUFFER, 1000L);
             }
         }
 
@@ -178,7 +196,7 @@ class EventLogTransmitter {
                 }
                 default: {
                     if (msg.what >= WHAT_PUSH_LOG) {
-                        EventLog log = (EventLog) msg.obj;
+                        CustomLog log = (CustomLog) msg.obj;
                         addLogToLast(log);
                     }
 

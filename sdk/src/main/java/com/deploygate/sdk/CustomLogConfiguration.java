@@ -2,13 +2,13 @@ package com.deploygate.sdk;
 
 import com.deploygate.sdk.internal.Logger;
 
-public class EventLogConfiguration {
+public class CustomLogConfiguration {
     private static final int MAX_BUFFER_SIZE = 100; // FIXME experimental
 
     public final Backpressure backpressure;
     public final int bufferSize;
 
-    private EventLogConfiguration(
+    private CustomLogConfiguration(
             Backpressure backpressure,
             int bufferSize
     ) {
@@ -43,8 +43,8 @@ public class EventLogConfiguration {
             return this;
         }
 
-        public EventLogConfiguration build() {
-            return new EventLogConfiguration(backpressure, bufferSize);
+        public CustomLogConfiguration build() {
+            return new CustomLogConfiguration(backpressure, bufferSize);
         }
     }
 }

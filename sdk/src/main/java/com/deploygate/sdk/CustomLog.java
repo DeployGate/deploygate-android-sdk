@@ -3,11 +3,11 @@ package com.deploygate.sdk;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-class EventLog implements Parcelable {
+class CustomLog implements Parcelable {
     public final String type;
     public final String body;
 
-    EventLog(
+    CustomLog(
             String type,
             String body
     ) {
@@ -15,20 +15,20 @@ class EventLog implements Parcelable {
         this.body = body;
     }
 
-    protected EventLog(Parcel in) {
+    protected CustomLog(Parcel in) {
         type = in.readString();
         body = in.readString();
     }
 
-    public static final Creator<EventLog> CREATOR = new Creator<EventLog>() {
+    public static final Creator<CustomLog> CREATOR = new Creator<CustomLog>() {
         @Override
-        public EventLog createFromParcel(Parcel in) {
-            return new EventLog(in);
+        public CustomLog createFromParcel(Parcel in) {
+            return new CustomLog(in);
         }
 
         @Override
-        public EventLog[] newArray(int size) {
-            return new EventLog[size];
+        public CustomLog[] newArray(int size) {
+            return new CustomLog[size];
         }
     };
 

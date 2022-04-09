@@ -69,7 +69,7 @@ public class DeployGate {
 
     private final Context mApplicationContext;
     private final Handler mHandler;
-    private final EventLogTransmitter mEventLogTransmitter;
+    private final CustomLogTransmitter mCustomLogTransmitter;
     private final HashSet<DeployGateCallback> mCallbacks;
     private final String mExpectedAuthor;
     private String mAuthor;
@@ -224,11 +224,12 @@ public class DeployGate {
     private DeployGate(
             Context applicationContext,
             String author,
-            DeployGateCallback callback
+            DeployGateCallback callback,
+            CustomLogConfiguration customLogConfiguration
     ) {
         mApplicationContext = applicationContext;
         mHandler = new Handler();
-        mEventLogTransmitter = new EventLogTransmitter(mApplicationContext.getPackageName(), new EventLogConfiguration.Builder().build());
+        mCustomLogTransmitter = new CustomLogTransmitter(mApplicationContext.getPackageName(), customLogConfiguration);
         mCallbacks = new HashSet<DeployGateCallback>();
         mExpectedAuthor = author;
 
@@ -304,7 +305,7 @@ public class DeployGate {
             public void onServiceDisconnected(ComponentName name) {
                 Log.v(TAG, "DeployGate service disconneced");
                 mRemoteService = null;
-                mEventLogTransmitter.disconnect();
+                mCustomLogTransmitter.disconnect();
             }
         }, Context.BIND_AUTO_CREATE);
     }
@@ -317,7 +318,7 @@ public class DeployGate {
         args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, SDK_VERSION);
         try {
             mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
-            mEventLogTransmitter.connect(mRemoteService);
+            mCustomLogTransmitter.connect(mRemoteService);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
         }
@@ -568,6 +569,35 @@ public class DeployGate {
             DeployGateCallback callback,
             boolean forceApplyOnReleaseBuild
     ) {
+        install(app, author, callback, forceApplyOnReleaseBuild, new CustomLogConfiguration.Builder().build());
+    }
+
+    /**
+     * Install DeployGate on your application instance and register a callback
+     * listener. Call this method inside of your {@link Application#onCreate()}
+     * once.
+     *
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     * @param author
+     *         author username of this app. Can be null.
+     * @param callback
+     *         Callback interface to listen events. Can be null.
+     * @param forceApplyOnReleaseBuild
+     *         if you want to keep DeployGate alive on
+     *         the release build, set this true.
+     * @param customLogConfiguration
+     *         set a configuration for custom logging
+     *
+     * @since r4.4
+     */
+    public static void install(
+            Application app,
+            String author,
+            DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild,
+            CustomLogConfiguration customLogConfiguration
+    ) {
         if (sInstance != null) {
             Log.w(TAG, "DeployGate.install was already called. Ignoring.");
             return;
@@ -578,7 +608,7 @@ public class DeployGate {
         }
 
         Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread.getDefaultUncaughtExceptionHandler()));
-        sInstance = new DeployGate(app.getApplicationContext(), author, callback);
+        sInstance = new DeployGate(app.getApplicationContext(), author, callback, customLogConfiguration);
     }
 
     /**
@@ -1066,7 +1096,7 @@ public class DeployGate {
             String type,
             String body
     ) {
-        mEventLogTransmitter.transmit(type, body);
+        mCustomLogTransmitter.transmit(type, body);
     }
 
     /**
