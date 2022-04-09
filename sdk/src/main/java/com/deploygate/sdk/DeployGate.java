@@ -69,6 +69,7 @@ public class DeployGate {
 
     private final Context mApplicationContext;
     private final Handler mHandler;
+    private final EventLogTransmitter mEventLogTransmitter;
     private final HashSet<DeployGateCallback> mCallbacks;
     private final String mExpectedAuthor;
     private String mAuthor;
@@ -225,8 +226,9 @@ public class DeployGate {
             String author,
             DeployGateCallback callback
     ) {
-        mHandler = new Handler();
         mApplicationContext = applicationContext;
+        mHandler = new Handler();
+        mEventLogTransmitter = new EventLogTransmitter(mApplicationContext.getPackageName(), new EventLogConfiguration.Builder().build());
         mCallbacks = new HashSet<DeployGateCallback>();
         mExpectedAuthor = author;
 
@@ -302,6 +304,7 @@ public class DeployGate {
             public void onServiceDisconnected(ComponentName name) {
                 Log.v(TAG, "DeployGate service disconneced");
                 mRemoteService = null;
+                mEventLogTransmitter.disconnect();
             }
         }, Context.BIND_AUTO_CREATE);
     }
@@ -314,6 +317,7 @@ public class DeployGate {
         args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, SDK_VERSION);
         try {
             mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
+            mEventLogTransmitter.connect(mRemoteService);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
         }
@@ -1062,15 +1066,7 @@ public class DeployGate {
             String type,
             String body
     ) {
-        Bundle extras = new Bundle();
-        extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
-        extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
-
-        try {
-            mRemoteService.sendEvent(mApplicationContext.getPackageName(), DeployGateEvent.ACTION_SEND_CUSTOM_LOG, extras);
-        } catch (RemoteException e) {
-            Log.w(TAG, "failed to send custom log: " + e.getMessage());
-        }
+        mEventLogTransmitter.transmit(type, body);
     }
 
     /**
