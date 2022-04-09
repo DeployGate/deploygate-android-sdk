@@ -48,7 +48,6 @@ import java.util.concurrent.CountDownLatch;
  * @author tnj
  */
 public class DeployGate {
-
     private static final String TAG = "DeployGate";
     private static final int SDK_VERSION = 4;
 
@@ -115,8 +114,6 @@ public class DeployGate {
                 onEnableLogcat(false);
             }
         }
-
-        ;
 
         private void onInitialized(
                 final boolean isManaged,
