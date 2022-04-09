@@ -91,6 +91,11 @@ public class DeployGateInterfaceTest {
     }
 
     @Test
+    public void install__Application_String_DeployGateCallback_CustomLogConfiguration() {
+        DeployGate.install(app, "author", callback, true, new CustomLogConfiguration.Builder().build());
+    }
+
+    @Test
     public void refresh() {
         DeployGate.refresh();
     }

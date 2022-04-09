@@ -39,5 +39,10 @@ class BundleMatcher {
 
             return true;
         }
+
+        @Override
+        public String toString() {
+            return expected.toString();
+        }
     }
 }

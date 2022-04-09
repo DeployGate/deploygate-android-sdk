@@ -13,6 +13,19 @@ import com.deploygate.service.IDeployGateSdkService;
 
 import java.util.LinkedList;
 
+/**
+ * This class transmits pending logs to the DeployGate client.
+ * The internal handler class creates a buffer pool and assure the sending-order.
+ *
+ * <p>
+ * - Enqueue a new log to the buffer pool
+ * - Send logs in the order of FIFO
+ *
+ * The cost of polling the log buffer pool may be high, so SDK starts sending logs only while a service is active.
+ * <p>
+ * - When a new log is stored to the buffer
+ * -
+ */
 class CustomLogTransmitter {
     private final String packageName;
     private final CustomLogConfiguration configuration;
@@ -37,15 +50,15 @@ class CustomLogTransmitter {
     public final synchronized void connect(IDeployGateSdkService service) {
         ensureHandlerInitialized();
 
-        handler.cancelExtruding();
+        handler.cancelPendingSendLogsInstruction();
         this.service = service;
-        handler.extrudeAllLogs();
+        handler.enqueueSendLogsInstruction();
     }
 
     public final void disconnect() {
         ensureHandlerInitialized();
 
-        handler.cancelExtruding();
+        handler.cancelPendingSendLogsInstruction();
         this.service = null;
     }
 
@@ -56,7 +69,7 @@ class CustomLogTransmitter {
         ensureHandlerInitialized();
 
         CustomLog log = new CustomLog(type, body);
-        handler.enqueueNewLog(log);
+        handler.enqueueAddNewLogInstruction(log);
     }
 
     /**
@@ -110,48 +123,81 @@ class CustomLogTransmitter {
         }
     }
 
-    static class CustomLogHandler extends Handler {
-        static final int WHAT_EXTRUDE_ALL_BUFFER = 0x30;
-        static final int WHAT_PUSH_LOG = 0x100;
+    /**
+     * This handler behaves as a ordered-buffer of instructions.
+     * <p>
+     * The instruction of adding a new log and sending buffered logs are synchronized.
+     */
+    private static class CustomLogHandler extends Handler {
+        private static final int WHAT_SEND_LOGS = 0x30;
+        private static final int WHAT_ADD_NEW_LOG = 0x100;
 
-        private final CustomLogTransmitter extruder;
-        private final Backpressure backpressure;
+        private final CustomLogTransmitter transmitter;
+        private final CustomLogConfiguration.Backpressure backpressure;
         private final int bufferSize;
+        private final int maxWhatOffset;
         private final LinkedList<CustomLog> customLogs;
         private int pushWhatOffset = 0;
 
+        /**
+         * @param looper
+         *         Do not use Main Looper to avoid wasting the main thread resource.
+         * @param transmitter
+         *         an instance to send logs
+         * @param backpressure
+         *         the backpressure strategy of the log buffer, not of instructions.
+         * @param bufferSize
+         *         the max size of the log buffer, not of instructions.
+         */
         CustomLogHandler(
                 Looper looper,
-                CustomLogTransmitter extruder,
-                Backpressure backpressure,
+                CustomLogTransmitter transmitter,
+                CustomLogConfiguration.Backpressure backpressure,
                 int bufferSize
         ) {
             super(looper);
-            this.extruder = extruder;
+            this.transmitter = transmitter;
             this.backpressure = backpressure;
             this.bufferSize = bufferSize;
+            this.maxWhatOffset = bufferSize * 2;
             this.customLogs = new LinkedList<>();
         }
 
-        void cancelExtruding() {
-            removeMessages(WHAT_EXTRUDE_ALL_BUFFER);
+        /**
+         * Cancel the send-logs instruction in the handler message queue.
+         * This doesn't interrupt the thread and stop the sending-logs instruction that is running at the time.
+         */
+        void cancelPendingSendLogsInstruction() {
+            removeMessages(WHAT_SEND_LOGS);
         }
 
-        void extrudeAllLogs() {
-            if (hasMessages(WHAT_EXTRUDE_ALL_BUFFER)) {
+        /**
+         * Enqueue the send-logs instruction in the handler message queue unless enqueued.
+         */
+        void enqueueSendLogsInstruction() {
+            if (hasMessages(WHAT_SEND_LOGS)) {
                 return;
             }
 
-            sendEmptyMessage(WHAT_EXTRUDE_ALL_BUFFER);
+            sendEmptyMessage(WHAT_SEND_LOGS);
         }
 
-        void enqueueNewLog(CustomLog log) {
-            Message msg = obtainMessage(WHAT_PUSH_LOG + getAndIncrementPushWhatOffset(), log);
+        /**
+         * Enqueue new add-new-log instruction to the handler message queue.
+         */
+        void enqueueAddNewLogInstruction(CustomLog log) {
+            Message msg = obtainMessage(WHAT_ADD_NEW_LOG + getAndIncrementPushWhatOffset(), log);
             sendMessage(msg);
         }
 
+        /**
+         * Append the new log to the log buffer if the backpressure is not dropping LATEST.
+         *
+         * @param log
+         *         a new log
+         */
         void addLogToLast(CustomLog log) {
-            boolean dropFirst = backpressure == Backpressure.DROP_OLDEST;
+            boolean dropFirst = backpressure == CustomLogConfiguration.Backpressure.DROP_BUFFER_BY_OLDEST;
             int droppedCount = 0;
 
             while (customLogs.size() >= bufferSize) {
@@ -159,28 +205,32 @@ class CustomLogTransmitter {
                     customLogs.poll();
                     droppedCount++;
                 } else {
-                    Logger.d("the queue is already full and reject the new element.");
+                    Logger.d("the log buffer is already full and reject the new log.");
                     return;
                 }
             }
 
-            Logger.d("filtered out %d overflowed old elements.", droppedCount);
+            Logger.d("filtered out %d overflowed logs from the oldests.", droppedCount);
 
             customLogs.addLast(log);
 
-            if (extruder.isConnected()) {
-                extrudeAllInBuffer();
+            if (transmitter.isConnected()) {
+                sendAllInBuffer();
             }
         }
 
-        void extrudeAllInBuffer() {
+        /**
+         * send all logs from the oldest in the log buffers
+         * If sending a log failed, it will be put into the head of the log buffer. And then, this schedules the sending-logs instruction with some delay.
+         */
+        void sendAllInBuffer() {
             while (!customLogs.isEmpty()) {
                 CustomLog log = customLogs.poll();
 
-                if (!extruder.sendLog(log)) {
-                    // push back
+                if (!transmitter.sendLog(log)) {
+                    // Don't lost the failed log
                     customLogs.addFirst(log);
-                    sendEmptyMessageDelayed(WHAT_EXTRUDE_ALL_BUFFER, 1000L);
+                    sendEmptyMessageDelayed(WHAT_SEND_LOGS, 1000L);
                     break;
                 }
             }
@@ -189,13 +239,13 @@ class CustomLogTransmitter {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case WHAT_EXTRUDE_ALL_BUFFER: {
-                    extrudeAllInBuffer();
+                case WHAT_SEND_LOGS: {
+                    sendAllInBuffer();
 
                     break;
                 }
                 default: {
-                    if (msg.what >= WHAT_PUSH_LOG) {
+                    if (msg.what >= WHAT_ADD_NEW_LOG) {
                         CustomLog log = (CustomLog) msg.obj;
                         addLogToLast(log);
                     }
@@ -205,8 +255,13 @@ class CustomLogTransmitter {
             }
         }
 
+        /**
+         * To avoid what number conflicts, sdk uses a simple counter.
+         *
+         * @return positive number, which is greater than or equal to the value of {@link #WHAT_ADD_NEW_LOG}
+         */
         private int getAndIncrementPushWhatOffset() {
-            if (pushWhatOffset > 1000) {
+            if (pushWhatOffset > maxWhatOffset) {
                 pushWhatOffset = 0;
             }
             return pushWhatOffset++;

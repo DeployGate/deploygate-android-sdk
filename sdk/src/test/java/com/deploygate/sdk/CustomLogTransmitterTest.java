@@ -42,13 +42,41 @@ public class CustomLogTransmitterTest {
     }
 
     @Test(timeout = 3000L)
-    public void check_buffer_size_works() throws RemoteException {
-        CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().setBufferSize(5).build();
+    public void check_buffer_size_works_with_drop_by_oldest() throws RemoteException, InterruptedException {
+        CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().setBufferSize(5).setBackpressure(CustomLogConfiguration.Backpressure.DROP_BUFFER_BY_OLDEST).build();
         CustomLogTransmitter customLogTransmitter = new CustomLogTransmitter(PACKAGE_NAME, configuration);
 
         for (int i = 0; i < 10; i++) {
             customLogTransmitter.transmit("type", String.valueOf(i));
         }
+
+        Shadows.shadowOf(customLogTransmitter.getLooper()).idle();
+
+        customLogTransmitter.connect(service);
+
+        Shadows.shadowOf(customLogTransmitter.getLooper()).idle();
+
+        for (int i = 0; i < 5; i++) {
+            Mockito.verify(service, Mockito.never()).sendEvent(Mockito.eq(PACKAGE_NAME), Mockito.eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), BundleMatcher.eq(createLogExtra("type", String.valueOf(i))));
+        }
+
+        VerificationMode once = Mockito.times(1);
+
+        for (int i = 5; i < 10; i++) {
+            Mockito.verify(service, once).sendEvent(Mockito.eq(PACKAGE_NAME), Mockito.eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), BundleMatcher.eq(createLogExtra("type", String.valueOf(i))));
+        }
+    }
+
+    @Test(timeout = 3000L)
+    public void check_buffer_size_works_with_preserve_buffer() throws RemoteException {
+        CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().setBufferSize(5).setBackpressure(CustomLogConfiguration.Backpressure.PRESERVE_BUFFER).build();
+        CustomLogTransmitter customLogTransmitter = new CustomLogTransmitter(PACKAGE_NAME, configuration);
+
+        for (int i = 0; i < 10; i++) {
+            customLogTransmitter.transmit("type", String.valueOf(i));
+        }
+
+        Shadows.shadowOf(customLogTransmitter.getLooper()).idle();
 
         customLogTransmitter.connect(service);
 
@@ -56,8 +84,12 @@ public class CustomLogTransmitterTest {
 
         VerificationMode once = Mockito.times(1);
 
-        for (int i = 5; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             Mockito.verify(service, once).sendEvent(Mockito.eq(PACKAGE_NAME), Mockito.eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), BundleMatcher.eq(createLogExtra("type", String.valueOf(i))));
+        }
+
+        for (int i = 5; i < 10; i++) {
+            Mockito.verify(service, Mockito.never()).sendEvent(Mockito.eq(PACKAGE_NAME), Mockito.eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), BundleMatcher.eq(createLogExtra("type", String.valueOf(i))));
         }
     }
 
