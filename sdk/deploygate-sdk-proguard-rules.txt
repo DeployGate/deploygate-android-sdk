@@ -1,1 +1,10 @@
 -keep class * extends android.os.IInterface
+
+# To allow removing our logger
+-assumenosideeffects class com.deploygate.sdk.internal.Logger {
+    public static void v(...);
+    public static void i(...);
+    public static void w(...);
+    public static void d(...);
+    public static void e(...);
+}
