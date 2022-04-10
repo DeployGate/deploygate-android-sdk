@@ -1,6 +1,5 @@
 package com.deploygate.sdk;
 
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -29,6 +28,9 @@ import java.util.LinkedList;
  */
 class CustomLogTransmitter {
     private static final int MAX_RETRY_COUNT = 3;
+    static final int SEND_LOG_RESULT_SUCCESS = 0;
+    static final int SEND_LOG_RESULT_FAILURE_RETRIABLE = -1;
+    static final int SEND_LOG_RESULT_FAILURE_RETRY_EXCEEDED = -2;
 
     private final String packageName;
     private final CustomLogConfiguration configuration;
@@ -36,7 +38,7 @@ class CustomLogTransmitter {
     @SuppressWarnings("FieldCanBeLocal")
     private final HandlerThread thread;
     private CustomLogHandler handler;
-    private boolean isDisabled;
+    private boolean isDisabledTransmission;
 
     private volatile IDeployGateSdkService service;
 
@@ -54,7 +56,7 @@ class CustomLogTransmitter {
 
         this.packageName = packageName;
         this.configuration = configuration;
-        this.isDisabled = true;
+        this.isDisabledTransmission = false;
 
         this.thread = new HandlerThread("deploygate-sdk-event-log");
         this.thread.start();
@@ -100,7 +102,7 @@ class CustomLogTransmitter {
             String type,
             String body
     ) {
-        if (isDisabled) {
+        if (isDisabledTransmission) {
             return;
         }
 
@@ -113,13 +115,13 @@ class CustomLogTransmitter {
     /**
      * Disable transmissions.
      *
-     * @param disabled
+     * @param disabledTransmission
      *         specify true if wanna disable the transmitter, otherwise false.
      */
-    public final void setDisabled(boolean disabled) {
-        isDisabled = disabled;
+    public final void setDisabledTransmission(boolean disabledTransmission) {
+        isDisabledTransmission = disabledTransmission;
 
-        if (disabled) {
+        if (disabledTransmission) {
             Logger.d("Disabled custom log transmitter");
         } else {
             Logger.d("Enabled custom log transmitter");
@@ -162,30 +164,28 @@ class CustomLogTransmitter {
      *
      * @return true if this can transmit the custom log, otherwise false.
      */
-    boolean sendLog(CustomLog log) {
+    int sendLog(CustomLog log) {
         IDeployGateSdkService service = this.service;
 
         if (service == null) {
-            return false;
+            // Don't increment retry count
+            return SEND_LOG_RESULT_FAILURE_RETRIABLE;
         }
 
         try {
-            Bundle extras = new Bundle();
-            extras.putSerializable(DeployGateEvent.EXTRA_LOG, log.body);
-            extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, log.type);
-
-            service.sendEvent(packageName, DeployGateEvent.ACTION_SEND_CUSTOM_LOG, extras);
-            return true;
+            service.sendEvent(packageName, DeployGateEvent.ACTION_SEND_CUSTOM_LOG, log.toExtras());
+            return SEND_LOG_RESULT_SUCCESS;
         } catch (RemoteException e) {
             int currentAttempts = log.getAndIncrementRetryCount();
 
             if (currentAttempts >= MAX_RETRY_COUNT) {
                 Logger.e("failed to send custom log and exceeded the max retry count: %s", e.getMessage());
+                return SEND_LOG_RESULT_FAILURE_RETRY_EXCEEDED;
             } else {
                 Logger.w("failed to send custom log %d times: %s", currentAttempts + 1, e.getMessage());
             }
 
-            return false;
+            return SEND_LOG_RESULT_FAILURE_RETRIABLE;
         }
     }
 
@@ -307,7 +307,7 @@ class CustomLogTransmitter {
             while (!customLogs.isEmpty()) {
                 CustomLog log = customLogs.poll();
 
-                if (!transmitter.sendLog(log)) {
+                if (transmitter.sendLog(log) == SEND_LOG_RESULT_FAILURE_RETRIABLE) {
                     // Don't lost the failed log
                     customLogs.addFirst(log);
                     sendEmptyMessageDelayed(WHAT_SEND_LOGS, 1000L);

@@ -1,7 +1,10 @@
 package com.deploygate.sdk;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.deploygate.service.DeployGateEvent;
 
 class CustomLog implements Parcelable {
     public final String type;
@@ -28,6 +31,16 @@ class CustomLog implements Parcelable {
      */
     int getAndIncrementRetryCount() {
         return retryCount++;
+    }
+
+    /**
+     * @return a bundle to send to the client service
+     */
+    Bundle toExtras() {
+        Bundle extras = new Bundle();
+        extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
+        extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
+        return extras;
     }
 
     public static final Creator<CustomLog> CREATOR = new Creator<CustomLog>() {
