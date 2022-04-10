@@ -94,6 +94,8 @@ dependencies {
 }
 ```
 
+> Proper variants depends on your use-case. If you are using R8-applied applications during the QA process, you may need to use non-mock SDK even in release build type.
+
 ## Upload your app to DeployGate
 
 [Gradle DeployGate Plugin](https://github.com/DeployGate/gradle-deploygate-plugin/) will be your help. Please note that the SDK works without the Gradle plugin and vice versa. 

@@ -1,7 +1,7 @@
-name: Release artifacts
+name: Build the sample project and upload artifacts if possible
 
 on:
-  pull-request:
+  pull_request:
 
 jobs:
   build-and-upload:
@@ -14,21 +14,22 @@ jobs:
           java-package: jdk
           cache: 'gradle'
       - run: ./gradlew sample:assembleRelease
-      - if: >
-          secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO
-        name: upload mock sdk apk
-        run: >
-          curl
-          -F file=@./sample/build/outputs/bundle/mockSdkRelease/sample-mockSdk-release.aab
-          -F distribution_name="sdk/pulls/${{ github.event.pull_request.number }}"
-          -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}'
-          --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps'
-      - if: >
-          secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO
-        name: upload real sdk apk
-        run: >
-          curl
-          -F file=@./sample/build/outputs/bundle/realSdkRelease/sample-realSdk-release.aab
-          -F distribution_name="sdk/pulls/${{ github.event.pull_request.number }}"
-          -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}'
-          --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps'
+      - name: upload aab files
+        run: |
+          if [[ -z '${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}' ]]; then
+            echo '::notice::contributors cannot upload files to deploygate'
+            exit 0
+          fi
+
+          curl \
+            -F file=@./sample/build/outputs/bundle/mockSdkRelease/sample-mockSdk-release.aab \
+            -F distribution_name="sdk/pulls/${{ github.event.pull_request.number }}" \
+            -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}' \
+            --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps'
+
+          curl \
+            -F file=@./sample/build/outputs/bundle/realSdkRelease/sample-realSdk-release.aab \
+            -F distribution_name="sdk/pulls/${{ github.event.pull_request.number }}" \
+            -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}' \
+            --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps'
+

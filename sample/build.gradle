@@ -13,7 +13,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-project.txt'
         }
     }
 
@@ -32,14 +32,12 @@ android {
     lintOptions {
         abortOnError false
     }
-
-    signingConfigs {
-        release.initWith(debug)
-    }
 }
+
 
 dependencies {
     realSdkImplementation project(':sdk')
     mockSdkImplementation project(':sdkMock')
-//    implementation "com.deploygate:sdk:4.3.0"
+    // def latest_version = '4.3.0'
+    // implementation "com.deploygate.sdk:${latest_version}"
 }
