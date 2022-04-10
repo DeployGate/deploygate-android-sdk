@@ -13,7 +13,7 @@ jobs:
   check-new-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: gh-pages
       - uses: actions/github-script@v6
@@ -42,7 +42,7 @@ jobs:
       - check-new-release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: gh-pages
       - id: download-javadoc

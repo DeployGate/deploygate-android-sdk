@@ -17,6 +17,18 @@ android {
         }
     }
 
+    flavorDimensions "mode"
+    productFlavors {
+        realSdk {
+            dimension "mode"
+            applicationIdSuffix ".realsdk"
+        }
+        mockSdk {
+            dimension "mode"
+            applicationIdSuffix ".mocksdk"
+        }
+    }
+
     lintOptions {
         abortOnError false
     }
@@ -27,5 +39,7 @@ android {
 }
 
 dependencies {
-    implementation "com.deploygate:sdk:4.3.0"
+    realSdkImplementation project(':sdk')
+    mockSdkImplementation project(':sdkMock')
+//    implementation "com.deploygate:sdk:4.3.0"
 }
