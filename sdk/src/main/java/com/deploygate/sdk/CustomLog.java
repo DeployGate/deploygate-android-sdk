@@ -6,6 +6,7 @@ import android.os.Parcelable;
 class CustomLog implements Parcelable {
     public final String type;
     public final String body;
+    private int retryCount;
 
     CustomLog(
             String type,
@@ -13,11 +14,20 @@ class CustomLog implements Parcelable {
     ) {
         this.type = type;
         this.body = body;
+        this.retryCount = 0;
     }
 
     protected CustomLog(Parcel in) {
         type = in.readString();
         body = in.readString();
+        retryCount = in.readInt();
+    }
+
+    /**
+     * @return the number of current attempts
+     */
+    int getAndIncrementRetryCount() {
+        return retryCount++;
     }
 
     public static final Creator<CustomLog> CREATOR = new Creator<CustomLog>() {
@@ -44,5 +54,6 @@ class CustomLog implements Parcelable {
     ) {
         dest.writeString(type);
         dest.writeString(body);
+        dest.writeInt(retryCount);
     }
 }

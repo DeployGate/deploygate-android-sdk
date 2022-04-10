@@ -246,10 +246,12 @@ public class DeployGate {
     private boolean initService(boolean isBoot) {
         if (isDeployGateAvailable()) {
             Log.v(TAG, "DeployGate installation detected. Initializing.");
+            mCustomLogTransmitter.setDisabled(false);
             bindToService(isBoot);
             return true;
         } else {
             Log.v(TAG, "DeployGate is not available on this device.");
+            mCustomLogTransmitter.setDisabled(true);
             mInitializedLatch.countDown();
             mIsDeployGateAvailable = false;
             callbackDeployGateUnavailable();

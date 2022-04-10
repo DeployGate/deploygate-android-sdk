@@ -11,10 +11,6 @@ public class Logger {
             String format,
             Object... args
     ) {
-        if (!Config.DEBUG) {
-            return;
-        }
-
         Log.d(TAG, String.format(Locale.US, format, args));
     }
 
@@ -22,10 +18,6 @@ public class Logger {
             String format,
             Object... args
     ) {
-        if (!Config.DEBUG) {
-            return;
-        }
-
         Log.i(TAG, String.format(Locale.US, format, args));
     }
 
@@ -33,10 +25,6 @@ public class Logger {
             String format,
             Object... args
     ) {
-        if (!Config.DEBUG) {
-            return;
-        }
-
         Log.w(TAG, String.format(Locale.US, format, args));
     }
 
@@ -45,10 +33,6 @@ public class Logger {
             String format,
             Object... args
     ) {
-        if (!Config.DEBUG) {
-            return;
-        }
-
         Log.w(TAG, String.format(Locale.US, format, args), th);
     }
 
@@ -56,10 +40,6 @@ public class Logger {
             String format,
             Object... args
     ) {
-        if (!Config.DEBUG) {
-            return;
-        }
-
         Log.e(TAG, String.format(Locale.US, format, args));
     }
 
@@ -68,10 +48,6 @@ public class Logger {
             String format,
             Object... args
     ) {
-        if (!Config.DEBUG) {
-            return;
-        }
-
         Log.e(TAG, String.format(Locale.US, format, args), th);
     }
 }
