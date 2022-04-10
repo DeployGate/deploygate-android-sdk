@@ -13,19 +13,31 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-project.txt'
+        }
+    }
+
+    flavorDimensions "mode"
+    productFlavors {
+        realSdk {
+            dimension "mode"
+            applicationIdSuffix ".realsdk"
+        }
+        mockSdk {
+            dimension "mode"
+            applicationIdSuffix ".mocksdk"
         }
     }
 
     lintOptions {
         abortOnError false
     }
-
-    signingConfigs {
-        release.initWith(debug)
-    }
 }
 
+
 dependencies {
-    implementation "com.deploygate:sdk:4.3.0"
+    realSdkImplementation project(':sdk')
+    mockSdkImplementation project(':sdkMock')
+    // def latest_version = '4.3.0'
+    // implementation "com.deploygate.sdk:${latest_version}"
 }

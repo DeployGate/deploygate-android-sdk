@@ -1,5 +1,5 @@
-<manifest package="com.deploygate.sample"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.deploygate.sample"
     android:versionCode="2"
     android:versionName="1.0"
     >
@@ -7,7 +7,10 @@
       This permission is necessary to enable DeployGate's Remote LogCat on pre-JellyBean platforms. 
       You can remove it you don't need the feature.
     -->
-    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission
+        android:name="android.permission.READ_LOGS"
+        android:maxSdkVersion="15"
+        />
 
     <!--
       If you have multiple processes in your application, or you want to customize SDK initializer,
@@ -28,9 +31,9 @@
         >
         <activity
             android:name=".SampleActivity"
+            android:exported="true"
             android:label="@string/app_name"
             android:windowSoftInputMode="stateHidden"
-            android:exported="true"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

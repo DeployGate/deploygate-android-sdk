@@ -69,7 +69,6 @@ DeployGate.registerCallback(new DeployGateCallback() {
 }, true);
 ```
 
-
 See [SDK Sample](./sample) for more examples.
 
 ## Mock
@@ -94,6 +93,8 @@ dependencies {
 }
 ```
 
+> Proper variants depends on your use-case. If you are using R8-applied applications during the QA process, you may need to use non-mock SDK even in release build type.
+
 ## Upload your app to DeployGate
 
 [Gradle DeployGate Plugin](https://github.com/DeployGate/gradle-deploygate-plugin/) will be your help. Please note that the SDK works without the Gradle plugin and vice versa. 
@@ -101,7 +102,6 @@ dependencies {
 ## Links
 
  * [SDK Document](https://deploygate.com/docs/sdk)
- * [SDK Sample](https://github.com/deploygate/deploygate-android-sdk-sample)
  * [Reference (Javadoc)](https://deploygate.github.io/deploygate-android-sdk/)
    * Javadoc hosting is currently in beta.
  * [Previous releases, download JAR/AARs](https://search.maven.org/artifact/com.deploygate/sdk)
