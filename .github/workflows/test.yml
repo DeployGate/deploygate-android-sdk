@@ -14,7 +14,7 @@ jobs:
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
-      - run: ./gradlew sample:assembleRelease
+      - run: ./gradlew sample:bundleRelease
       - name: upload aab files
         run: |
           if [[ -z '${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}' ]]; then
