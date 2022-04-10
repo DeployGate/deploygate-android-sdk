@@ -58,7 +58,7 @@ class CustomLogTransmitter {
         this.configuration = configuration;
         this.isDisabledTransmission = false;
 
-        this.thread = new HandlerThread("deploygate-sdk-event-log");
+        this.thread = new HandlerThread("deploygate-sdk-custom-log");
         this.thread.start();
     }
 
