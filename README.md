@@ -69,7 +69,6 @@ DeployGate.registerCallback(new DeployGateCallback() {
 }, true);
 ```
 
-
 See [SDK Sample](./sample) for more examples.
 
 ## Mock
@@ -103,7 +102,6 @@ dependencies {
 ## Links
 
  * [SDK Document](https://deploygate.com/docs/sdk)
- * [SDK Sample](https://github.com/deploygate/deploygate-android-sdk-sample)
  * [Reference (Javadoc)](https://deploygate.github.io/deploygate-android-sdk/)
    * Javadoc hosting is currently in beta.
  * [Previous releases, download JAR/AARs](https://search.maven.org/artifact/com.deploygate/sdk)

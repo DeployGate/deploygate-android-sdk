@@ -1,6 +1,10 @@
 name: Build the sample project and upload artifacts if possible
 
 on:
+  push:
+    branches:
+      - master
+
   pull_request:
 
 jobs:
@@ -20,6 +24,12 @@ jobs:
           if [[ -z '${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}' ]]; then
             echo '::notice::contributors cannot upload files to deploygate'
             exit 0
+          fi
+
+          if [[ -z '${{ github.event.pull_request.number }}' ]]; then
+            distribution_name="deploygate-sdk-sample"
+          else
+            distribution_name="sdk/pulls/${{ github.event.pull_request.number }}"
           fi
 
           curl \
