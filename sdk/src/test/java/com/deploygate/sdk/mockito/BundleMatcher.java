@@ -1,14 +1,14 @@
-package com.deploygate.sdk;
+package com.deploygate.sdk.mockito;
 
 import android.os.Bundle;
 
-import org.mockito.ArgumentMatcher;
+import com.deploygate.sdk.helper.Bundles;
 
-import java.util.Objects;
+import org.mockito.ArgumentMatcher;
 
 import static org.mockito.internal.progress.ThreadSafeMockingProgress.mockingProgress;
 
-class BundleMatcher {
+public class BundleMatcher {
     public static Bundle eq(Bundle expected) {
         mockingProgress().getArgumentMatcherStorage().reportMatcher(new Equals(expected));
         return expected;
@@ -23,21 +23,7 @@ class BundleMatcher {
 
         @Override
         public boolean matches(Bundle argument) {
-            if (expected.size() != argument.size()) {
-                return false;
-            }
-
-            if (!expected.keySet().equals(argument.keySet())) {
-                return false;
-            }
-
-            for (final String key : expected.keySet()) {
-                if (!Objects.equals(expected.get(key), argument.get(key))) {
-                    return false;
-                }
-            }
-
-            return true;
+            return Bundles.equals(expected, argument);
         }
 
         @Override
