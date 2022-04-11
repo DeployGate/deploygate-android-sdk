@@ -22,6 +22,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 class LogcatInstructionSerializer {
     static final int MAX_RETRY_COUNT = 2;
@@ -40,7 +41,7 @@ class LogcatInstructionSerializer {
     @SuppressWarnings("FieldCanBeLocal")
     private final HandlerThread thread;
     private LogcatHandler handler;
-    private boolean isDisabledTransmission;
+    private boolean isDisabled;
 
     private volatile IDeployGateSdkService service;
 
@@ -52,7 +53,7 @@ class LogcatInstructionSerializer {
         }
 
         this.packageName = packageName;
-        this.isDisabledTransmission = false;
+        this.isDisabled = false;
 
         this.thread = new HandlerThread("deploygate-sdk-logcat");
         this.thread.start();
@@ -95,7 +96,7 @@ class LogcatInstructionSerializer {
     public final synchronized void request(
             boolean isOneShot
     ) {
-        if (isDisabledTransmission) {
+        if (isDisabled) {
             return;
         }
 
@@ -103,24 +104,24 @@ class LogcatInstructionSerializer {
         handler.enqueueSendLogcatInstruction(isOneShot);
     }
 
-    /**
-     * Disable transmissions.
-     *
-     * @param disabledTransmission
-     *         specify true if wanna disable the transmitter, otherwise false.
-     */
-    public final void setDisabledTransmission(boolean disabledTransmission) {
-        isDisabledTransmission = disabledTransmission;
+    public final void setDisabled(boolean disabled) {
+        isDisabled = disabled;
 
-        if (disabledTransmission) {
-            Logger.d("Disabled custom log transmitter");
+        if (disabled) {
+            Logger.d("Disabled logcat instruction serializer");
         } else {
-            Logger.d("Enabled custom log transmitter");
+            Logger.d("Enabled logcat instruction serializer");
         }
     }
 
+    public final void cancel() {
+        ensureHandlerInitialized();
+        handler.cancelPendingSendLogcatInstruction();
+        handler.interrupt();
+    }
+
     /**
-     * Check if this transmitter has a service connection.
+     * Check if this serializer has a service connection.
      * <p>
      * The connection may return {@link android.os.DeadObjectException} even if this returns true;
      *
@@ -200,6 +201,8 @@ class LogcatInstructionSerializer {
         private static final int WHAT_SEND_LOGCAT = 0x20;
 
         private final LogcatInstructionSerializer transmitter;
+        private boolean isInterrupted;
+        private AtomicReference<BufferedReader> ioRef;
 
         LogcatHandler(
                 Looper looper,
@@ -207,6 +210,8 @@ class LogcatInstructionSerializer {
         ) {
             super(looper);
             this.transmitter = transmitter;
+            this.isInterrupted = false;
+            this.ioRef = new AtomicReference<>();
         }
 
         /**
@@ -239,6 +244,22 @@ class LogcatInstructionSerializer {
             sendMessage(obtainMessage(WHAT_SEND_LOGCAT, isOneShot));
         }
 
+        /**
+         * Interrupt the process of Logcat but never interrupt the thread itself.
+         */
+        void interrupt() {
+            BufferedReader reader = ioRef.get();
+
+            if (reader != null) {
+                isInterrupted = true;
+
+                try {
+                    reader.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
+
         void getAndSendLogcat(boolean isOneShot) {
             Process process = null;
             BufferedReader bufferedReader = null;
@@ -254,9 +275,16 @@ class LogcatInstructionSerializer {
                 process = Runtime.getRuntime().exec(buildCommands(isOneShot));
                 bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()), BUFFER_SIZE);
 
+                ioRef.set(bufferedReader);
+
                 Logger.d("Start retrieving logcat");
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
+                    if (isInterrupted) {
+                        Logger.w("Logcat stream is interrupted");
+                        return;
+                    }
+
                     logcatBuf.add(line + "\n");
                     if (isOneShot) {
                         if (logcatBuf.size() > MAX_LINES) {
@@ -281,6 +309,9 @@ class LogcatInstructionSerializer {
             } catch (IOException e) {
                 Logger.d("Logcat stopped: %s", e.getMessage());
             } finally {
+                ioRef.set(null);
+                isInterrupted = false;
+
                 if (bufferedReader != null) {
                     try {
                         bufferedReader.close();
@@ -310,6 +341,10 @@ class LogcatInstructionSerializer {
                 int splitCount,
                 Collection<String> lines
         ) {
+            if (isInterrupted) {
+                return SEND_LOGCAT_RESULT_FAILURE_ANYWAY;
+            }
+
             ArrayList<String> serializee = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
 
             int result = transmitter.sendLogcat(serializee);
@@ -361,6 +396,7 @@ class LogcatInstructionSerializer {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case WHAT_SEND_LOGCAT: {
+                    isInterrupted = false;
                     getAndSendLogcat((Boolean) msg.obj);
 
                     break;
