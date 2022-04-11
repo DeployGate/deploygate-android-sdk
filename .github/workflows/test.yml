@@ -18,7 +18,7 @@ jobs:
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
-      - run: ./gradlew sample:bundleRelease
+      - run: ./gradlew sample:bundleDebug sample:bundleRelease
       - name: upload aab files
         run: |
           if [[ -z '${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}' ]]; then
@@ -32,20 +32,11 @@ jobs:
             distribution_name="sdk/pulls/${{ github.event.pull_request.number }}"
           fi
 
-          curl \
-            -F file=@./sample/build/outputs/bundle/mockSdkRelease/sample-mockSdk-release.aab \
-            -F distribution_name="$distribution_name" \
-            -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}' \
-            --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps'
-
-          curl \
-            -F file=@./sample/build/outputs/bundle/realSdkRelease/sample-realSdk-release.aab \
-            -F distribution_name="$distribution_name" \
-            -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}' \
-            --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps'
-
-          curl \
-            -F file=@./sample/build/outputs/bundle/contentProviderRelease/sample-contentProvider-release.aab \
-            -F distribution_name="$distribution_name" \
-            -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}' \
-            --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps'
+          while read -r aab_path; do
+            curl \
+              -F file=@$aab_path \
+              -F distribution_name="$distribution_name" \
+              -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}' \
+              --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps' | \
+              jq -r '"\(.results.package_name) \(.results.distribution.url)"'
+          done < <(find ./sample/build/outputs/bundle -name "*.aab")
