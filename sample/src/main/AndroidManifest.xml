@@ -42,17 +42,6 @@
             </intent-filter>
         </activity>
 
-        <!--
-          If you have multiple processes in your application, or you want to customize SDK initializer,
-          remove the ContentProvider that SDK automatically add to your manifest by uncommenting following tag.
-        -->
-
-        <provider
-            android:name="com.deploygate.sdk.DeployGateProvider"
-            android:authorities="${applicationId}.deploygateprovider"
-            tools:node="remove"
-            />
-
         <receiver
             android:name="com.deploygate.sample.DirectBootBroadcastReceiver"
             android:directBootAware="true"
