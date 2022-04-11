@@ -46,7 +46,7 @@
         </activity>
 
         <receiver
-            android:name="com.deploygate.sample.DirectBootBroadcastReceiver"
+            android:name=".DirectBootBroadcastReceiver"
             android:directBootAware="true"
             android:exported="false"
             >
@@ -56,7 +56,7 @@
         </receiver>
 
         <receiver
-            android:name="com.deploygate.sample.BootBroadcastReceiver"
+            android:name=".BootBroadcastReceiver"
             android:exported="false"
             >
             <intent-filter>
