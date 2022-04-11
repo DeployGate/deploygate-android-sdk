@@ -14,20 +14,17 @@ import com.deploygate.service.IDeployGateSdkService;
 import java.util.LinkedList;
 
 /**
- * This class transmits pending logs to the DeployGate client.
- * The internal handler class creates a buffer pool and assure the sending-order.
+ * This class serialize the instructions for custom logs and process them in another thread in order of enqueued.
+ * The internal handler class creates a buffer pool and grantee the order.
  *
  * <p>
  * - Enqueue a new log to the buffer pool
  * - Send logs in the order of FIFO
  * <p>
  * The cost of polling the log buffer pool may be high, so SDK starts sending logs only while a service is active.
- * <p>
- * - When a new log is stored to the buffer
- * -
  */
-class CustomLogTransmitter {
-    static final int MAX_RETRY_COUNT = 3;
+class CustomLogInstructionSerializer {
+    static final int MAX_RETRY_COUNT = 2;
     static final int SEND_LOG_RESULT_SUCCESS = 0;
     static final int SEND_LOG_RESULT_FAILURE_RETRIABLE = -1;
     static final int SEND_LOG_RESULT_FAILURE_RETRY_EXCEEDED = -2;
@@ -38,11 +35,11 @@ class CustomLogTransmitter {
     @SuppressWarnings("FieldCanBeLocal")
     private final HandlerThread thread;
     private CustomLogHandler handler;
-    private boolean isDisabledTransmission;
+    private boolean isDisabled;
 
     private volatile IDeployGateSdkService service;
 
-    CustomLogTransmitter(
+    CustomLogInstructionSerializer(
             String packageName,
             CustomLogConfiguration configuration
     ) {
@@ -56,7 +53,7 @@ class CustomLogTransmitter {
 
         this.packageName = packageName;
         this.configuration = configuration;
-        this.isDisabledTransmission = false;
+        this.isDisabled = false;
 
         this.thread = new HandlerThread("deploygate-sdk-custom-log");
         this.thread.start();
@@ -91,18 +88,18 @@ class CustomLogTransmitter {
     }
 
     /**
-     * Transmit custom logs to DeployGate client service. All transmissions will be scheduled to an exclusive thread.
+     * Request sending custom logs to DeployGate client service. All requests will be scheduled to an exclusive thread.
      *
      * @param type
      *         custom log type
      * @param body
      *         custom log body
      */
-    public final synchronized void transmit(
+    public final synchronized void requestSendingLog(
             String type,
             String body
     ) {
-        if (isDisabledTransmission) {
+        if (isDisabled) {
             return;
         }
 
@@ -113,23 +110,23 @@ class CustomLogTransmitter {
     }
 
     /**
-     * Disable transmissions.
+     * Disable accepting instructions. This does not mean interrupting and/or terminating the exclusive thread.
      *
-     * @param disabledTransmission
-     *         specify true if wanna disable the transmitter, otherwise false.
+     * @param isDisabled
+     *         specify true if wanna disable this serializer, otherwise false.
      */
-    public final void setDisabledTransmission(boolean disabledTransmission) {
-        isDisabledTransmission = disabledTransmission;
+    public final void setDisabled(boolean isDisabled) {
+        this.isDisabled = isDisabled;
 
-        if (disabledTransmission) {
-            Logger.d("Disabled custom log transmitter");
+        if (isDisabled) {
+            Logger.d("Disabled custom log instruction serializer");
         } else {
-            Logger.d("Enabled custom log transmitter");
+            Logger.d("Enabled custom log instruction serializer");
         }
     }
 
     /**
-     * Check if this transmitter has a service connection.
+     * Check if this serializer a service connection.
      * <p>
      * The connection may return {@link android.os.DeadObjectException} even if this returns true;
      *
@@ -148,7 +145,15 @@ class CustomLogTransmitter {
         return handler.getLooper();
     }
 
+    boolean hasHandlerInitialized() {
+        return handler != null;
+    }
+
     int getPendingCount() {
+        if (handler == null) {
+            return 0;
+        }
+
         return handler.customLogs.size();
     }
 
@@ -162,7 +167,7 @@ class CustomLogTransmitter {
      * @param log
      *         a custom log to send
      *
-     * @return true if this can transmit the custom log, otherwise false.
+     * @return true if this could send the custom log, otherwise false.
      */
     int sendLog(CustomLog log) {
         IDeployGateSdkService service = this.service;
@@ -212,7 +217,7 @@ class CustomLogTransmitter {
         private static final int WHAT_SEND_LOGS = 0x30;
         private static final int WHAT_ADD_NEW_LOG = 0x100;
 
-        private final CustomLogTransmitter transmitter;
+        private final CustomLogInstructionSerializer serializer;
         private final CustomLogConfiguration.Backpressure backpressure;
         private final int bufferSize;
         private final int maxWhatOffset;
@@ -222,7 +227,7 @@ class CustomLogTransmitter {
         /**
          * @param looper
          *         Do not use Main Looper to avoid wasting the main thread resource.
-         * @param transmitter
+         * @param serializer
          *         an instance to send logs
          * @param backpressure
          *         the backpressure strategy of the log buffer, not of instructions.
@@ -231,12 +236,12 @@ class CustomLogTransmitter {
          */
         CustomLogHandler(
                 Looper looper,
-                CustomLogTransmitter transmitter,
+                CustomLogInstructionSerializer serializer,
                 CustomLogConfiguration.Backpressure backpressure,
                 int bufferSize
         ) {
             super(looper);
-            this.transmitter = transmitter;
+            this.serializer = serializer;
             this.backpressure = backpressure;
             this.bufferSize = bufferSize;
             this.maxWhatOffset = bufferSize * 2;
@@ -290,11 +295,11 @@ class CustomLogTransmitter {
                 }
             }
 
-            Logger.d("filtered out %d overflowed logs from the oldests.", droppedCount);
+            Logger.d("filtered out %d overflowed logs from the oldest.", droppedCount);
 
             customLogs.addLast(log);
 
-            if (transmitter.hasServiceConnection()) {
+            if (serializer.hasServiceConnection()) {
                 sendAllInBuffer();
             }
         }
@@ -304,14 +309,27 @@ class CustomLogTransmitter {
          * If sending a log failed, it will be put into the head of the log buffer. And then, this schedules the sending-logs instruction with some delay.
          */
         void sendAllInBuffer() {
+            boolean retry = false;
+
             while (!customLogs.isEmpty()) {
                 CustomLog log = customLogs.poll();
 
-                if (transmitter.sendLog(log) == SEND_LOG_RESULT_FAILURE_RETRIABLE) {
+                if (serializer.sendLog(log) == SEND_LOG_RESULT_FAILURE_RETRIABLE) {
                     // Don't lost the failed log
                     customLogs.addFirst(log);
-                    sendEmptyMessageDelayed(WHAT_SEND_LOGS, 1000L);
+                    retry = true;
                     break;
+                }
+            }
+
+            if (retry) {
+                try {
+                    removeMessages(WHAT_SEND_LOGS);
+                    Message msg = obtainMessage(WHAT_SEND_LOGS);
+                    // Put the retry message at front of the queue because delay or enqueuing a message may cause unexpected overflow of the buffer.
+                    sendMessageAtFrontOfQueue(msg);
+                    Thread.sleep(600); // experimental valuea
+                } catch (InterruptedException ignore) {
                 }
             }
         }

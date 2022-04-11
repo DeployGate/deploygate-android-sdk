@@ -69,7 +69,7 @@ public class DeployGate {
 
     private final Context mApplicationContext;
     private final Handler mHandler;
-    private final CustomLogTransmitter mCustomLogTransmitter;
+    private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
     private final String mExpectedAuthor;
     private String mAuthor;
@@ -229,7 +229,7 @@ public class DeployGate {
     ) {
         mApplicationContext = applicationContext;
         mHandler = new Handler();
-        mCustomLogTransmitter = new CustomLogTransmitter(mApplicationContext.getPackageName(), customLogConfiguration);
+        mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mApplicationContext.getPackageName(), customLogConfiguration);
         mCallbacks = new HashSet<DeployGateCallback>();
         mExpectedAuthor = author;
 
@@ -246,12 +246,12 @@ public class DeployGate {
     private boolean initService(boolean isBoot) {
         if (isDeployGateAvailable()) {
             Log.v(TAG, "DeployGate installation detected. Initializing.");
-            mCustomLogTransmitter.setDisabledTransmission(false);
+            mCustomLogInstructionSerializer.setDisabled(false);
             bindToService(isBoot);
             return true;
         } else {
             Log.v(TAG, "DeployGate is not available on this device.");
-            mCustomLogTransmitter.setDisabledTransmission(true);
+            mCustomLogInstructionSerializer.setDisabled(true);
             mInitializedLatch.countDown();
             mIsDeployGateAvailable = false;
             callbackDeployGateUnavailable();
@@ -307,7 +307,7 @@ public class DeployGate {
             public void onServiceDisconnected(ComponentName name) {
                 Log.v(TAG, "DeployGate service disconneced");
                 mRemoteService = null;
-                mCustomLogTransmitter.disconnect();
+                mCustomLogInstructionSerializer.disconnect();
             }
         }, Context.BIND_AUTO_CREATE);
     }
@@ -320,7 +320,7 @@ public class DeployGate {
         args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, SDK_VERSION);
         try {
             mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
-            mCustomLogTransmitter.connect(mRemoteService);
+            mCustomLogInstructionSerializer.connect(mRemoteService);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
         }
@@ -1098,7 +1098,7 @@ public class DeployGate {
             String type,
             String body
     ) {
-        mCustomLogTransmitter.transmit(type, body);
+        mCustomLogInstructionSerializer.requestSendingLog(type, body);
     }
 
     /**
