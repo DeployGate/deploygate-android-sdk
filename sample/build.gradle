@@ -54,10 +54,10 @@ easylauncher {
 
     productFlavors {
         devreal {
-            filters = redRibbonFilter()
+            filters = customColorRibbonFilter("devmock", "#A0E74C3C", "#FFFFFF", "topRight")
         }
         devmock {
-            filters = greenRibbonFilter()
+            filters = customColorRibbonFilter("devmock", "#556600CC", "#FFFFFF", "topRight")
         }
         stablereal {
             enable false
