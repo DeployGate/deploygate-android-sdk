@@ -69,4 +69,28 @@ class CustomLog implements Parcelable {
         dest.writeString(body);
         dest.writeInt(retryCount);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        CustomLog customLog = (CustomLog) o;
+
+        if (!type.equals(customLog.type)) {
+            return false;
+        }
+        return body.equals(customLog.body);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type.hashCode();
+        result = 31 * result + body.hashCode();
+        return result;
+    }
 }
