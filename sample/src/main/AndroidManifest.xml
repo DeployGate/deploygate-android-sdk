@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.deploygate.sample"
     android:versionCode="2"
     android:versionName="1.0"
@@ -44,12 +45,31 @@
         <!--
           If you have multiple processes in your application, or you want to customize SDK initializer,
           remove the ContentProvider that SDK automatically add to your manifest by uncommenting following tag.
-
-          <provider
-              android:name="com.deploygate.sdk.DeployGateProvider"
-              android:authorities="${applicationId}.deploygateprovider"
-              tools:node="remove"
-          />
         -->
+
+        <provider
+            android:name="com.deploygate.sdk.DeployGateProvider"
+            android:authorities="${applicationId}.deploygateprovider"
+            tools:node="remove"
+            />
+
+        <receiver
+            android:name="com.deploygate.sample.DirectBootBroadcastReceiver"
+            android:directBootAware="true"
+            android:exported="false"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="com.deploygate.sample.BootBroadcastReceiver"
+            android:exported="false"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

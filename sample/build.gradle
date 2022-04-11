@@ -27,6 +27,10 @@ android {
             dimension "mode"
             applicationIdSuffix ".mocksdk"
         }
+        contentProvider {
+            dimension "mode"
+            applicationIdSuffix ".cp"
+        }
     }
 
     lintOptions {
@@ -38,6 +42,7 @@ android {
 dependencies {
     realSdkImplementation project(':sdk')
     mockSdkImplementation project(':sdkMock')
+    contentProviderImplementation project(':sdk')
     // def latest_version = '4.3.0'
     // implementation "com.deploygate.sdk:${latest_version}"
 }
