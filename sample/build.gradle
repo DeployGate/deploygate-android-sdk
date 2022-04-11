@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'deploygate'
+apply plugin: 'com.akaita.android.easylauncher'
 
 android {
     compileSdkVersion = 32
@@ -40,7 +40,21 @@ android {
         abortOnError false
     }
 }
+easylauncher {
+    defaultFlavorNaming = true
 
+    productFlavors {
+        realSdk {
+            filters = redRibbonFilter()
+        }
+        mockSdk {
+            filters = greenRibbonFilter()
+        }
+        contentProvider {
+            filters = orangeRibbonFilter()
+        }
+    }
+}
 
 dependencies {
     realSdkImplementation project(':sdk')

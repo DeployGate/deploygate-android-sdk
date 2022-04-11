@@ -1,6 +1,6 @@
 You can try this sample app via the following link.
 
-[<img src="https://dply.me/ogqtcx/button/small" alt="Download to device">](https://dply.me/ogqtcx#install)
+[<img src="https://dply.me/z51trs/button/small" alt="Download to device">](https://dply.me/z51trs#install)
 
 **We recommend you to uninstall our sample app (not DeployGate app!) after checking the behavior**
 
@@ -20,8 +20,8 @@ If you still have any trouble, please file an issue in this repository.
 
 Every operation does nothing. The following distribution link is available.
 
-[<img src="https://dply.me/rjikwm/button/small" alt="Download to device">](https://dply.me/rjikwm#install)
+[<img src="https://dply.me/cyc50q/button/small" alt="Download to device">](https://dply.me/cyc50q#install)
 
 ## Others
 
-- A sample App with SDK that is initialized through ContentProvider [<img src="https://dply.me/2l0oa7/button/small" alt="Download to device">](https://dply.me/2l0oa7#install)
+- A sample App with SDK that is initialized through ContentProvider [<img src="https://dply.me/56c5vi/button/small" alt="Download to device">](https://dply.me/56c5vi#install)
