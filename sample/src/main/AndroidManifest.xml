@@ -1,5 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.deploygate.sample"
     android:versionCode="2"
     android:versionName="1.0"
@@ -12,6 +11,9 @@
         android:name="android.permission.READ_LOGS"
         android:maxSdkVersion="15"
         />
+
+    <!-- only for sample app -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!--
       If you have multiple processes in your application, or you want to customize SDK initializer,
@@ -26,6 +28,7 @@
       Please refer the source code of the class to how to implement the code.
     -->
     <application
+        android:name=".App"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"

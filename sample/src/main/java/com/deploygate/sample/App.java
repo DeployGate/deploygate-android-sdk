@@ -14,7 +14,6 @@ import java.util.Locale;
  */
 public class App extends Application {
     public static final String TAG = "DeployGateSDKSample";
-    public final UserUnlockBroadcastReceiver userUnlockBroadcastReceiver = new UserUnlockBroadcastReceiver();
 
     @Override
     public void onCreate() {
@@ -27,7 +26,8 @@ public class App extends Application {
         // Refer the comment on realSdk/AndroidManifest.xml included in this sample.
 
         DeployGate.install(this, new DeployGateCallback() {
-            // Please note that this callback won't be called if you haven't removed the content provider.
+            // Please note that this callback is called iff you have removed the content provider.
+            // For those who wanna use the content provider, SDK provides DeployGate#registerCallback for your use-case.
 
             @Override
             public void onInitialized(boolean isServiceAvailable) {
