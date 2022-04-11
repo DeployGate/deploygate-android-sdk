@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SDK (Mock/dev) Sample</string>
+    <string name="hello">This is a sample app of DeployGate SDK (mock/dev). Every operation does nothing.</string>
+</resources>

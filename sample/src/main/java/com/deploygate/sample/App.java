@@ -23,7 +23,7 @@ public class App extends Application {
         // or you want to customize initialize options, you can install DeployGate manually.
         //
         // Note that you also need to edit your AndroidManifest.xml to activate customized initializer.
-        // Refer the comment on realSdk/AndroidManifest.xml included in this sample.
+        // Refer the comment on stableReal/AndroidManifest.xml included in this sample.
 
         DeployGate.install(this, new DeployGateCallback() {
             // Please note that this callback is called iff you have removed the content provider.

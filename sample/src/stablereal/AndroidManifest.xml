@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <application>
+        <!--
+          If you have multiple processes in your application, or you want to customize SDK initializer,
+          remove the ContentProvider that SDK automatically add to your manifest by uncommenting following tag.
+        -->
+
+        <provider
+            android:name="com.deploygate.sdk.DeployGateProvider"
+            android:authorities="${applicationId}.deploygateprovider"
+            tools:node="remove"
+            />
+    </application>
+</manifest>

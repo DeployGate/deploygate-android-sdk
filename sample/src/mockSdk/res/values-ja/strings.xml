@@ -1,6 +1,0 @@
-<resources>
-
-    <string name="app_name">SDK (Mock) サンプル</string>
-    <string name="hello">これはDeployGate SDK (Mock)のサンプルです。全てのコマンドで何も起きません。</string>
-
-</resources>

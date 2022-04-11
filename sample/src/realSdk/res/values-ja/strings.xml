@@ -1,6 +1,0 @@
-<resources>
-
-    <string name="app_name">SDK サンプル</string>
-    <string name="hello">これはDeployGate SDK のサンプルです。DeployGate からインストールした場合、コマンド操作が有効です。</string>
-
-</resources>

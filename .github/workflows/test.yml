@@ -7,6 +7,10 @@ on:
 
   pull_request:
 
+  # Run this job when new version has been released and available.
+  workflow_dispatch:
+
+
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
@@ -18,7 +22,7 @@ jobs:
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
-      - run: ./gradlew sample:bundleDebug sample:bundleRelease
+      - run: ./gradlew sample:bundleDevrealDebug sample:bundleDevrealRelease sample:bundleDevmockDebug sample:bundleDevmockRelease
       - name: upload aab files
         run: |
           if [[ -z '${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}' ]]; then
@@ -27,10 +31,36 @@ jobs:
           fi
 
           if [[ -z '${{ github.event.pull_request.number }}' ]]; then
-            distribution_name="deploygate-sdk-sample"
+            distribution_name="canary"
           else
             distribution_name="sdk/pulls/${{ github.event.pull_request.number }}"
           fi
+
+          while read -r aab_path; do
+            curl \
+              -F file=@$aab_path \
+              -F distribution_name="$distribution_name" \
+              -H 'Authorization: token ${{ secrets.SHARED_DEPLOYGATE_API_TOKEN_FOR_PUBLIC_REPO }}' \
+              --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps' | \
+              jq -r '"\(.results.package_name) \(.results.distribution.url)"'
+          done < <(find ./sample/build/outputs/bundle -name "*.aab")
+
+  distribute-stable:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '8.x'
+          java-package: jdk
+          distribution: 'temurin'
+          cache: 'gradle'
+      - run: ./gradlew sample:bundleStablerealDistribution sample:bundleStablemockDistribution
+      - name: upload aab files
+        run: |
+          distribution_name="deploygate-sdk-sample"
 
           while read -r aab_path; do
             curl \
