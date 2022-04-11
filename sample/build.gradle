@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'deploygate'
+apply plugin: 'com.akaita.android.easylauncher'
 
 android {
     compileSdkVersion = 32
@@ -11,6 +11,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-project.txt'
@@ -27,17 +30,36 @@ android {
             dimension "mode"
             applicationIdSuffix ".mocksdk"
         }
+        contentProvider {
+            dimension "mode"
+            applicationIdSuffix ".cp"
+        }
     }
 
     lintOptions {
         abortOnError false
     }
 }
+easylauncher {
+    defaultFlavorNaming = true
 
+    productFlavors {
+        realSdk {
+            filters = redRibbonFilter()
+        }
+        mockSdk {
+            filters = greenRibbonFilter()
+        }
+        contentProvider {
+            filters = orangeRibbonFilter()
+        }
+    }
+}
 
 dependencies {
     realSdkImplementation project(':sdk')
     mockSdkImplementation project(':sdkMock')
+    contentProviderImplementation project(':sdk')
     // def latest_version = '4.3.0'
     // implementation "com.deploygate.sdk:${latest_version}"
 }

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SDK with Content Provider Sample</string>
+    <string name="hello">This is a sample app of DeployGate SDK that is initialized through ContentProvider. Every operation should work if this has been installed by DeployGate client app.</string>
+</resources>
