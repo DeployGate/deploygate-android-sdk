@@ -22,12 +22,15 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.LooperMode;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.deploygate.sdk.mockito.BundleMatcher.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
 
 @RunWith(AndroidJUnit4.class)
@@ -106,6 +109,52 @@ public class CustomLogTransmitterTest {
     }
 
     @Test(timeout = 3000L)
+    public void sendLog_always_returns_retriable_status_if_service_is_none() throws RemoteException {
+        CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().build();
+        CustomLogTransmitter customLogTransmitter = new CustomLogTransmitter(PACKAGE_NAME, configuration);
+
+        CustomLog noIssue = new CustomLog("type", "noIssue");
+        CustomLog successAfterRetries = new CustomLog("type", "successAfterRetries");
+        CustomLog retryExceeded = new CustomLog("type", "retryExceeded");
+
+        doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(noIssue.toExtras()));
+        doThrow(TransactionTooLargeException.class).doThrow(DeadObjectException.class).doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(successAfterRetries.toExtras()));
+        doThrow(RemoteException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(retryExceeded.toExtras()));
+
+        for (int i = 0; i < 10; i++) {
+            Truth.assertThat(customLogTransmitter.sendLog(noIssue)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRIABLE);
+            Truth.assertThat(customLogTransmitter.sendLog(successAfterRetries)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRIABLE);
+            Truth.assertThat(customLogTransmitter.sendLog(retryExceeded)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRIABLE);
+        }
+    }
+
+    @Test(timeout = 3000L)
+    public void sendLog_uses_retry_barrier() throws RemoteException {
+        CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().build();
+        CustomLogTransmitter customLogTransmitter = new CustomLogTransmitter(PACKAGE_NAME, configuration);
+        customLogTransmitter.connect(service);
+
+        Shadows.shadowOf(customLogTransmitter.getLooper()).pause();
+
+        CustomLog noIssue = new CustomLog("type", "noIssue");
+        CustomLog successAfterRetries = new CustomLog("type", "successAfterRetries");
+        CustomLog retryExceeded = new CustomLog("type", "retryExceeded");
+
+        doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(noIssue.toExtras()));
+        doThrow(TransactionTooLargeException.class).doThrow(DeadObjectException.class).doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(successAfterRetries.toExtras()));
+        doThrow(RemoteException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(retryExceeded.toExtras()));
+
+        Truth.assertThat(customLogTransmitter.sendLog(noIssue)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_SUCCESS);
+        Truth.assertThat(customLogTransmitter.sendLog(successAfterRetries)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(customLogTransmitter.sendLog(successAfterRetries)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(customLogTransmitter.sendLog(successAfterRetries)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_SUCCESS);
+        Truth.assertThat(customLogTransmitter.sendLog(retryExceeded)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(customLogTransmitter.sendLog(retryExceeded)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(customLogTransmitter.sendLog(retryExceeded)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(customLogTransmitter.sendLog(retryExceeded)).isEqualTo(CustomLogTransmitter.SEND_LOG_RESULT_FAILURE_RETRY_EXCEEDED);
+    }
+
+    @Test(timeout = 3000L)
     public void transmit_works_regardless_of_service() throws RemoteException {
         CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().build();
         CustomLogTransmitter customLogTransmitter = new CustomLogTransmitter(PACKAGE_NAME, configuration);
@@ -130,21 +179,27 @@ public class CustomLogTransmitterTest {
     }
 
     @Test(timeout = 3000L)
-    public void retry_barrier_can_prevent_holding_logs_that_always_fail() throws RemoteException {
-        CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().setBufferSize(8).build();
+    public void retry_barrier_can_prevent_holding_logs_that_always_fail() throws RemoteException, InterruptedException {
+        CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().build();
         CustomLogTransmitter customLogTransmitter = new CustomLogTransmitter(PACKAGE_NAME, configuration);
+
+        doThrow(RemoteException.class).when(service).sendEvent(any(), any(), any());
+
+        customLogTransmitter.connect(service);
 
         for (int i = 0; i < 10; i++) {
             CustomLog log = new CustomLog("type", String.valueOf(i));
-
-            doThrow(RemoteException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(log.toExtras()));
-
             customLogTransmitter.transmit(log.type, log.body);
         }
 
         Shadows.shadowOf(customLogTransmitter.getLooper()).idle();
 
-        Truth.assertThat(customLogTransmitter.getPendingCount()).isEqualTo(8);
+        while (customLogTransmitter.getPendingCount() > 0) {
+            Shadows.shadowOf(customLogTransmitter.getLooper()).idleFor(100, TimeUnit.MILLISECONDS);
+        }
+
+        Truth.assertThat(customLogTransmitter.getPendingCount()).isEqualTo(0);
+        Mockito.verify(service, times((CustomLogTransmitter.MAX_RETRY_COUNT + 1) * 10)).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), any());
     }
 
     @Test(timeout = 3000L)
@@ -156,7 +211,8 @@ public class CustomLogTransmitterTest {
         CustomLog successAfterRetries = new CustomLog("type", "successAfterRetries");
         CustomLog retryExceeded = new CustomLog("type", "retryExceeded");
 
-        doThrow(TransactionTooLargeException.class).doThrow(DeadObjectException.class).doCallRealMethod().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(successAfterRetries.toExtras()));
+        //noinspection unchecked
+        doThrow(TransactionTooLargeException.class, DeadObjectException.class).doCallRealMethod().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(successAfterRetries.toExtras()));
         doThrow(RemoteException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(retryExceeded.toExtras()));
 
         customLogTransmitter.connect(service);

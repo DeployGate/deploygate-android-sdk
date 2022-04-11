@@ -27,7 +27,7 @@ import java.util.LinkedList;
  * -
  */
 class CustomLogTransmitter {
-    private static final int MAX_RETRY_COUNT = 3;
+    static final int MAX_RETRY_COUNT = 3;
     static final int SEND_LOG_RESULT_SUCCESS = 0;
     static final int SEND_LOG_RESULT_FAILURE_RETRIABLE = -1;
     static final int SEND_LOG_RESULT_FAILURE_RETRY_EXCEEDED = -2;
