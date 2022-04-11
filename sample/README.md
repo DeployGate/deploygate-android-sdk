@@ -17,3 +17,7 @@ If you still have any trouble, please file an issue in this repository.
 Every operation does nothing. The following distribution link is available.
 
 [<img src="https://dply.me/rjikwm/button/small" alt="Download to device">](https://dply.me/rjikwm#install)
+
+## Others
+
+- A sample App with SDK that is initialized through ContentProvider [<img src="https://dply.me/2l0oa7/button/small" alt="Download to device">](https://dply.me/2l0oa7#install)
