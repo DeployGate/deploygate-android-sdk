@@ -137,3 +137,11 @@ sdkMock must be No-Op implementation.
 
 - Do not have any permission
 - In the same version, the public API of sdkMock and sdk must have no difference
+
+## Deployment
+
+Use GitHub Actions.
+
+- [release a new version](.github/workflows/release.yml)
+- [distribute a new sample with the latest version](.github/workflows/test.yml)
+- [deploy the Javadocs](.github/workflows/deploy-javadoc.yml)

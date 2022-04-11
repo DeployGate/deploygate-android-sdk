@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SDK (dev) Sample</string>
+    <string name="hello">This is a sample app of DeployGate SDK(dev) that is initialized manually. Every operation should work if this has been installed by DeployGate client app.</string>
+</resources>

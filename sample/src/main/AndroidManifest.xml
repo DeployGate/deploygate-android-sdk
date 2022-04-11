@@ -63,5 +63,8 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <!-- SDK will be initialized through ContentProvider by default -->
+        <!-- Please refer to stablereal/AndroidManifest.xml -->
     </application>
 </manifest>

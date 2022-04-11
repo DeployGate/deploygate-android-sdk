@@ -14,6 +14,10 @@ android {
         debug {
             applicationIdSuffix '.debug'
         }
+        distribute {
+            debuggable true
+            matchingFallbacks = ['release']
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-project.txt'
@@ -21,18 +25,23 @@ android {
     }
 
     flavorDimensions "mode"
+
     productFlavors {
-        realSdk {
+        devreal {
             dimension "mode"
-            applicationIdSuffix ".realsdk"
+            applicationIdSuffix ".realsdk.dev"
         }
-        mockSdk {
+        devmock {
             dimension "mode"
-            applicationIdSuffix ".mocksdk"
+            applicationIdSuffix ".mocksdk.dev"
         }
-        contentProvider {
+        stablereal {
             dimension "mode"
-            applicationIdSuffix ".cp"
+            applicationIdSuffix ".realsdk.stable"
+        }
+        stablemock {
+            dimension "mode"
+            applicationIdSuffix ".mocksdk.stable"
         }
     }
 
@@ -44,22 +53,26 @@ easylauncher {
     defaultFlavorNaming = true
 
     productFlavors {
-        realSdk {
-            filters = redRibbonFilter()
+        devreal {
+            filters = customColorRibbonFilter("devmock", "#55E74C3C", "#FFFFFF", "topRight")
         }
-        mockSdk {
-            filters = greenRibbonFilter()
+        devmock {
+            filters = customColorRibbonFilter("devmock", "#556600CC", "#FFFFFF", "topRight")
         }
-        contentProvider {
-            filters = orangeRibbonFilter()
+        stablereal {
+            enable false
+        }
+        stablemock {
+            enable false
         }
     }
 }
 
 dependencies {
-    realSdkImplementation project(':sdk')
-    mockSdkImplementation project(':sdkMock')
-    contentProviderImplementation project(':sdk')
-    // def latest_version = '4.3.0'
-    // implementation "com.deploygate.sdk:${latest_version}"
+    devrealImplementation project(':sdk')
+    devmockImplementation project(':sdkMock')
+
+    def version = "4.3.0"
+    stablerealImplementation "com.deploygate:sdk:$version"
+    stablemockImplementation "com.deploygate:sdk-mock:$version"
 }
