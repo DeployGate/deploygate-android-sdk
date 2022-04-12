@@ -48,7 +48,6 @@ import java.util.concurrent.CountDownLatch;
  * @author tnj
  */
 public class DeployGate {
-
     private static final String TAG = "DeployGate";
     private static final int SDK_VERSION = 4;
 
@@ -70,6 +69,7 @@ public class DeployGate {
 
     private final Context mApplicationContext;
     private final Handler mHandler;
+    private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
     private final String mExpectedAuthor;
     private String mAuthor;
@@ -115,8 +115,6 @@ public class DeployGate {
                 onEnableLogcat(false);
             }
         }
-
-        ;
 
         private void onInitialized(
                 final boolean isManaged,
@@ -226,10 +224,12 @@ public class DeployGate {
     private DeployGate(
             Context applicationContext,
             String author,
-            DeployGateCallback callback
+            DeployGateCallback callback,
+            CustomLogConfiguration customLogConfiguration
     ) {
-        mHandler = new Handler();
         mApplicationContext = applicationContext;
+        mHandler = new Handler();
+        mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mApplicationContext.getPackageName(), customLogConfiguration);
         mCallbacks = new HashSet<DeployGateCallback>();
         mExpectedAuthor = author;
 
@@ -246,10 +246,12 @@ public class DeployGate {
     private boolean initService(boolean isBoot) {
         if (isDeployGateAvailable()) {
             Log.v(TAG, "DeployGate installation detected. Initializing.");
+            mCustomLogInstructionSerializer.setDisabled(false);
             bindToService(isBoot);
             return true;
         } else {
             Log.v(TAG, "DeployGate is not available on this device.");
+            mCustomLogInstructionSerializer.setDisabled(true);
             mInitializedLatch.countDown();
             mIsDeployGateAvailable = false;
             callbackDeployGateUnavailable();
@@ -305,6 +307,7 @@ public class DeployGate {
             public void onServiceDisconnected(ComponentName name) {
                 Log.v(TAG, "DeployGate service disconneced");
                 mRemoteService = null;
+                mCustomLogInstructionSerializer.disconnect();
             }
         }, Context.BIND_AUTO_CREATE);
     }
@@ -317,6 +320,7 @@ public class DeployGate {
         args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, SDK_VERSION);
         try {
             mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
+            mCustomLogInstructionSerializer.connect(mRemoteService);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
         }
@@ -567,6 +571,35 @@ public class DeployGate {
             DeployGateCallback callback,
             boolean forceApplyOnReleaseBuild
     ) {
+        install(app, author, callback, forceApplyOnReleaseBuild, new CustomLogConfiguration.Builder().build());
+    }
+
+    /**
+     * Install DeployGate on your application instance and register a callback
+     * listener. Call this method inside of your {@link Application#onCreate()}
+     * once.
+     *
+     * @param app
+     *         Application instance, typically just pass <em>this</em>.
+     * @param author
+     *         author username of this app. Can be null.
+     * @param callback
+     *         Callback interface to listen events. Can be null.
+     * @param forceApplyOnReleaseBuild
+     *         if you want to keep DeployGate alive on
+     *         the release build, set this true.
+     * @param customLogConfiguration
+     *         set a configuration for custom logging
+     *
+     * @since r4.4
+     */
+    public static void install(
+            Application app,
+            String author,
+            DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild,
+            CustomLogConfiguration customLogConfiguration
+    ) {
         if (sInstance != null) {
             Log.w(TAG, "DeployGate.install was already called. Ignoring.");
             return;
@@ -577,7 +610,7 @@ public class DeployGate {
         }
 
         Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread.getDefaultUncaughtExceptionHandler()));
-        sInstance = new DeployGate(app.getApplicationContext(), author, callback);
+        sInstance = new DeployGate(app.getApplicationContext(), author, callback, customLogConfiguration);
     }
 
     /**
@@ -1065,15 +1098,7 @@ public class DeployGate {
             String type,
             String body
     ) {
-        Bundle extras = new Bundle();
-        extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
-        extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
-
-        try {
-            mRemoteService.sendEvent(mApplicationContext.getPackageName(), DeployGateEvent.ACTION_SEND_CUSTOM_LOG, extras);
-        } catch (RemoteException e) {
-            Log.w(TAG, "failed to send custom log: " + e.getMessage());
-        }
+        mCustomLogInstructionSerializer.requestSendingLog(type, body);
     }
 
     /**

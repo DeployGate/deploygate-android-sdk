@@ -19,3 +19,8 @@
 #   public *;
 #}
 -keep class * extends android.os.IInterface
+
+# to check the R8 results except obfuscation
+-keepnames class com.deploygate.sdk.** {
+  *;
+}

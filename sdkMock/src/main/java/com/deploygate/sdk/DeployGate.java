@@ -50,6 +50,15 @@ public class DeployGate {
     ) {
     }
 
+    public static void install(
+            Application app,
+            String author,
+            DeployGateCallback callback,
+            boolean forceApplyOnReleaseBuild,
+            CustomLogConfiguration configuration
+    ) {
+    }
+
     public static void refresh() {
     }
 
