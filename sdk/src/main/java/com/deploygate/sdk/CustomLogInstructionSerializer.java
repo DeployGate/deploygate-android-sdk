@@ -1,5 +1,6 @@
 package com.deploygate.sdk;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -159,6 +160,18 @@ class CustomLogInstructionSerializer {
         }
 
         return handler.customLogs.size();
+    }
+
+    /**
+     * Only for testing
+     */
+    void halt() {
+        thread.interrupt();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            thread.quitSafely();
+        } else {
+            thread.quit();
+        }
     }
 
     /**

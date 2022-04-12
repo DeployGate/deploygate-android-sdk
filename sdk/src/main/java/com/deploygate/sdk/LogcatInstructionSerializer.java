@@ -2,7 +2,6 @@ package com.deploygate.sdk;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -10,33 +9,32 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 class LogcatInstructionSerializer {
     static final int MAX_RETRY_COUNT = 2;
     static final int MAX_CHUNK_CHALLENGE_COUNT = 2;
     static final int SEND_LOGCAT_RESULT_SUCCESS = 0;
-    static final int SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE = -1;
-    static final int SEND_LOGCAT_RESULT_FAILURE_ANYWAY = -2;
+    static final int SEND_LOGCAT_RESULT_FAILURE_RETRIABLE = -1;
+    static final int SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE = -2;
+    static final int SEND_LOGCAT_RESULT_FAILURE_RETRY_EXCEEDED = -3;
+
+    static final int WHAT_SEND_LOGCAT = 0x20;
+    static final int WHAT_ADD_LOGCAT_CHUNK = 0x30;
 
     private static final Object LOCK = new Object();
-    private static final int BUFFER_SIZE = 8192;
-    // FIXME this should be flexible cuz the transaction needs to be reduced if exceeded.
-    private static final int MAX_LINES = 500;
 
     private final String packageName;
+    private final LogcatProcess logcatProcess;
 
     @SuppressWarnings("FieldCanBeLocal")
     private final HandlerThread thread;
@@ -53,6 +51,17 @@ class LogcatInstructionSerializer {
         }
 
         this.packageName = packageName;
+        this.logcatProcess = new LogcatProcess(new LogcatProcess.Callback() {
+            @Override
+            public void emit(
+                    String watchId,
+                    ArrayList<String> logcatLines
+            ) {
+                ensureHandlerInitialized();
+
+                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(watchId, logcatLines));
+            }
+        });
         this.isDisabled = false;
 
         this.thread = new HandlerThread("deploygate-sdk-logcat");
@@ -72,36 +81,34 @@ class LogcatInstructionSerializer {
 
         ensureHandlerInitialized();
 
-        Boolean isOneShot = handler.cancelPendingSendLogcatInstruction();
-
         this.service = service;
-
-        if (isOneShot == null) {
-            return;
-        }
-
-        handler.enqueueSendLogcatInstruction(isOneShot);
     }
 
     /**
-     * Release a service connection and cancel all pending instructions.
+     * Release a service connection and cancel all pending instructions and on-going instruction.
      */
     public final void disconnect() {
         ensureHandlerInitialized();
 
-        handler.cancelPendingSendLogcatInstruction();
+        cancel();
         this.service = null;
     }
 
-    public final synchronized void request(
+    public final synchronized void requestSendingLogcat(
             boolean isOneShot
     ) {
         if (isDisabled) {
             return;
         }
 
-        ensureHandlerInitialized();
-        handler.enqueueSendLogcatInstruction(isOneShot);
+        Pair<String, String> ids = logcatProcess.execute(isOneShot);
+
+        String retiredId = ids.first;
+
+        if (LogcatProcess.UNKNOWN_WATCHER_ID.equals(retiredId)) {
+            ensureHandlerInitialized();
+            handler.cancelPendingSendLogcatInstruction(retiredId);
+        }
     }
 
     public final void setDisabled(boolean disabled) {
@@ -116,8 +123,8 @@ class LogcatInstructionSerializer {
 
     public final void cancel() {
         ensureHandlerInitialized();
+        logcatProcess.stop();
         handler.cancelPendingSendLogcatInstruction();
-        handler.interrupt();
     }
 
     /**
@@ -132,55 +139,86 @@ class LogcatInstructionSerializer {
     }
 
     /**
+     * Send a set of lines to the receiver with a simple retry strategy.
+     * <p>
+     * Visible only for testing
+     *
+     * @param request
+     *         a request that is same with a single chunk
+     *
+     * @return Return {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_SUCCESS} if this can transmit the log cat,
+     * or return {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE} if smaller transaction may pass,
+     * or return {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_FAILURE_RETRIABLE} if a simply retry may pass,
+     * otherwise {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_FAILURE_RETRY_EXCEEDED}
+     */
+    int sendSingleChunk(
+            SendLogcatRequest request
+    ) {
+        IDeployGateSdkService service = this.service;
+
+        if (service == null) {
+            return SEND_LOGCAT_RESULT_FAILURE_RETRIABLE;
+        }
+
+        Bundle extras = request.toExtras();
+
+        try {
+            service.sendEvent(packageName, DeployGateEvent.ACTION_SEND_LOGCAT, extras);
+            return SEND_LOGCAT_RESULT_SUCCESS;
+        } catch (RemoteException e) {
+            int currentAttempts = request.getAndIncrementRetryCount();
+
+            if (currentAttempts >= MAX_RETRY_COUNT) {
+                Logger.e("failed to send custom log and exceeded the max retry count: %s", e.getMessage());
+                return SEND_LOGCAT_RESULT_FAILURE_RETRY_EXCEEDED;
+            } else {
+                Logger.w("failed to send custom log %d times: %s", currentAttempts + 1, e.getMessage());
+            }
+
+            if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
+                if (e instanceof TransactionTooLargeException) {
+                    return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
+                }
+            }
+
+            return SEND_LOGCAT_RESULT_FAILURE_RETRIABLE;
+        }
+    }
+
+    /**
      * @return
      *
      * @hide Only for testing.
      */
     Looper getLooper() {
-        return handler.getLooper();
+        return getHandler().getLooper();
     }
 
     /**
-     * Send a set of lines to the receiver.
-     * <p>
-     * Visible only for testing
+     * @return
      *
-     * @param lines
-     *         logcat lines to send
-     *
-     * @return Return {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_SUCCESS} if this can transmit the log cat,
-     * or return {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE} if smaller transaction may pass,
-     * otherwise {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_FAILURE_ANYWAY}
+     * @hide Only for testing.
      */
-    int sendLogcat(ArrayList<String> lines) {
-        IDeployGateSdkService service = this.service;
+    Handler getHandler() {
+        ensureHandlerInitialized();
+        return handler;
+    }
 
-        if (service == null) {
-            // never support pending requests
-            return SEND_LOGCAT_RESULT_FAILURE_ANYWAY;
+    /**
+     * Only for testing
+     */
+    void halt() {
+        cancel();
+        thread.interrupt();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            thread.quitSafely();
+        } else {
+            thread.quit();
         }
+    }
 
-        Bundle extras = new Bundle();
-        extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
-
-        int retryCount = 0;
-
-        do {
-            try {
-                service.sendEvent(packageName, DeployGateEvent.ACTION_SEND_LOGCAT, extras);
-                return SEND_LOGCAT_RESULT_SUCCESS;
-            } catch (DeadObjectException e) {
-                return SEND_LOGCAT_RESULT_FAILURE_ANYWAY;
-            } catch (RemoteException e) {
-                if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
-                    if (e instanceof TransactionTooLargeException) {
-                        return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
-                    }
-                }
-            }
-        } while (retryCount++ < MAX_RETRY_COUNT);
-
-        return SEND_LOGCAT_RESULT_FAILURE_ANYWAY;
+    boolean hasHandlerInitialized() {
+        return handler != null;
     }
 
     private void ensureHandlerInitialized() {
@@ -197,12 +235,43 @@ class LogcatInstructionSerializer {
         }
     }
 
-    private static class LogcatHandler extends Handler {
-        private static final int WHAT_SEND_LOGCAT = 0x20;
+    /**
+     * Send a set or multiple smaller sets of lines in order to the receiver.
+     *
+     * @param splitTimes
+     *         number of times that one transaction has been split.
+     *
+     * @see LogcatInstructionSerializer#sendSingleChunk(SendLogcatRequest)
+     */
+    private int sendChunkedLogcats(
+            int splitTimes,
+            LinkedList<SendLogcatRequest> pendingRequests
+    ) {
+        SendLogcatRequest request = pendingRequests.removeFirst();
 
+        int result = sendSingleChunk(request);
+
+        if (result == SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE) {
+            if (splitTimes >= MAX_CHUNK_CHALLENGE_COUNT) {
+                // stop splitting this request any more.
+                pendingRequests.addFirst(request); // revert the request
+                return SEND_LOGCAT_RESULT_FAILURE_RETRIABLE;
+            }
+
+            pendingRequests.addAll(0, request.splitInto(2));
+
+            return sendChunkedLogcats(splitTimes + 1, pendingRequests);
+        }
+
+        return result;
+    }
+
+    private static class LogcatHandler extends Handler {
         private final LogcatInstructionSerializer transmitter;
-        private boolean isInterrupted;
-        private AtomicReference<BufferedReader> ioRef;
+        /**
+         * Handler(MessageQueue) uses == to check the equality of msg.what, so we need to preserve the raw msg.what
+         */
+        private final Map<String, LinkedList<SendLogcatRequest>> requestMap;
 
         LogcatHandler(
                 Looper looper,
@@ -210,197 +279,126 @@ class LogcatInstructionSerializer {
         ) {
             super(looper);
             this.transmitter = transmitter;
-            this.isInterrupted = false;
-            this.ioRef = new AtomicReference<>();
+            this.requestMap = new HashMap<>();
         }
 
         /**
-         * Cancel the send-logcat instruction in the handler message queue.
-         * This doesn't interrupt the thread and stop the sending-logcat instruction that is running at the time.
+         * Cancel the send-logcat instruction of all watchers in the handler message queue.
          *
-         * @return nullable. null means no request has been canceled. non-null value is same to isOneShot parameter of the cancled request, so it doesn't mean if cancel succeed or not.
+         * @return true if canceled, otherwise false.
          */
-        Boolean cancelPendingSendLogcatInstruction() {
-            if (hasMessages(WHAT_SEND_LOGCAT, true)) {
-                removeMessages(WHAT_SEND_LOGCAT);
-                return true;
-            } else if (hasMessages(WHAT_SEND_LOGCAT, false)) {
-                removeMessages(WHAT_SEND_LOGCAT);
-                return false;
+        void cancelPendingSendLogcatInstruction() {
+            synchronized (requestMap) {
+                requestMap.clear();
             }
 
-            // dirty implementation :shrug:
-            return null;
+            removeMessages(WHAT_SEND_LOGCAT);
+            removeMessages(WHAT_ADD_LOGCAT_CHUNK);
+        }
+
+        /**
+         * Cancel the send-logcat instruction of the specific watcher in the handler message queue.
+         *
+         * @return true if canceled, otherwise false.
+         */
+        void cancelPendingSendLogcatInstruction(String watchId) {
+            acquireRequests(watchId);
+            removeMessages(WHAT_SEND_LOGCAT, watchId);
         }
 
         /**
          * Enqueue the send-logcat instruction in the handler message queue unless enqueued.
-         *
-         * @param isOneShot
-         *         specify true to send oneshot LogCat, otherwise false.
          */
-        void enqueueSendLogcatInstruction(boolean isOneShot) {
-            removeMessages(WHAT_SEND_LOGCAT);
-            sendMessage(obtainMessage(WHAT_SEND_LOGCAT, isOneShot));
-        }
-
-        /**
-         * Interrupt the process of Logcat but never interrupt the thread itself.
-         */
-        void interrupt() {
-            BufferedReader reader = ioRef.get();
-
-            if (reader != null) {
-                isInterrupted = true;
-
-                try {
-                    reader.close();
-                } catch (IOException ignore) {
-                }
-            }
-        }
-
-        void getAndSendLogcat(boolean isOneShot) {
-            Process process = null;
-            BufferedReader bufferedReader = null;
-
-            try {
-                // ArrayList is the best unless isOneShot. Otherwise, ArrayDeque is the best.
-                //
-                // - add(String) should be O(1)
-                // - remove(0) should be O(1) if isOneShot is true
-                // - toArray should be O(N) to transform itself to ArrayList
-                Collection<String> logcatBuf = isOneShot ? new ArrayDeque<>(MAX_LINES) : new ArrayList<>(MAX_LINES);
-
-                process = Runtime.getRuntime().exec(buildCommands(isOneShot));
-                bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()), BUFFER_SIZE);
-
-                ioRef.set(bufferedReader);
-
-                Logger.d("Start retrieving logcat");
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    if (isInterrupted) {
-                        Logger.w("Logcat stream is interrupted");
-                        return;
-                    }
-
-                    logcatBuf.add(line + "\n");
-                    if (isOneShot) {
-                        if (logcatBuf.size() > MAX_LINES) {
-                            ((ArrayDeque<String>) logcatBuf).removeFirst();
-                        }
-                    } else {
-                        if (!bufferedReader.ready()) {
-                            if (sendLogcat(0, logcatBuf) == SEND_LOGCAT_RESULT_SUCCESS) {
-                                logcatBuf.clear();
-                            } else {
-                                return;
-                            }
-                        }
-                    }
-                }
-
-                if (!logcatBuf.isEmpty()) {
-                    sendLogcat(0, logcatBuf);
-                }
-
-                // EOF
-            } catch (IOException e) {
-                Logger.d("Logcat stopped: %s", e.getMessage());
-            } finally {
-                ioRef.set(null);
-                isInterrupted = false;
-
-                if (bufferedReader != null) {
-                    try {
-                        bufferedReader.close();
-                    } catch (IOException e) {
-                        // ignored
-                    }
-                }
-                try {
-                    if (process != null) {
-                        process.destroy();
-                    }
-                } catch (Throwable th) {
-                    Logger.e(th, "failed to stop the logcat process");
-                }
-            }
-        }
-
-        /**
-         * @param splitCount
-         *         number of times that one transaction has been split.
-         * @param lines
-         *         logcat lines to send
-         *
-         * @return return {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_SUCCESS} if succeeded, otherwise {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_FAILURE_ANYWAY}
-         */
-        private int sendLogcat(
-                int splitCount,
-                Collection<String> lines
+        void enqueueSendLogcatMessageInstruction(
+                SendLogcatRequest request
         ) {
-            if (isInterrupted) {
-                return SEND_LOGCAT_RESULT_FAILURE_ANYWAY;
-            }
-
-            ArrayList<String> serializee = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
-
-            int result = transmitter.sendLogcat(serializee);
-
-            if (result != SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE) {
-                return result;
-            }
-
-            if (splitCount >= MAX_CHUNK_CHALLENGE_COUNT) {
-                // terminate this request due to too many attempts.
-                return SEND_LOGCAT_RESULT_FAILURE_ANYWAY;
-            }
-
-            int partitionIndex = serializee.size();
-
-            if (sendLogcat(splitCount + 1, serializee.subList(0, partitionIndex)) != SEND_LOGCAT_RESULT_SUCCESS) {
-                return SEND_LOGCAT_RESULT_FAILURE_ANYWAY;
-            }
-
-            return sendLogcat(splitCount + 1, serializee.subList(partitionIndex, serializee.size()));
-        }
-
-        /**
-         * @param isOneShot
-         *         true if oneshot logcat is requested
-         *
-         * @return an array for command-exec
-         */
-        private String[] buildCommands(boolean isOneShot) {
-            List<String> commandLine = new ArrayList<>();
-            commandLine.add("logcat");
-
-            int MAX_LINES = 500;
-            if (isOneShot) {
-                commandLine.add("-d");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-                    commandLine.add("-t");
-                    commandLine.add(String.valueOf(MAX_LINES));
+            synchronized (requestMap) {
+                if (!requestMap.containsKey(request.watchId)) {
+                    requestMap.put(request.watchId, new LinkedList<>());
                 }
             }
-            commandLine.add("-v");
-            commandLine.add("threadtime");
-            commandLine.add("*:V");
 
-            return commandLine.toArray(new String[0]);
+            sendMessage(obtainMessage(WHAT_ADD_LOGCAT_CHUNK, request));
+        }
+
+        void sendAllInBuffer(String watchId) {
+            LinkedList<SendLogcatRequest> pendingRequests = acquireRequests(watchId);
+
+            if (pendingRequests == null) {
+                return;
+            }
+
+            boolean retry = false;
+
+            while (!pendingRequests.isEmpty()) {
+                if (transmitter.sendChunkedLogcats(0, pendingRequests) == SEND_LOGCAT_RESULT_FAILURE_RETRIABLE) {
+                    retry = true;
+                    break;
+                }
+            }
+
+            if (retry) {
+                synchronized (requestMap) {
+                    LinkedList<SendLogcatRequest> newlyPendingRequests = requestMap.remove(watchId);
+
+                    if (newlyPendingRequests != null) {
+                        pendingRequests.addAll(newlyPendingRequests);
+                    }
+
+                    requestMap.put(watchId, pendingRequests);
+                }
+
+                try {
+                    removeMessages(WHAT_SEND_LOGCAT, watchId);
+                    Message msg = obtainMessage(WHAT_SEND_LOGCAT, watchId);
+                    // Put the retry message at front of the queue because delay or enqueuing a message may cause unexpected overflow of the buffer.
+                    sendMessageAtFrontOfQueue(msg);
+                    Thread.sleep(600); // experimental value
+                } catch (InterruptedException ignore) {
+                }
+            }
         }
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case WHAT_SEND_LOGCAT: {
-                    isInterrupted = false;
-                    getAndSendLogcat((Boolean) msg.obj);
+                case WHAT_ADD_LOGCAT_CHUNK: {
+                    SendLogcatRequest request = (SendLogcatRequest) msg.obj;
+
+                    if (appendRequest(request)) {
+                        if (transmitter.hasServiceConnection()) {
+                            sendAllInBuffer(request.watchId);
+                        }
+                    }
 
                     break;
                 }
+                case WHAT_SEND_LOGCAT: {
+                    String watchId = (String) msg.obj;
+                    sendAllInBuffer(watchId);
+
+                    break;
+                }
+            }
+        }
+
+        private boolean appendRequest(SendLogcatRequest request) {
+            synchronized (requestMap) {
+                LinkedList<SendLogcatRequest> requests = requestMap.get(request.watchId);
+
+                if (requests == null) {
+                    return false;
+                }
+
+                requests.add(request);
+            }
+
+            return true;
+        }
+
+        private LinkedList<SendLogcatRequest> acquireRequests(String watchId) {
+            synchronized (requestMap) {
+                return requestMap.remove(watchId);
             }
         }
     }

@@ -171,14 +171,14 @@ public class DeployGate {
     };
 
     private void onOneshotLogcat() {
-        mLogcatInstructionSerializer.request(true);
+        mLogcatInstructionSerializer.requestSendingLogcat(true);
     }
 
     private void onEnableLogcat(boolean isEnabled) {
         mLogcatInstructionSerializer.setDisabled(!isEnabled);
 
         if (isEnabled) {
-            mLogcatInstructionSerializer.request(false);
+            mLogcatInstructionSerializer.requestSendingLogcat(false);
         } else {
             mLogcatInstructionSerializer.cancel();
         }
@@ -291,6 +291,7 @@ public class DeployGate {
                 Log.v(TAG, "DeployGate service disconneced");
                 mRemoteService = null;
                 mCustomLogInstructionSerializer.disconnect();
+                mLogcatInstructionSerializer.disconnect();
             }
         }, Context.BIND_AUTO_CREATE);
     }
@@ -304,6 +305,7 @@ public class DeployGate {
         try {
             mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
             mCustomLogInstructionSerializer.connect(mRemoteService);
+            mLogcatInstructionSerializer.connect(mRemoteService);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
         }

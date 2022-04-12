@@ -32,6 +32,7 @@ public interface DeployGateEvent {
     public static final String EXTRA_LOG_TYPE = "logType";
     public static final String EXTRA_BUFFERED_AT_IN_MILLI_SECONDS = "bufferedAt";
     public static final String EXTRA_UID = "uid";
+    public static final String EXTRA_LOG_CLIENT_ID = "logId";
 
     /**
      * this key shouldn't be used
