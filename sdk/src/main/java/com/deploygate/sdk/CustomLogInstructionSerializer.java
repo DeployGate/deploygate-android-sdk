@@ -15,7 +15,7 @@ import java.util.LinkedList;
 
 /**
  * This class serialize the instructions for custom logs and process them in another thread in order of enqueued.
- * The internal handler class creates a buffer pool and grantee the order.
+ * The internal handler class creates a buffer pool and guarantee the order.
  *
  * <p>
  * - Enqueue a new log to the buffer pool
@@ -220,9 +220,7 @@ class CustomLogInstructionSerializer {
         private final CustomLogInstructionSerializer serializer;
         private final CustomLogConfiguration.Backpressure backpressure;
         private final int bufferSize;
-        private final int maxWhatOffset;
         private final LinkedList<CustomLog> customLogs;
-        private int pushWhatOffset = 0;
 
         /**
          * @param looper
@@ -244,7 +242,6 @@ class CustomLogInstructionSerializer {
             this.serializer = serializer;
             this.backpressure = backpressure;
             this.bufferSize = bufferSize;
-            this.maxWhatOffset = bufferSize * 2;
             this.customLogs = new LinkedList<>();
         }
 
@@ -271,7 +268,7 @@ class CustomLogInstructionSerializer {
          * Enqueue new add-new-log instruction to the handler message queue.
          */
         void enqueueAddNewLogInstruction(CustomLog log) {
-            Message msg = obtainMessage(WHAT_ADD_NEW_LOG + getAndIncrementPushWhatOffset(), log);
+            Message msg = obtainMessage(WHAT_ADD_NEW_LOG, log);
             sendMessage(msg);
         }
 
@@ -342,27 +339,13 @@ class CustomLogInstructionSerializer {
 
                     break;
                 }
-                default: {
-                    if (msg.what >= WHAT_ADD_NEW_LOG) {
-                        CustomLog log = (CustomLog) msg.obj;
-                        addLogToLast(log);
-                    }
+                case WHAT_ADD_NEW_LOG: {
+                    CustomLog log = (CustomLog) msg.obj;
+                    addLogToLast(log);
 
                     break;
                 }
             }
-        }
-
-        /**
-         * To avoid WHAT number conflicts, sdk uses a simple counter.
-         *
-         * @return positive number, which is greater than or equal to the value of {@link #WHAT_ADD_NEW_LOG}
-         */
-        private int getAndIncrementPushWhatOffset() {
-            if (pushWhatOffset > maxWhatOffset) {
-                pushWhatOffset = 0;
-            }
-            return pushWhatOffset++;
         }
     }
 }
