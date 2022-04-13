@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-class LogcatInstructionSerializer {
+class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     static final int MAX_RETRY_COUNT = 2;
     static final int MAX_CHUNK_CHALLENGE_COUNT = 2;
     static final int SEND_LOGCAT_RESULT_SUCCESS = 0;
@@ -34,12 +34,23 @@ class LogcatInstructionSerializer {
     private static final Object LOCK = new Object();
 
     private final String packageName;
+
+    /**
+     * nullable if logcat is not supported on this device
+     */
     private final LogcatProcess logcatProcess;
 
+    /**
+     * nullable if logcat is not supported on this device
+     */
     @SuppressWarnings("FieldCanBeLocal")
     private final HandlerThread thread;
+
+    /**
+     * NonNull if prepared once, however this is always null Logcat is not supported
+     */
     private LogcatHandler handler;
-    private boolean isDisabled;
+    private boolean isEnabled;
 
     private volatile IDeployGateSdkService service;
 
@@ -51,53 +62,47 @@ class LogcatInstructionSerializer {
         }
 
         this.packageName = packageName;
+        this.isEnabled = true; // enabled by default because service availability is unknown yet
+
         this.logcatProcess = new LogcatProcess(new LogcatProcess.Callback() {
             @Override
             public void emit(
                     String watchId,
                     ArrayList<String> logcatLines
             ) {
-                ensureHandlerInitialized();
+                ensureHandlerPrepared();
 
                 handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(watchId, logcatLines));
             }
         });
-        this.isDisabled = false;
-
         this.thread = new HandlerThread("deploygate-sdk-logcat");
         this.thread.start();
     }
 
-    /**
-     * Bind a service and trigger several instructions immediately.
-     *
-     * @param service
-     *         the latest service connection
-     */
+    @Override
     public final synchronized void connect(IDeployGateSdkService service) {
         if (service == null) {
             throw new IllegalArgumentException("service must not be null");
         }
 
-        ensureHandlerInitialized();
+        ensureHandlerPrepared();
 
         this.service = service;
     }
 
-    /**
-     * Release a service connection and cancel all pending instructions and on-going instruction.
-     */
+    @Override
     public final void disconnect() {
-        ensureHandlerInitialized();
-
         cancel();
         this.service = null;
     }
 
+    @Override
     public final synchronized void requestSendingLogcat(
             boolean isOneShot
     ) {
-        if (isDisabled) {
+        ensureHandlerPrepared();
+
+        if (!isEnabled) {
             return;
         }
 
@@ -106,23 +111,25 @@ class LogcatInstructionSerializer {
         String retiredId = ids.first;
 
         if (LogcatProcess.UNKNOWN_WATCHER_ID.equals(retiredId)) {
-            ensureHandlerInitialized();
             handler.cancelPendingSendLogcatInstruction(retiredId);
         }
     }
 
-    public final void setDisabled(boolean disabled) {
-        isDisabled = disabled;
+    @Override
+    public final void setEnabled(boolean enabled) {
+        isEnabled = enabled;
 
-        if (disabled) {
+        if (isEnabled) {
             Logger.d("Disabled logcat instruction serializer");
         } else {
             Logger.d("Enabled logcat instruction serializer");
         }
     }
 
+    @Override
     public final void cancel() {
-        ensureHandlerInitialized();
+        ensureHandlerPrepared();
+
         logcatProcess.stop();
         handler.cancelPendingSendLogcatInstruction();
     }
@@ -185,47 +192,7 @@ class LogcatInstructionSerializer {
         }
     }
 
-    /**
-     * @return
-     *
-     * @hide Only for testing.
-     */
-    Looper getLooper() {
-        return getHandler().getLooper();
-    }
-
-    /**
-     * @return
-     *
-     * @hide Only for testing.
-     */
-    Handler getHandler() {
-        ensureHandlerInitialized();
-        return handler;
-    }
-
-    /**
-     * Only for testing
-     */
-    void halt() {
-        cancel();
-        thread.interrupt();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            thread.quitSafely();
-        } else {
-            thread.quit();
-        }
-    }
-
-    boolean hasHandlerInitialized() {
-        return handler != null;
-    }
-
-    private void ensureHandlerInitialized() {
-        if (handler != null) {
-            return;
-        }
-
+    private void ensureHandlerPrepared() {
         synchronized (LOCK) {
             if (handler != null) {
                 return;
@@ -264,6 +231,37 @@ class LogcatInstructionSerializer {
         }
 
         return result;
+    }
+
+    /*
+     * Only for testing
+     */
+
+    /**
+     * @return the handler instance or null if not prepared.
+     */
+    Handler getHandler() {
+        ensureHandlerPrepared();
+        return handler;
+    }
+
+    boolean hasHandlerPrepared() {
+        return handler != null;
+    }
+
+    /**
+     * Halt the process and the thread. Any of methods are not guaranteed after calling this.
+     */
+    void halt() {
+        cancel();
+
+        thread.interrupt();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            thread.quitSafely();
+        } else {
+            thread.quit();
+        }
     }
 
     private static class LogcatHandler extends Handler {

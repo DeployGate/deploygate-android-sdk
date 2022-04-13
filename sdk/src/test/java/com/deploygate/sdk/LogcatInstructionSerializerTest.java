@@ -96,7 +96,7 @@ public class LogcatInstructionSerializerTest {
         instructionSerializer = new LogcatInstructionSerializer(PACKAGE_NAME);
         instructionSerializer.connect(service);
 
-        Shadows.shadowOf(instructionSerializer.getLooper()).pause();
+        Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).pause();
 
         SendLogcatRequest noIssue = new SendLogcatRequest("noIssue", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
         SendLogcatRequest successAfterRetries = new SendLogcatRequest("successAfterRetries", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
@@ -127,7 +127,7 @@ public class LogcatInstructionSerializerTest {
             instructionSerializer.requestSendingLogcat(true);
         }
 
-        Shadows.shadowOf(instructionSerializer.getLooper()).idle();
+        Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
 
         // don't fail
     }
@@ -136,13 +136,13 @@ public class LogcatInstructionSerializerTest {
     public void requestSendingLogcat_does_nothing_if_disabled() throws RemoteException {
         instructionSerializer = new LogcatInstructionSerializer(PACKAGE_NAME);
 
-        instructionSerializer.setDisabled(true);
+        instructionSerializer.setEnabled(false);
 
         for (int i = 0; i < 30; i++) {
             instructionSerializer.requestSendingLogcat(i % 2 == 0);
         }
 
-        Truth.assertThat(instructionSerializer.hasHandlerInitialized()).isFalse();
+        Truth.assertThat(instructionSerializer.hasHandlerPrepared()).isFalse();
 
         // Even if a service connection is established, this does nothing.
         instructionSerializer.connect(service);
@@ -151,7 +151,7 @@ public class LogcatInstructionSerializerTest {
             instructionSerializer.requestSendingLogcat(i % 2 == 0);
         }
 
-        Shadows.shadowOf(instructionSerializer.getLooper()).idle();
+        Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
 
         Truth.assertThat(instructionSerializer.getHandler().hasMessages(LogcatInstructionSerializer.WHAT_SEND_LOGCAT)).isFalse();
     }

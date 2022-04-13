@@ -63,7 +63,8 @@ public class DeployGate {
 
     private final Context mApplicationContext;
     private final Handler mHandler;
-    private final LogcatInstructionSerializer mLogcatInstructionSerializer;
+    private final boolean mIsLogcatSupported;
+    private final ILogcatInstructionSerializer mLogcatInstructionSerializer;
     private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
     private final String mExpectedAuthor;
@@ -103,9 +104,9 @@ public class DeployGate {
             } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
                 onOneshotLogcat();
             } else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
-                onEnableLogcat(true);
+                onEnableStreamedLogcat(true);
             } else if (DeployGateEvent.ACTION_DISABLE_LOGCAT.equals(action)) {
-                onEnableLogcat(false);
+                onEnableStreamedLogcat(false);
             }
         }
 
@@ -174,9 +175,7 @@ public class DeployGate {
         mLogcatInstructionSerializer.requestSendingLogcat(true);
     }
 
-    private void onEnableLogcat(boolean isEnabled) {
-        mLogcatInstructionSerializer.setDisabled(!isEnabled);
-
+    private void onEnableStreamedLogcat(boolean isEnabled) {
         if (isEnabled) {
             mLogcatInstructionSerializer.requestSendingLogcat(false);
         } else {
@@ -209,7 +208,8 @@ public class DeployGate {
     ) {
         mApplicationContext = applicationContext;
         mHandler = new Handler();
-        mLogcatInstructionSerializer = new LogcatInstructionSerializer(mApplicationContext.getPackageName());
+        mIsLogcatSupported = canLogCat(applicationContext);
+        mLogcatInstructionSerializer = mIsLogcatSupported ? new LogcatInstructionSerializer(mApplicationContext.getPackageName()) : ILogcatInstructionSerializer.NULL_INSTANCE;
         mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mApplicationContext.getPackageName(), customLogConfiguration);
         mCallbacks = new HashSet<DeployGateCallback>();
         mExpectedAuthor = author;
@@ -228,13 +228,13 @@ public class DeployGate {
         if (isDeployGateAvailable()) {
             Log.v(TAG, "DeployGate installation detected. Initializing.");
             mCustomLogInstructionSerializer.setDisabled(false);
-            mLogcatInstructionSerializer.setDisabled(!canLogCat());
+            mLogcatInstructionSerializer.setEnabled(true);
             bindToService(isBoot);
             return true;
         } else {
             Log.v(TAG, "DeployGate is not available on this device.");
             mCustomLogInstructionSerializer.setDisabled(true);
-            mLogcatInstructionSerializer.setDisabled(true);
+            mLogcatInstructionSerializer.setEnabled(false);
             mInitializedLatch.countDown();
             mIsDeployGateAvailable = false;
             callbackDeployGateUnavailable();
@@ -299,7 +299,7 @@ public class DeployGate {
     private void requestServiceInit(final boolean isBoot) {
         Bundle args = new Bundle();
         args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
-        args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, canLogCat());
+        args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, mIsLogcatSupported);
         args.putString(DeployGateEvent.EXTRA_EXPECTED_AUTHOR, mExpectedAuthor);
         args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, SDK_VERSION);
         try {
@@ -309,13 +309,6 @@ public class DeployGate {
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
         }
-    }
-
-    private boolean canLogCat() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            return true;
-        }
-        return mApplicationContext.getPackageManager().checkPermission(permission.READ_LOGS, mApplicationContext.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
 
     private String getDeployGatePackageSignature() {
@@ -343,6 +336,14 @@ public class DeployGate {
             result.append(Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1));
         }
         return result.toString();
+    }
+
+    private static boolean canLogCat(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            return true;
+        }
+
+        return context.getPackageManager().checkPermission(permission.READ_LOGS, context.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
