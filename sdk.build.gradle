@@ -22,6 +22,11 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 dependencies {
@@ -31,4 +36,14 @@ dependencies {
 
     testImplementation 'androidx.test:rules:1.2.0'
     testImplementation 'com.google.truth:truth:1.0'
+}
+
+['debug', 'release'].each { variant ->
+    tasks.register("verifyBytecodeVersion${variant.capitalize()}", Exec).configure {
+        dependsOn "assemble${variant.capitalize()}"
+
+        def module = project.name.replaceAll(/([A-Z])/) { g -> "-${g[0]}".toLowerCase() }
+
+        commandLine 'echo', rootProject.file("scripts/verify-bytecode-version").path, "--aar", project.file("build/outputs/aar/${module}-${variant}.aar")
+    }
 }

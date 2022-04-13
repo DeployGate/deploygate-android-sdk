@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.deploygate.sample"
-        minSdkVersion 19
+        minSdkVersion 14
         targetSdkVersion 32
     }
 
@@ -48,7 +48,13 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
+
 easylauncher {
     defaultFlavorNaming = true
 
