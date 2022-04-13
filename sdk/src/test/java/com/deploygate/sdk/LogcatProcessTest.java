@@ -3,7 +3,6 @@ package com.deploygate.sdk;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.deploygate.sdk.helper.FakeLogcat;
-import com.deploygate.sdk.internal.Factory;
 import com.google.common.truth.Truth;
 
 import org.junit.After;
@@ -24,12 +23,7 @@ public class LogcatProcessTest {
 
     @Before
     public void before() {
-        LogcatProcess.sLogcatProcessFactory = new Factory<Process>() {
-            @Override
-            public Process create() {
-                return fakeLogcat;
-            }
-        };
+        LogcatProcess.sLogcatProcessFactory = () -> fakeLogcat;
     }
 
     @After
@@ -193,7 +187,7 @@ public class LogcatProcessTest {
         }
 
         try {
-            // call the method for the finished process
+            // interrupt the on-going process that read lines less than MAX_LINES
 
             fakeLogcat = new FakeLogcat(20, 10);
             LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
@@ -212,7 +206,7 @@ public class LogcatProcessTest {
         }
 
         try {
-            // call the method for the finished process
+            // interrupt the on-going process that read many lines more than MAX_LINES
 
             fakeLogcat = new FakeLogcat(550, 549);
             LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
@@ -226,7 +220,7 @@ public class LogcatProcessTest {
 
             List<List<String>> linesList = capture.captured.get(watcher.getWatchId());
 
-            // emit only once due to interrupted
+            // emit the first chunk but second chunk
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(LogcatProcess.MAX_LINES);
             Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(generatedLineWithLF.stream().limit(LogcatProcess.MAX_LINES).collect(Collectors.toList()));
@@ -263,7 +257,7 @@ public class LogcatProcessTest {
         }
 
         try {
-            // call the method for the finished process
+            // interrupt the on-going process that read lines less than MAX_LINES
 
             fakeLogcat = new FakeLogcat(20, 10);
             LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(true, capture);
@@ -282,9 +276,9 @@ public class LogcatProcessTest {
         }
 
         try {
-            // call the method for the finished process
+            // interrupt the on-going process that read many lines more than MAX_LINES
 
-            fakeLogcat = new FakeLogcat(520, 502);
+            fakeLogcat = new FakeLogcat(550, 549);
             LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(true, capture);
 
             destroyWorkerAfter(watcher, 300, TimeUnit.MILLISECONDS);
@@ -293,6 +287,7 @@ public class LogcatProcessTest {
 
             List<List<String>> linesList = capture.captured.get(watcher.getWatchId());
 
+            // no chunk should be emitted
             Truth.assertThat(linesList).isNull();
         } finally {
             if (fakeLogcat != null) {
