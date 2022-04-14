@@ -3,6 +3,6 @@
 set -euo pipefail
 
 ./gradlew clean \
-    sdk:assembleRelease sdkMock:assembleRelease \
+    sdk:verifyBytecodeVersionRelease sdkMock:verifyBytecodeVersionRelease \
     sdk:publishToMavenRepository sdkMock:publishToMavenRepository \
     --stacktrace

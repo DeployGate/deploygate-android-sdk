@@ -36,7 +36,7 @@ jobs:
     steps:
       - checkout
       - restore_gradle_cache
-      - run: ./gradlew sdk:build sdkMock:build -x sdk:test -x sdkMock:test --continue
+      - run: ./gradlew verifyBytecodeVersionDebug verifyBytecodeVersionRelease --continue
       - save_gradle_cache
   test:
     executor: android
