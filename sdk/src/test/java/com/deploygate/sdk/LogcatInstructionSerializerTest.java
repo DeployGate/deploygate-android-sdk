@@ -103,9 +103,9 @@ public class LogcatInstructionSerializerTest {
 
         instructionSerializer.requestSendingLogcat(true);
 
-        SendLogcatRequest chunk1 = new SendLogcatRequest("watchId1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
-        SendLogcatRequest chunk2 = new SendLogcatRequest("watchId2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
-        SendLogcatRequest chunk3 = new SendLogcatRequest("watchId3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
+        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
+        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
+        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
 
         doNothing().when(service).sendEvent(anyString(), anyString(), any(Bundle.class));
 

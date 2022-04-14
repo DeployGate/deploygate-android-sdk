@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -24,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 class LogcatProcess {
     interface Callback {
         void emit(
-                String watchId,
+                String tid,
                 ArrayList<String> logcatLines
         );
     }
@@ -56,7 +55,7 @@ class LogcatProcess {
     Pair<String, String> execute(boolean isOneShot) {
         final LogcatWatcher currentWatcher;
         final LogcatWatcher newWatcher;
-        final String currentWatchId;
+        final String currentTid;
 
         Pair<String, String> ids;
 
@@ -64,24 +63,24 @@ class LogcatProcess {
             currentWatcher = latestLogcatWatcher;
 
             if (currentWatcher != null) {
-                currentWatchId = currentWatcher.watchId;
+                currentTid = currentWatcher.bundleId;
             } else {
-                currentWatchId = UNKNOWN_WATCHER_ID;
+                currentTid = UNKNOWN_WATCHER_ID;
             }
 
             if (currentWatcher != null && currentWatcher.isAlive()) {
-                ids = Pair.create(currentWatchId, currentWatchId);
+                ids = Pair.create(currentTid, currentTid);
             } else {
                 newWatcher = new LogcatWatcher(isOneShot, callback);
 
                 try {
                     this.latestLogcatWatcher = newWatcher;
                     this.executorService.submit(newWatcher);
-                    ids = Pair.create(currentWatchId, newWatcher.watchId);
+                    ids = Pair.create(currentTid, newWatcher.bundleId);
                 } catch (RejectedExecutionException th) {
                     Logger.e(th, "cannot schedule the logcat worker");
                     this.latestLogcatWatcher = currentWatcher;
-                    ids = Pair.create(currentWatchId, currentWatchId);
+                    ids = Pair.create(currentTid, currentTid);
                 }
             }
         }
@@ -105,7 +104,7 @@ class LogcatProcess {
             }
 
             latestLogcatWatcher.interrupt();
-            return latestLogcatWatcher.watchId;
+            return latestLogcatWatcher.bundleId;
         }
     }
 
@@ -115,20 +114,20 @@ class LogcatProcess {
         private static final int STATE_INTERRUPTED = 2;
         private static final int STATE_FINISHED = 3;
 
+        private final String bundleId;
         private final boolean isOneShot;
         private final WeakReference<Callback> callback;
         private final AtomicReference<Process> processRef;
-        private final String watchId;
         private final AtomicInteger state;
 
         LogcatWatcher(
                 boolean isOneShot,
                 Callback callback
         ) {
+            this.bundleId = UniqueId.generate();
             this.isOneShot = isOneShot;
             this.callback = new WeakReference<>(callback);
             this.processRef = new AtomicReference<>();
-            this.watchId = UUID.randomUUID().toString();
             this.state = new AtomicInteger(STATE_READY);
         }
 
@@ -162,8 +161,8 @@ class LogcatProcess {
          *
          * @return
          */
-        String getWatchId() {
-            return watchId;
+        String getBundleId() {
+            return bundleId;
         }
 
         @Override
@@ -214,10 +213,10 @@ class LogcatProcess {
                     if (isOneShot) {
                         continue;
                     } else if (logcatBuf.size() >= MAX_LINES) {
-                        callback.emit(watchId, toArrayList(logcatBuf));
+                        callback.emit(bundleId, toArrayList(logcatBuf));
                         logcatBuf = createBuffer(MAX_LINES); // Don't reuse to make sure releasing the reference
                     } else if (!bufferedReader.ready()) {
-                        callback.emit(watchId, toArrayList(logcatBuf));
+                        callback.emit(bundleId, toArrayList(logcatBuf));
                         logcatBuf = createBuffer(MAX_LINES); // Don't reuse to make sure releasing the reference
                     } else {
                         continue;
@@ -234,7 +233,7 @@ class LogcatProcess {
                     Callback callback = this.callback.get();
 
                     if (callback != null) {
-                        callback.emit(watchId, toArrayList(logcatBuf));
+                        callback.emit(bundleId, toArrayList(logcatBuf));
                     }
                 }
 

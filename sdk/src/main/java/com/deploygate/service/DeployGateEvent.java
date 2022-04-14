@@ -31,8 +31,16 @@ public interface DeployGateEvent {
     public static final String EXTRA_LOG = "log";
     public static final String EXTRA_LOG_TYPE = "logType";
     public static final String EXTRA_BUFFERED_AT_IN_MILLI_SECONDS = "bufferedAt";
+
+    /**
+     * the unique id to identify data
+     */
     public static final String EXTRA_UID = "uid";
-    public static final String EXTRA_LOG_CLIENT_ID = "logId";
+
+    /**
+     * id of a bundle that collects instructions (data)
+     */
+    public static final String EXTRA_BUNDLE_ID = "bid";
 
     /**
      * this key shouldn't be used

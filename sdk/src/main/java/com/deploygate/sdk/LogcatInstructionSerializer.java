@@ -67,12 +67,12 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         this.logcatProcess = new LogcatProcess(new LogcatProcess.Callback() {
             @Override
             public void emit(
-                    String watchId,
+                    String bundleId,
                     ArrayList<String> logcatLines
             ) {
                 ensureHandlerPrepared();
 
-                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(watchId, logcatLines));
+                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(bundleId, logcatLines));
             }
         });
         this.thread = new HandlerThread("deploygate-sdk-logcat");
@@ -309,9 +309,9 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
          *
          * @return true if canceled, otherwise false.
          */
-        void cancelPendingSendLogcatInstruction(String watchId) {
-            acquireRequests(watchId);
-            removeMessages(WHAT_SEND_LOGCAT, watchId);
+        void cancelPendingSendLogcatInstruction(String bundleId) {
+            acquireRequests(bundleId);
+            removeMessages(WHAT_SEND_LOGCAT, bundleId);
         }
 
         /**
@@ -321,16 +321,16 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
                 SendLogcatRequest request
         ) {
             synchronized (requestMap) {
-                if (!requestMap.containsKey(request.watchId)) {
-                    requestMap.put(request.watchId, new LinkedList<SendLogcatRequest>());
+                if (!requestMap.containsKey(request.bundleId)) {
+                    requestMap.put(request.bundleId, new LinkedList<SendLogcatRequest>());
                 }
             }
 
             sendMessage(obtainMessage(WHAT_ADD_LOGCAT_CHUNK, request));
         }
 
-        void sendAllInBuffer(String watchId) {
-            LinkedList<SendLogcatRequest> pendingRequests = acquireRequests(watchId);
+        void sendAllInBuffer(String bundleId) {
+            LinkedList<SendLogcatRequest> pendingRequests = acquireRequests(bundleId);
 
             if (pendingRequests == null) {
                 return;
@@ -347,18 +347,18 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
             if (retry) {
                 synchronized (requestMap) {
-                    LinkedList<SendLogcatRequest> newlyPendingRequests = requestMap.remove(watchId);
+                    LinkedList<SendLogcatRequest> newlyPendingRequests = requestMap.remove(bundleId);
 
                     if (newlyPendingRequests != null) {
                         pendingRequests.addAll(newlyPendingRequests);
                     }
 
-                    requestMap.put(watchId, pendingRequests);
+                    requestMap.put(bundleId, pendingRequests);
                 }
 
                 try {
-                    removeMessages(WHAT_SEND_LOGCAT, watchId);
-                    Message msg = obtainMessage(WHAT_SEND_LOGCAT, watchId);
+                    removeMessages(WHAT_SEND_LOGCAT, bundleId);
+                    Message msg = obtainMessage(WHAT_SEND_LOGCAT, bundleId);
                     // Put the retry message at front of the queue because delay or enqueuing a message may cause unexpected overflow of the buffer.
                     sendMessageAtFrontOfQueue(msg);
                     Thread.sleep(600); // experimental value
@@ -375,15 +375,15 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
                     if (appendRequest(request)) {
                         if (transmitter.hasServiceConnection()) {
-                            sendAllInBuffer(request.watchId);
+                            sendAllInBuffer(request.bundleId);
                         }
                     }
 
                     break;
                 }
                 case WHAT_SEND_LOGCAT: {
-                    String watchId = (String) msg.obj;
-                    sendAllInBuffer(watchId);
+                    String bundleId = (String) msg.obj;
+                    sendAllInBuffer(bundleId);
 
                     break;
                 }
@@ -392,7 +392,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         private boolean appendRequest(SendLogcatRequest request) {
             synchronized (requestMap) {
-                LinkedList<SendLogcatRequest> requests = requestMap.get(request.watchId);
+                LinkedList<SendLogcatRequest> requests = requestMap.get(request.bundleId);
 
                 if (requests == null) {
                     return false;
@@ -404,9 +404,9 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             return true;
         }
 
-        private LinkedList<SendLogcatRequest> acquireRequests(String watchId) {
+        private LinkedList<SendLogcatRequest> acquireRequests(String bundleId) {
             synchronized (requestMap) {
-                return requestMap.remove(watchId);
+                return requestMap.remove(bundleId);
             }
         }
     }
