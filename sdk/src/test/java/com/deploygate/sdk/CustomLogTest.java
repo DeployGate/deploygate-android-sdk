@@ -9,6 +9,8 @@ import com.deploygate.sdk.truth.BundleSubject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.robolectric.shadows.ShadowSystemClock;
 
 import java.time.Duration;
@@ -18,13 +20,22 @@ public class CustomLogTest {
 
     @Test
     public void CustomLog_toExtras_must_be_valid_format() {
-        long bufferedAt = SystemClock.elapsedRealtime();
+        try (MockedStatic<UniqueId> uidMock = Mockito.mockStatic(UniqueId.class)) {
+            uidMock.when(new MockedStatic.Verification() {
+                @Override
+                public void apply() throws Throwable {
+                    UniqueId.generate();
+                }
+            }).thenReturn("unique_id");
 
-        CustomLog log = new CustomLog("error", "yes");
+            long bufferedAt = SystemClock.elapsedRealtime();
 
-        ShadowSystemClock.advanceBy(Duration.ofMillis(123));
+            CustomLog log = new CustomLog("error", "yes");
 
-        BundleSubject.assertThat(log.toExtras()).isEqualTo(createLogExtra("error", "yes", bufferedAt));
+            ShadowSystemClock.advanceBy(Duration.ofMillis(123));
+
+            BundleSubject.assertThat(log.toExtras()).isEqualTo(createLogExtra("error", "yes", bufferedAt));
+        }
     }
 
     private static Bundle createLogExtra(
@@ -33,6 +44,7 @@ public class CustomLogTest {
             long bufferedAt
     ) {
         Bundle bundle = new Bundle();
+        bundle.putString("uid", "unique_id");
         bundle.putString("logType", type);
         bundle.putString("log", body);
         bundle.putLong("bufferedAt", bufferedAt);
