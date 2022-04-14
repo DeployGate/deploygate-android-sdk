@@ -32,7 +32,7 @@ public class FakeDeployGateClientService implements IDeployGateSdkService {
 
             if (name.startsWith("ACTION_")) {
                 try {
-                    eventExtrasMap.put((String) field.get(null), new ArrayList<>());
+                    eventExtrasMap.put((String) field.get(null), new ArrayList<Bundle>());
                 } catch (IllegalAccessException e) {
                     throw new IllegalArgumentException(String.format(Locale.US, "cannot access %s", name), e);
                 }
@@ -41,7 +41,7 @@ public class FakeDeployGateClientService implements IDeployGateSdkService {
     }
 
     public List<Bundle> getEventExtraList(String action) {
-        return Collections.unmodifiableList(eventExtrasMap.getOrDefault(action, new ArrayList<>()));
+        return Collections.unmodifiableList(eventExtrasMap.getOrDefault(action, new ArrayList<Bundle>()));
     }
 
     @Override

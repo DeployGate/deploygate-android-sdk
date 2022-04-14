@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.deploygate.sdk.mockito.BundleMatcher.eq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -200,7 +201,7 @@ public class CustomLogInstructionSerializerTest {
         CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().build();
         CustomLogInstructionSerializer customLogInstructionSerializer = new CustomLogInstructionSerializer(PACKAGE_NAME, configuration);
 
-        doThrow(RemoteException.class).when(service).sendEvent(any(), any(), any());
+        doThrow(RemoteException.class).when(service).sendEvent(anyString(), anyString(), any(Bundle.class));
 
         customLogInstructionSerializer.connect(service);
 
@@ -216,7 +217,7 @@ public class CustomLogInstructionSerializerTest {
         }
 
         Truth.assertThat(customLogInstructionSerializer.getPendingCount()).isEqualTo(0);
-        Mockito.verify(service, times((CustomLogInstructionSerializer.MAX_RETRY_COUNT + 1) * 10)).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), any());
+        Mockito.verify(service, times((CustomLogInstructionSerializer.MAX_RETRY_COUNT + 1) * 10)).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), any(Bundle.class));
     }
 
     @Test(timeout = 3000L)
