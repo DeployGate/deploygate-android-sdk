@@ -137,8 +137,12 @@ java -jar "$OUTPUT_DIR/animal-sniffer.jar" "$(basename "$target_path")" | sort -
 
 popd >/dev/null 2>&1
 
+if [[ ! -s "$OUTPUT_DIR/contents.txt" ]]; then
+  die "animal-sniffer produced unexpected results"
+fi
+
 if [[ -z "$(cat < "$OUTPUT_DIR/contents.txt" | grep -v -e "^$bytecode_version\s")" ]]; then
-  info "OK!"
+  info "OK! $java_version ($bytecode_version)"
 else
   cat < "$OUTPUT_DIR/contents.txt" | grep -v -e "^$bytecode_version\s" || true
   die "different bytecode version from $bytecode_version was found"

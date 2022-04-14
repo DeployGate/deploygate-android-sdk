@@ -33,7 +33,7 @@ android.libraryVariants.configureEach { variant ->
             from files(tasks.getByName("generateJavadocFor${variant.name.capitalize()}Publication"))
         }
 
-        project.tasks.findByName("assemble${variant.name.capitalize()}").dependsOn(
+        project.tasks.findByName("verifyBytecodeVersion${variant.name.capitalize()}").dependsOn(
                 "generateSourcesJarFor${variant.name.capitalize()}Publication",
                 "generateJavadocsJarFor${variant.name.capitalize()}Publication",
                 "generatePomFileFor${variant.name.capitalize()}Publication"

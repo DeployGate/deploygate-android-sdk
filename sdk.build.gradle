@@ -38,12 +38,10 @@ dependencies {
     testImplementation 'com.google.truth:truth:1.0'
 }
 
-['debug', 'release'].each { variant ->
-    tasks.register("verifyBytecodeVersion${variant.capitalize()}", Exec).configure {
-        dependsOn "assemble${variant.capitalize()}"
+android.libraryVariants.configureEach { variant ->
+    tasks.register("verifyBytecodeVersion${variant.name.capitalize()}", Exec).configure {
+        dependsOn "assemble${variant.name.capitalize()}"
 
-        def module = project.name.replaceAll(/([A-Z])/) { g -> "-${g[0]}".toLowerCase() }
-
-        commandLine 'echo', rootProject.file("scripts/verify-bytecode-version").path, "--aar", project.file("build/outputs/aar/${module}-${variant}.aar")
+        commandLine rootProject.file("scripts/verify-bytecode-version").path, "--aar", project.file("build/outputs/aar/${project.name}-${variant.name}.aar"), "--java", project.android.compileOptions.targetCompatibility.toString()
     }
 }

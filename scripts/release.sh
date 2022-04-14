@@ -2,9 +2,7 @@
 
 set -euo pipefail
 
-./gradlew clean verifyBytecodeVersionDebug verifyBytecodeVersionRelease --continue
-
 ./gradlew clean \
-    sdk:assembleRelease sdkMock:assembleRelease \
+    sdk:verifyBytecodeVersionRelease sdkMock:verifyBytecodeVersionRelease \
     sdk:publishToMavenRepository sdkMock:publishToMavenRepository \
     --stacktrace
