@@ -29,15 +29,13 @@ class CustomLog {
     }
 
     /**
-     * This measures the waiting-time in the buffer, so don't hold or reuse the returned value.
-     *
      * @return a bundle to send to the client service
      */
     Bundle toExtras() {
         Bundle extras = new Bundle();
         extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
         extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
-        extras.putLong(DeployGateEvent.EXTRA_BUFFERED_TIME_IN_MILLI_SECONDS, SystemClock.elapsedRealtime() - elapsedTime);
+        extras.putLong(DeployGateEvent.EXTRA_BUFFERED_AT_IN_MILLI_SECONDS, elapsedTime);
         return extras;
     }
 }
