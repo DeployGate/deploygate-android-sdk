@@ -3,8 +3,6 @@ package com.deploygate.sdk;
 import android.os.Build;
 import android.util.Pair;
 
-import com.deploygate.sdk.internal.Config;
-import com.deploygate.sdk.internal.Factory;
 import com.deploygate.sdk.internal.Logger;
 
 import java.io.BufferedReader;
@@ -38,11 +36,6 @@ class LogcatProcess {
     private static final Object LOCK = new Object();
 
     static final int MAX_LINES = 500; // plus 1 due to the legacy behavior
-
-    /**
-     * Only for testing
-     */
-    static Factory<Process> sLogcatProcessFactory;
 
     private final LogcatProcess.Callback callback;
     private final ExecutorService executorService;
@@ -290,16 +283,12 @@ class LogcatProcess {
             return isOneShot ? new ArrayDeque<String>(size) : new ArrayList<String>(size);
         }
 
-        private static ArrayList<String> toArrayList(Collection<String> collection) {
+        static ArrayList<String> toArrayList(Collection<String> collection) {
             return collection instanceof ArrayList ? (ArrayList<String>) collection : new ArrayList<>(collection);
         }
 
-        private static Process execLogcatCommand(boolean isOneShot) throws IOException {
-            if (!Config.DEBUG) {
-                return Runtime.getRuntime().exec(buildCommands(isOneShot));
-            }
-
-            return sLogcatProcessFactory.create();
+        static Process execLogcatCommand(boolean isOneShot) throws IOException {
+            return Runtime.getRuntime().exec(buildCommands(isOneShot));
         }
 
         /**

@@ -3,33 +3,53 @@ package com.deploygate.sdk;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.deploygate.sdk.helper.FakeLogcat;
-import com.deploygate.sdk.internal.Factory;
 import com.google.common.truth.Truth;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.MockedStatic;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.mockStatic;
+
 @RunWith(AndroidJUnit4.class)
 public class LogcatProcessTest {
     private FakeLogcat fakeLogcat;
+    private MockedStatic<LogcatProcess.LogcatWatcher> mockStatic;
 
     @Before
     public void before() {
-        LogcatProcess.sLogcatProcessFactory = new Factory<Process>() {
+        mockStatic = mockStatic(LogcatProcess.LogcatWatcher.class);
+        mockStatic.when(new MockedStatic.Verification() {
             @Override
-            public Process create() {
+            public void apply() throws Throwable {
+                LogcatProcess.LogcatWatcher.toArrayList(ArgumentMatchers.<String>anyCollection());
+            }
+        }).thenCallRealMethod();
+        mockStatic.when(new MockedStatic.Verification() {
+            @Override
+            public void apply() throws Throwable {
+                LogcatProcess.LogcatWatcher.execLogcatCommand(anyBoolean());
+            }
+        }).thenAnswer(new Answer<Process>() {
+            @Override
+            public Process answer(InvocationOnMock invocation) throws Throwable {
                 return fakeLogcat;
             }
-        };
+        });
     }
 
     @After
@@ -39,6 +59,10 @@ public class LogcatProcessTest {
                 fakeLogcat.destroy();
             }
         }
+
+        if (mockStatic != null) {
+            mockStatic.close();
+        }
     }
 
     @Test(timeout = 3000L)
@@ -47,6 +71,7 @@ public class LogcatProcessTest {
 
         try {
             fakeLogcat = new FakeLogcat(10);
+
             LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
 
             watcher.run();

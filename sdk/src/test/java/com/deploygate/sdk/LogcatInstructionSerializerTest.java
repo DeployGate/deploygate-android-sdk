@@ -7,7 +7,6 @@ import android.os.TransactionTooLargeException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.deploygate.sdk.helper.FakeLogcat;
-import com.deploygate.sdk.internal.Factory;
 import com.deploygate.sdk.mockito.BundleMatcher;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.FakeDeployGateClientService;
@@ -17,7 +16,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.LooperMode;
 
@@ -28,10 +31,12 @@ import java.util.Random;
 
 import static com.deploygate.sdk.mockito.BundleMatcher.eq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
 import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
 
 @RunWith(AndroidJUnit4.class)
@@ -42,22 +47,36 @@ public class LogcatInstructionSerializerTest {
 
     private FakeDeployGateClientService service;
     private LogcatInstructionSerializer instructionSerializer;
+    private MockedStatic<LogcatProcess.LogcatWatcher> mockStatic;
     private List<Process> processes;
 
     @Before
     public void before() {
         service = Mockito.spy(new FakeDeployGateClientService(PACKAGE_NAME));
         processes = new ArrayList<>();
-        LogcatProcess.sLogcatProcessFactory = new Factory<Process>() {
+
+        mockStatic = mockStatic(LogcatProcess.LogcatWatcher.class);
+        mockStatic.when(new MockedStatic.Verification() {
+            @Override
+            public void apply() throws Throwable {
+                LogcatProcess.LogcatWatcher.toArrayList(ArgumentMatchers.<String>anyCollection());
+            }
+        }).thenCallRealMethod();
+        mockStatic.when(new MockedStatic.Verification() {
+            @Override
+            public void apply() throws Throwable {
+                LogcatProcess.LogcatWatcher.execLogcatCommand(anyBoolean());
+            }
+        }).thenAnswer(new Answer<Process>() {
             private final Random RANDOM = new Random();
 
             @Override
-            public Process create() {
+            public Process answer(InvocationOnMock invocation) throws Throwable {
                 FakeLogcat logcat = new FakeLogcat(Math.max(1, RANDOM.nextInt(700)));
                 processes.add(logcat);
                 return logcat;
             }
-        };
+        });
     }
 
     @After
@@ -71,6 +90,10 @@ public class LogcatInstructionSerializerTest {
             if (process.isAlive()) {
                 process.destroy();
             }
+        }
+
+        if (mockStatic != null) {
+            mockStatic.close();
         }
     }
 
