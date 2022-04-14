@@ -61,32 +61,43 @@ class LogcatProcess {
      * @return a pair of watcher ids (non-nulls). first is the previous watcher id, second is the new watcher id.
      */
     Pair<String, String> execute(boolean isOneShot) {
+        final LogcatWatcher currentWatcher;
         final LogcatWatcher newWatcher;
         final String currentWatchId;
 
+        Pair<String, String> ids;
+
         synchronized (LOCK) {
-            if (latestLogcatWatcher != null) {
-                currentWatchId = latestLogcatWatcher.watchId;
+            currentWatcher = latestLogcatWatcher;
+
+            if (currentWatcher != null) {
+                currentWatchId = currentWatcher.watchId;
             } else {
                 currentWatchId = UNKNOWN_WATCHER_ID;
             }
 
-            if (latestLogcatWatcher != null && latestLogcatWatcher.isAlive()) {
-                return Pair.create(UNKNOWN_WATCHER_ID, currentWatchId);
-            }
+            if (currentWatcher != null && currentWatcher.isAlive()) {
+                ids = Pair.create(currentWatchId, currentWatchId);
+            } else {
+                newWatcher = new LogcatWatcher(isOneShot, callback);
 
-            newWatcher = new LogcatWatcher(isOneShot, callback);
-
-            try {
-                this.latestLogcatWatcher = newWatcher;
-                this.executorService.submit(newWatcher);
-                return Pair.create(currentWatchId, newWatcher.watchId);
-            } catch (RejectedExecutionException th) {
-                Logger.e(th, "cannot schedule the logcat worker");
-                this.latestLogcatWatcher = null;
-                return Pair.create(currentWatchId, UNKNOWN_WATCHER_ID);
+                try {
+                    this.latestLogcatWatcher = newWatcher;
+                    this.executorService.submit(newWatcher);
+                    ids = Pair.create(currentWatchId, newWatcher.watchId);
+                } catch (RejectedExecutionException th) {
+                    Logger.e(th, "cannot schedule the logcat worker");
+                    this.latestLogcatWatcher = currentWatcher;
+                    ids = Pair.create(currentWatchId, currentWatchId);
+                }
             }
         }
+
+        if (ids == null || ids.first == null || ids.second == null) {
+            throw new IllegalStateException("execution ids must not be null");
+        }
+
+        return ids;
     }
 
     /**
@@ -276,7 +287,7 @@ class LogcatProcess {
          * @return a buffer pool
          */
         private Collection<String> createBuffer(int size) {
-            return isOneShot ? new ArrayDeque<>(size) : new ArrayList<>(size);
+            return isOneShot ? new ArrayDeque<String>(size) : new ArrayList<String>(size);
         }
 
         private static ArrayList<String> toArrayList(Collection<String> collection) {

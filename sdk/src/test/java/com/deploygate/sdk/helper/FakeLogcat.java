@@ -22,8 +22,8 @@ public class FakeLogcat extends Process {
     }
 
     public FakeLogcat(
-            int lines,
-            int suspendAtLine
+            final int lines,
+            final int suspendAtLine
     ) {
         if (lines < suspendAtLine) {
             throw new IllegalArgumentException(String.format(Locale.US, "suspendAtLine (%d) must be less than lines (%d)", suspendAtLine, lines));
@@ -47,7 +47,7 @@ public class FakeLogcat extends Process {
                 if (currentLine == null) {
                     index = 0;
                     currentLine = UUID.randomUUID().toString();
-                    generatedLines.add(currentLine);
+                    generatedLines.add(currentLine + '\n');
                 }
 
                 if (suspendAtLine > 0 && generatedLines.size() >= suspendAtLine) {
@@ -63,7 +63,7 @@ public class FakeLogcat extends Process {
 
                     index = 0;
                     currentLine = UUID.randomUUID().toString();
-                    generatedLines.add(currentLine);
+                    generatedLines.add(currentLine + '\n');
                     read = '\n';
                 } else {
                     read = currentLine.charAt(index++);

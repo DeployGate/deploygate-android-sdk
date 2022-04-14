@@ -24,7 +24,7 @@ interface ILogcatInstructionSerializer {
      * @param isOneShot
      *         specify true for oneshot logcat, otherwise for streamed logcat
      */
-    void requestSendingLogcat(boolean isOneShot);
+    boolean requestSendingLogcat(boolean isOneShot);
 
     /**
      * Enable the logcat process. Serialization won't be disabled.
@@ -52,8 +52,9 @@ interface ILogcatInstructionSerializer {
         }
 
         @Override
-        public void requestSendingLogcat(boolean isOneShot) {
+        public boolean requestSendingLogcat(boolean isOneShot) {
             Logger.d("Logcat (no-op): requestSendingLogcat(%s)", String.valueOf(isOneShot));
+            return false;
         }
 
         @Override

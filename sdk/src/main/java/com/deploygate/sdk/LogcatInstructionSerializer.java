@@ -97,22 +97,32 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     }
 
     @Override
-    public final synchronized void requestSendingLogcat(
+    public final synchronized boolean requestSendingLogcat(
             boolean isOneShot
     ) {
         ensureHandlerPrepared();
 
         if (!isEnabled) {
-            return;
+            return false;
         }
 
         Pair<String, String> ids = logcatProcess.execute(isOneShot);
 
         String retiredId = ids.first;
+        String newId = ids.second;
 
-        if (LogcatProcess.UNKNOWN_WATCHER_ID.equals(retiredId)) {
+        if (retiredId.equals(newId)) {
+            // nothing is executed
+            return false;
+        }
+
+        if (!LogcatProcess.UNKNOWN_WATCHER_ID.equals(retiredId)) {
+            // the previous on-going execution has been retied
             handler.cancelPendingSendLogcatInstruction(retiredId);
         }
+
+        // check if the new execution has been started
+        return !LogcatProcess.UNKNOWN_WATCHER_ID.equals(newId);
     }
 
     @Override
@@ -312,7 +322,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         ) {
             synchronized (requestMap) {
                 if (!requestMap.containsKey(request.watchId)) {
-                    requestMap.put(request.watchId, new LinkedList<>());
+                    requestMap.put(request.watchId, new LinkedList<SendLogcatRequest>());
                 }
             }
 

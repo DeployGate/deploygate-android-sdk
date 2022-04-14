@@ -10,6 +10,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
 
+import org.checkerframework.checker.units.qual.A;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -89,7 +90,13 @@ public class SendLogcatRequestTest {
     }
 
     private static ArrayList<String> arrayListOf(int startInclusive, int count) {
-        return IntStream.range(startInclusive, startInclusive + count).mapToObj(String::valueOf).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<String> list = new ArrayList<>();
+
+        for (int i = startInclusive, max = startInclusive + count; i < max; i++) {
+            list.add(String.valueOf(i));
+        }
+
+        return list;
     }
 
     private static class SendLogcatRequestSubject extends Subject {

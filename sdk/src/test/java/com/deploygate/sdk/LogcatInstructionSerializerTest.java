@@ -1,5 +1,6 @@
 package com.deploygate.sdk;
 
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 
@@ -27,6 +28,7 @@ import java.util.Random;
 
 import static com.deploygate.sdk.mockito.BundleMatcher.eq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -82,7 +84,7 @@ public class LogcatInstructionSerializerTest {
         SendLogcatRequest chunk2 = new SendLogcatRequest("watchId2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
         SendLogcatRequest chunk3 = new SendLogcatRequest("watchId3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
 
-        doNothing().when(service).sendEvent(any(), any(), any());
+        doNothing().when(service).sendEvent(anyString(), anyString(), any(Bundle.class));
 
         Truth.assertThat(instructionSerializer.sendSingleChunk(chunk1)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
         Truth.assertThat(instructionSerializer.sendSingleChunk(chunk2)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
@@ -139,16 +141,14 @@ public class LogcatInstructionSerializerTest {
         instructionSerializer.setEnabled(false);
 
         for (int i = 0; i < 30; i++) {
-            instructionSerializer.requestSendingLogcat(i % 2 == 0);
+            Truth.assertThat(instructionSerializer.requestSendingLogcat(i % 2 == 0)).isFalse();
         }
-
-        Truth.assertThat(instructionSerializer.hasHandlerPrepared()).isFalse();
 
         // Even if a service connection is established, this does nothing.
         instructionSerializer.connect(service);
 
         for (int i = 0; i < 30; i++) {
-            instructionSerializer.requestSendingLogcat(i % 2 == 0);
+            Truth.assertThat(instructionSerializer.requestSendingLogcat(i % 2 == 0)).isFalse();
         }
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();

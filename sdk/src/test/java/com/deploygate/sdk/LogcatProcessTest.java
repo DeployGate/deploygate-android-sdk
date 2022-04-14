@@ -3,6 +3,7 @@ package com.deploygate.sdk;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.deploygate.sdk.helper.FakeLogcat;
+import com.deploygate.sdk.internal.Factory;
 import com.google.common.truth.Truth;
 
 import org.junit.After;
@@ -23,7 +24,12 @@ public class LogcatProcessTest {
 
     @Before
     public void before() {
-        LogcatProcess.sLogcatProcessFactory = () -> fakeLogcat;
+        LogcatProcess.sLogcatProcessFactory = new Factory<Process>() {
+            @Override
+            public Process create() {
+                return fakeLogcat;
+            }
+        };
     }
 
     @After
@@ -49,7 +55,7 @@ public class LogcatProcessTest {
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(10);
-            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(fakeLogcat.getGeneratedLines().stream().map(s -> s + "\n").collect(Collectors.toList()));
+            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(fakeLogcat.getGeneratedLines());
         } finally {
             if (fakeLogcat != null) {
                 fakeLogcat.destroy();
@@ -62,7 +68,7 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<String> generatedLineWithLF = fakeLogcat.getGeneratedLines().stream().map(s -> s + "\n").collect(Collectors.toList());
+            List<String> generatedLineWithLF = fakeLogcat.getGeneratedLines();
 
             List<List<String>> linesList = capture.captured.get(watcher.getWatchId());
 
@@ -83,15 +89,15 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<String> generatedLineWithLF = fakeLogcat.getGeneratedLines().stream().map(s -> s + "\n").collect(Collectors.toList());
+            List<String> generatedLineWithLF = fakeLogcat.getGeneratedLines();
 
             List<List<String>> linesList = capture.captured.get(watcher.getWatchId());
 
             Truth.assertThat(linesList).hasSize(2);
             Truth.assertThat(linesList.get(0)).hasSize(LogcatProcess.MAX_LINES);
-            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(generatedLineWithLF.stream().limit(LogcatProcess.MAX_LINES).collect(Collectors.toList()));
+            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(generatedLineWithLF.subList(0, LogcatProcess.MAX_LINES));
             Truth.assertThat(linesList.get(1)).hasSize(LogcatProcess.MAX_LINES);
-            Truth.assertThat(linesList.get(1)).containsExactlyElementsIn(generatedLineWithLF.stream().skip(LogcatProcess.MAX_LINES).limit(LogcatProcess.MAX_LINES).collect(Collectors.toList()));
+            Truth.assertThat(linesList.get(1)).containsExactlyElementsIn(generatedLineWithLF.subList(LogcatProcess.MAX_LINES, generatedLineWithLF.size()));
         } finally {
             if (fakeLogcat != null) {
                 fakeLogcat.destroy();
@@ -113,7 +119,7 @@ public class LogcatProcessTest {
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(10);
-            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(fakeLogcat.getGeneratedLines().stream().map(s -> s + "\n").collect(Collectors.toList()));
+            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(fakeLogcat.getGeneratedLines());
         } finally {
             if (fakeLogcat != null) {
                 fakeLogcat.destroy();
@@ -127,7 +133,7 @@ public class LogcatProcessTest {
             watcher.run();
 
             List<String> generatedLines = fakeLogcat.getGeneratedLines();
-            List<String> generatedLineWithLF = generatedLines.stream().skip(generatedLines.size() - LogcatProcess.MAX_LINES).map(s -> s + "\n").collect(Collectors.toList());
+            List<String> generatedLineWithLF = generatedLines.subList(generatedLines.size() - LogcatProcess.MAX_LINES, generatedLines.size());
 
             List<List<String>> linesList = capture.captured.get(watcher.getWatchId());
 
@@ -147,7 +153,7 @@ public class LogcatProcessTest {
             watcher.run();
 
             List<String> generatedLines = fakeLogcat.getGeneratedLines();
-            List<String> generatedLineWithLF = generatedLines.stream().skip(generatedLines.size() - LogcatProcess.MAX_LINES).map(s -> s + "\n").collect(Collectors.toList());
+            List<String> generatedLineWithLF = generatedLines.subList(generatedLines.size() - LogcatProcess.MAX_LINES, generatedLines.size());
 
             List<List<String>> linesList = capture.captured.get(watcher.getWatchId());
 
@@ -177,7 +183,7 @@ public class LogcatProcessTest {
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(10);
-            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(fakeLogcat.getGeneratedLines().stream().map(s -> s + "\n").collect(Collectors.toList()));
+            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(fakeLogcat.getGeneratedLines());
 
             watcher.interrupt(); // do not throw any error
         } finally {
@@ -216,14 +222,13 @@ public class LogcatProcessTest {
             watcher.run();
 
             List<String> generatedLines = fakeLogcat.getGeneratedLines();
-            List<String> generatedLineWithLF = generatedLines.stream().map(s -> s + "\n").collect(Collectors.toList());
 
             List<List<String>> linesList = capture.captured.get(watcher.getWatchId());
 
             // emit the first chunk but second chunk
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(LogcatProcess.MAX_LINES);
-            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(generatedLineWithLF.stream().limit(LogcatProcess.MAX_LINES).collect(Collectors.toList()));
+            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(generatedLines.subList(0, LogcatProcess.MAX_LINES));
         } finally {
             if (fakeLogcat != null) {
                 fakeLogcat.destroy();
@@ -247,7 +252,7 @@ public class LogcatProcessTest {
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(10);
-            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(fakeLogcat.getGeneratedLines().stream().map(s -> s + "\n").collect(Collectors.toList()));
+            Truth.assertThat(linesList.get(0)).containsExactlyElementsIn(fakeLogcat.getGeneratedLines());
 
             watcher.interrupt(); // do not throw any error
         } finally {
@@ -297,16 +302,19 @@ public class LogcatProcessTest {
     }
 
     private void destroyWorkerAfter(
-            LogcatProcess.LogcatWatcher watcher,
-            long duration,
-            TimeUnit unit
+            final LogcatProcess.LogcatWatcher watcher,
+            final long duration,
+            final TimeUnit unit
     ) {
-        Thread anotherThread = new Thread(() -> {
-            try {
-                Thread.sleep(unit.toMillis(duration));
-            } catch (InterruptedException e) {
+        Thread anotherThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(unit.toMillis(duration));
+                } catch (InterruptedException e) {
+                }
+                watcher.interrupt();
             }
-            watcher.interrupt();
         });
 
         anotherThread.start();
