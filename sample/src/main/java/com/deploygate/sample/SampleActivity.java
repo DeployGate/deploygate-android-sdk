@@ -83,18 +83,23 @@ public class SampleActivity extends Activity implements DeployGateCallback {
         String text = mLogMessage.getText().toString();
         switch (v.getId()) {
             case R.id.logError:
+                Log.e(TAG, "DeployGate#logError");
                 DeployGate.logError(text);
                 break;
             case R.id.logWarn:
+                Log.w(TAG, "DeployGate#logWarn");
                 DeployGate.logWarn(text);
                 break;
             case R.id.logDebug:
+                Log.d(TAG, "DeployGate#logDebug");
                 DeployGate.logDebug(text);
                 break;
             case R.id.logInfo:
+                Log.i(TAG, "DeployGate#logInfo");
                 DeployGate.logInfo(text);
                 break;
             case R.id.logVerbose:
+                Log.v(TAG, "DeployGate#logVerbose");
                 DeployGate.logVerbose(text);
                 break;
             default:
@@ -109,6 +114,7 @@ public class SampleActivity extends Activity implements DeployGateCallback {
      *         View instance of the button
      */
     public void onCrashMeClick(View v) {
+        Log.d(TAG, "DeployGate#onCrashMeClick");
         // let's throw!
         throw new RuntimeException("CRASH TEST BUTTON CLICKED YAY!");
     }
@@ -120,6 +126,7 @@ public class SampleActivity extends Activity implements DeployGateCallback {
      *         View instance of the button
      */
     public void onLogCatClick(View v) {
+        Log.d(TAG, "DeployGate#requestLogCat");
         DeployGate.requestLogCat();
         Toast.makeText(this, R.string.logcat_toast, Toast.LENGTH_LONG).show();
     }
@@ -131,6 +138,7 @@ public class SampleActivity extends Activity implements DeployGateCallback {
      *         View instance of the button
      */
     public void onUpdateClick(View v) {
+        Log.d(TAG, "DeployGate#installUpdate");
         DeployGate.installUpdate();
     }
 
@@ -142,6 +150,7 @@ public class SampleActivity extends Activity implements DeployGateCallback {
      *         View instance of the button
      */
     public void onCommentsClick(View view) {
+        Log.d(TAG, "DeployGate#openComments");
         DeployGate.openComments();
     }
 
