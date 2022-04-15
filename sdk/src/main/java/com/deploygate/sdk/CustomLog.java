@@ -1,12 +1,14 @@
 package com.deploygate.sdk;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import com.deploygate.service.DeployGateEvent;
 
 class CustomLog {
     public final String type;
     public final String body;
+    private final long elapsedTime;
     private int retryCount;
 
     CustomLog(
@@ -15,6 +17,7 @@ class CustomLog {
     ) {
         this.type = type;
         this.body = body;
+        this.elapsedTime = SystemClock.elapsedRealtime();
         this.retryCount = 0;
     }
 
@@ -32,6 +35,7 @@ class CustomLog {
         Bundle extras = new Bundle();
         extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
         extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
+        extras.putLong(DeployGateEvent.EXTRA_BUFFERED_AT_IN_MILLI_SECONDS, elapsedTime);
         return extras;
     }
 }
