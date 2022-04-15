@@ -55,6 +55,10 @@ public interface DeployGateEvent {
     public static final String EXTRA_CURRENT_REVISION = "currentRevision";
     public static final String EXTRA_CURRENT_DISTRIBUTION_ID = "currentDistributionId";
     public static final String EXTRA_CURRENT_DISTRIBUTION_TITLE = "currentDistributionTitle";
+    /**
+     * this key shouldn't be used
+     */
+    @Deprecated
     public static final String EXTRA_DEPLOYGATE_VERSION_CODE = "deploygateVersionCode";
     public static final String EXTRA_COMMENT = "comment";
     public static final String EXTRA_DISTRIBUTION_USER_NAME = "distributionUserName";

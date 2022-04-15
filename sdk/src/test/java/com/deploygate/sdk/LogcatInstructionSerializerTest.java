@@ -140,11 +140,11 @@ public class LogcatInstructionSerializerTest {
         Truth.assertThat(instructionSerializer.sendSingleChunk(retryExceeded)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
         Truth.assertThat(instructionSerializer.sendSingleChunk(retryExceeded)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRY_EXCEEDED);
 
-        try (MockedStatic<Compatibility> mocked = Mockito.mockStatic(Compatibility.class)) {
+        try (MockedStatic<DeployGate> mocked = Mockito.mockStatic(DeployGate.class)) {
             mocked.when(new MockedStatic.Verification() {
                 @Override
                 public void apply() throws Throwable {
-                    Compatibility.isLogcatBundleSupported();
+                    DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE);
                 }
             }).thenReturn(false, true);
 
