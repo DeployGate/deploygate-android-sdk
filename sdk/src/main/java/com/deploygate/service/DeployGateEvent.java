@@ -31,6 +31,7 @@ public interface DeployGateEvent {
     public static final String EXTRA_LOG = "log";
     public static final String EXTRA_LOG_TYPE = "logType";
     public static final String EXTRA_BUFFERED_AT_IN_MILLI_SECONDS = "bufferedAt";
+    public static final String EXTRA_UID = "uid";
 
     /**
      * this key shouldn't be used
