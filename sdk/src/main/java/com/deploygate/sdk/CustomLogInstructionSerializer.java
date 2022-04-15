@@ -90,14 +90,11 @@ class CustomLogInstructionSerializer {
     /**
      * Request sending custom logs to DeployGate client service. All requests will be scheduled to an exclusive thread.
      *
-     * @param type
-     *         custom log type
-     * @param body
-     *         custom log body
+     * @param log
+     *         a custum log to send
      */
     public final synchronized void requestSendingLog(
-            String type,
-            String body
+            CustomLog log
     ) {
         if (isDisabled) {
             return;
@@ -105,7 +102,6 @@ class CustomLogInstructionSerializer {
 
         ensureHandlerInitialized();
 
-        CustomLog log = new CustomLog(type, body);
         handler.enqueueAddNewLogInstruction(log);
     }
 

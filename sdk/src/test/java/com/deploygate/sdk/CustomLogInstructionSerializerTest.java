@@ -21,6 +21,7 @@ import org.mockito.verification.VerificationMode;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.LooperMode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -54,8 +55,12 @@ public class CustomLogInstructionSerializerTest {
         CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().setBufferSize(bufferSize).setBackpressure(CustomLogConfiguration.Backpressure.DROP_BUFFER_BY_OLDEST).build();
         CustomLogInstructionSerializer customLogInstructionSerializer = new CustomLogInstructionSerializer(PACKAGE_NAME, configuration);
 
+        List<CustomLog> logs = new ArrayList<>();
+
         for (int i = 0; i < 10; i++) {
-            customLogInstructionSerializer.requestSendingLog("type", String.valueOf(i));
+            CustomLog log = new CustomLog("type", String.valueOf(i));
+            logs.add(log);
+            customLogInstructionSerializer.requestSendingLog(log);
         }
 
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
@@ -65,7 +70,7 @@ public class CustomLogInstructionSerializerTest {
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
 
         for (int i = 0; i < bufferSize; i++) {
-            CustomLog log = new CustomLog("type", String.valueOf(i));
+            CustomLog log = logs.get(i);
             Mockito.verify(service, never()).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(log.toExtras()));
         }
 
@@ -73,7 +78,7 @@ public class CustomLogInstructionSerializerTest {
         InOrder inOrder = Mockito.inOrder(service);
 
         for (int i = bufferSize; i < 10; i++) {
-            CustomLog log = new CustomLog("type", String.valueOf(i));
+            CustomLog log = logs.get(i);
             inOrder.verify(service, once).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(log.toExtras()));
         }
     }
@@ -85,8 +90,12 @@ public class CustomLogInstructionSerializerTest {
         CustomLogConfiguration configuration = new CustomLogConfiguration.Builder().setBufferSize(bufferSize).setBackpressure(CustomLogConfiguration.Backpressure.PRESERVE_BUFFER).build();
         CustomLogInstructionSerializer customLogInstructionSerializer = new CustomLogInstructionSerializer(PACKAGE_NAME, configuration);
 
+        List<CustomLog> logs = new ArrayList<>();
+
         for (int i = 0; i < 10; i++) {
-            customLogInstructionSerializer.requestSendingLog("type", String.valueOf(i));
+            CustomLog log = new CustomLog("type", String.valueOf(i));
+            logs.add(log);
+            customLogInstructionSerializer.requestSendingLog(log);
         }
 
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
@@ -99,12 +108,12 @@ public class CustomLogInstructionSerializerTest {
         InOrder inOrder = Mockito.inOrder(service);
 
         for (int i = 0; i < bufferSize; i++) {
-            CustomLog log = new CustomLog("type", String.valueOf(i));
+            CustomLog log = logs.get(i);
             inOrder.verify(service, once).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(log.toExtras()));
         }
 
         for (int i = bufferSize; i < 10; i++) {
-            CustomLog log = new CustomLog("type", String.valueOf(i));
+            CustomLog log = logs.get(i);
             Mockito.verify(service, never()).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), eq(log.toExtras()));
         }
     }
@@ -162,7 +171,7 @@ public class CustomLogInstructionSerializerTest {
         // Don't connect a service
 
         for (int i = 0; i < 30; i++) {
-            customLogInstructionSerializer.requestSendingLog("type", "body");
+            customLogInstructionSerializer.requestSendingLog(new CustomLog("type", "body"));
         }
 
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
@@ -178,7 +187,7 @@ public class CustomLogInstructionSerializerTest {
         customLogInstructionSerializer.setDisabled(true);
 
         for (int i = 0; i < 30; i++) {
-            customLogInstructionSerializer.requestSendingLog("type", "body");
+            customLogInstructionSerializer.requestSendingLog(new CustomLog("type", "body"));
         }
 
         Truth.assertThat(customLogInstructionSerializer.hasHandlerInitialized()).isFalse();
@@ -188,7 +197,7 @@ public class CustomLogInstructionSerializerTest {
         customLogInstructionSerializer.connect(service);
 
         for (int i = 0; i < 30; i++) {
-            customLogInstructionSerializer.requestSendingLog("type", "body");
+            customLogInstructionSerializer.requestSendingLog(new CustomLog("type", "body"));
         }
 
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
@@ -207,7 +216,7 @@ public class CustomLogInstructionSerializerTest {
 
         for (int i = 0; i < 10; i++) {
             CustomLog log = new CustomLog("type", String.valueOf(i));
-            customLogInstructionSerializer.requestSendingLog(log.type, log.body);
+            customLogInstructionSerializer.requestSendingLog(log);
         }
 
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
@@ -235,9 +244,9 @@ public class CustomLogInstructionSerializerTest {
 
         customLogInstructionSerializer.connect(service);
 
-        customLogInstructionSerializer.requestSendingLog(successAfterRetries.type, successAfterRetries.body);
-        customLogInstructionSerializer.requestSendingLog(noIssue.type, noIssue.body);
-        customLogInstructionSerializer.requestSendingLog(retryExceeded.type, retryExceeded.body);
+        customLogInstructionSerializer.requestSendingLog(successAfterRetries);
+        customLogInstructionSerializer.requestSendingLog(noIssue);
+        customLogInstructionSerializer.requestSendingLog(retryExceeded);
 
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
 

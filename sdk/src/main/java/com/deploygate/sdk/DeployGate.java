@@ -1096,7 +1096,7 @@ public class DeployGate {
             String type,
             String body
     ) {
-        mCustomLogInstructionSerializer.requestSendingLog(type, body);
+        mCustomLogInstructionSerializer.requestSendingLog(new CustomLog(type, body));
     }
 
     /**
