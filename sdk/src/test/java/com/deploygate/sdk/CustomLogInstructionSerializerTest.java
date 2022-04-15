@@ -177,6 +177,7 @@ public class CustomLogInstructionSerializerTest {
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
 
         Truth.assertThat(customLogInstructionSerializer.getPendingCount()).isEqualTo(30);
+        Truth.assertThat(customLogInstructionSerializer.hasAnyMessage()).isFalse();
     }
 
     @Test(timeout = 3000L)
@@ -191,7 +192,6 @@ public class CustomLogInstructionSerializerTest {
         }
 
         Truth.assertThat(customLogInstructionSerializer.hasHandlerInitialized()).isFalse();
-        Truth.assertThat(customLogInstructionSerializer.getPendingCount()).isEqualTo(0);
 
         // Even if a service connection is established, this does nothing.
         customLogInstructionSerializer.connect(service);
@@ -203,6 +203,7 @@ public class CustomLogInstructionSerializerTest {
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
 
         Truth.assertThat(customLogInstructionSerializer.getPendingCount()).isEqualTo(0);
+        Truth.assertThat(customLogInstructionSerializer.hasAnyMessage()).isFalse();
     }
 
     @Test(timeout = 3000L)
@@ -221,11 +222,10 @@ public class CustomLogInstructionSerializerTest {
 
         Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idle();
 
-        while (customLogInstructionSerializer.getPendingCount() > 0) {
+        while (customLogInstructionSerializer.hasAnyMessage() || customLogInstructionSerializer.getPendingCount() > 0) {
             Shadows.shadowOf(customLogInstructionSerializer.getLooper()).idleFor(100, TimeUnit.MILLISECONDS);
         }
 
-        Truth.assertThat(customLogInstructionSerializer.getPendingCount()).isEqualTo(0);
         Mockito.verify(service, times((CustomLogInstructionSerializer.MAX_RETRY_COUNT + 1) * 10)).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_CUSTOM_LOG), any(Bundle.class));
     }
 

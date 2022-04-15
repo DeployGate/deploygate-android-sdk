@@ -145,6 +145,14 @@ class CustomLogInstructionSerializer {
         return handler != null;
     }
 
+    boolean hasAnyMessage() {
+        if (handler == null) {
+            return false;
+        }
+
+        return handler.hasMessages(CustomLogHandler.WHAT_SEND_LOGS) || handler.hasMessages(CustomLogHandler.WHAT_ADD_NEW_LOG);
+    }
+
     int getPendingCount() {
         if (handler == null) {
             return 0;
