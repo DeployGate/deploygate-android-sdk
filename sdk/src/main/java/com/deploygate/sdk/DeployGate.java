@@ -1176,7 +1176,7 @@ public class DeployGate {
      * @since r4
      */
     public static String getUpdateMessage() {
-        if (sInstance == null || sInstance.mDeployGateVersionCode < 39) {
+        if (sInstance == null || !Compatibility.isUpdateMessageOfBuildSupported()) {
             return null;
         }
 
