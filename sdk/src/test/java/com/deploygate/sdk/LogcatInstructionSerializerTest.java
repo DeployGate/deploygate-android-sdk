@@ -131,7 +131,7 @@ public class LogcatInstructionSerializerTest {
         doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), BundleMatcher.eq(noIssue.toExtras()));
         doThrow(RemoteException.class).doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(successAfterRetries.toExtras()));
         doThrow(RemoteException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(retryExceeded.toExtras()));
-        doThrow(TransactionTooLargeException.class).doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(chunkRequest.toExtras()));
+        doThrow(TransactionTooLargeException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(chunkRequest.toExtras()));
 
         Truth.assertThat(instructionSerializer.sendSingleChunk(noIssue)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_SUCCESS);
         Truth.assertThat(instructionSerializer.sendSingleChunk(successAfterRetries)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
@@ -139,7 +139,18 @@ public class LogcatInstructionSerializerTest {
         Truth.assertThat(instructionSerializer.sendSingleChunk(retryExceeded)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
         Truth.assertThat(instructionSerializer.sendSingleChunk(retryExceeded)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
         Truth.assertThat(instructionSerializer.sendSingleChunk(retryExceeded)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRY_EXCEEDED);
-        Truth.assertThat(instructionSerializer.sendSingleChunk(chunkRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE);
+
+        try (MockedStatic<Compatibility> mocked = Mockito.mockStatic(Compatibility.class)) {
+            mocked.when(new MockedStatic.Verification() {
+                @Override
+                public void apply() throws Throwable {
+                    Compatibility.isLogcatBundleSupported();
+                }
+            }).thenReturn(false, true);
+
+            Truth.assertThat(instructionSerializer.sendSingleChunk(chunkRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+            Truth.assertThat(instructionSerializer.sendSingleChunk(chunkRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE);
+        }
     }
 
     @Test(timeout = 3000L)

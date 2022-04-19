@@ -954,7 +954,7 @@ public class DeployGate {
 
         Bundle extras = new Bundle();
         try {
-            if (getDeployGateVersionCode() >= Compatibility.ClientVersion.SUPPORT_SERIALIZED_EXCEPTION) {
+            if (Compatibility.isSerializedExceptionSupported()) {
                 Throwable rootCause = getRootCause(ex);
                 String msg = rootCause.getMessage();
                 extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME, rootCause.getClass().getName());
@@ -1176,7 +1176,7 @@ public class DeployGate {
      * @since r4
      */
     public static String getUpdateMessage() {
-        if (sInstance == null || sInstance.mDeployGateVersionCode < 39) {
+        if (sInstance == null || !Compatibility.isUpdateMessageOfBuildSupported()) {
             return null;
         }
 
