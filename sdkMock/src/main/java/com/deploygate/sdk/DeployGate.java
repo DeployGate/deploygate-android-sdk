@@ -133,6 +133,10 @@ public class DeployGate {
         return 0;
     }
 
+    public static long getDeployGateLongVersionCode() {
+        return 0;
+    }
+
     public static boolean hasUpdate() {
         return false;
     }
