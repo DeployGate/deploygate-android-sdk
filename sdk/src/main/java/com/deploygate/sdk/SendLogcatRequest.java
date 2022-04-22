@@ -11,16 +11,16 @@ import java.util.List;
 import java.util.Locale;
 
 class SendLogcatRequest {
-    public final String bundleId;
+    public final String bundleSessionKey;
     public final String uid;
     public final ArrayList<String> lines;
     private int retryCount;
 
     SendLogcatRequest(
-            String bundleId,
+            String bundleSessionKey,
             List<String> lines
     ) {
-        this.bundleId = bundleId;
+        this.bundleSessionKey = bundleSessionKey;
         this.uid = UniqueId.generate();
         this.lines = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
     }
@@ -53,7 +53,7 @@ class SendLogcatRequest {
         for (int i = 0, offset = 0, step = size / count; i < count; i++, offset += step) {
             final int endIndex = (i == count - 1) ? size : offset + step;
 
-            splits.add(new SendLogcatRequest(bundleId, lines.subList(offset, endIndex)));
+            splits.add(new SendLogcatRequest(bundleSessionKey, lines.subList(offset, endIndex)));
         }
 
         return splits;
@@ -62,7 +62,7 @@ class SendLogcatRequest {
     Bundle toExtras() {
         Bundle extras = new Bundle();
 
-        extras.putString(DeployGateEvent.EXTRA_BUNDLE_ID, bundleId);
+        extras.putString(DeployGateEvent.EXTRA_BUNDLE_SESSION_KEY, bundleSessionKey);
         extras.putString(DeployGateEvent.EXTRA_UID, uid);
         extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
 

@@ -52,39 +52,39 @@ public class SendLogcatRequestTest {
 
         List<SendLogcatRequest> twoRequests = request.splitInto(2);
         Truth.assertThat(twoRequests).hasSize(2);
-        SendLogcatRequestSubject.assertThat(twoRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(0, 5)));
-        SendLogcatRequestSubject.assertThat(twoRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(5, 5)));
+        SendLogcatRequestSubject.assertThat(twoRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(0, 5)));
+        SendLogcatRequestSubject.assertThat(twoRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(5, 5)));
 
         List<SendLogcatRequest> threeRequests = request.splitInto(3);
         Truth.assertThat(threeRequests).hasSize(3);
-        SendLogcatRequestSubject.assertThat(threeRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(0, 3)));
-        SendLogcatRequestSubject.assertThat(threeRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(3, 3)));
-        SendLogcatRequestSubject.assertThat(threeRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(6, 4)));
+        SendLogcatRequestSubject.assertThat(threeRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(0, 3)));
+        SendLogcatRequestSubject.assertThat(threeRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(3, 3)));
+        SendLogcatRequestSubject.assertThat(threeRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(6, 4)));
 
         List<SendLogcatRequest> nineRequests = request.splitInto(9);
         Truth.assertThat(nineRequests).hasSize(9);
-        SendLogcatRequestSubject.assertThat(nineRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(0, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(1, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(2, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(3)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(3, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(4)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(4, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(5)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(5, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(6)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(6, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(7)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(7, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(8)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(8, 2)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(0, 1)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(1, 1)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(2, 1)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(3)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(3, 1)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(4)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(4, 1)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(5)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(5, 1)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(6)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(6, 1)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(7)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(7, 1)));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(8)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(8, 2)));
 
         List<SendLogcatRequest> overSplitRequests = request.splitInto(11);
         Truth.assertThat(overSplitRequests).hasSize(10);
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(0, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(1, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(2, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(3)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(3, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(4)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(4, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(5)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(5, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(6)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(6, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(7)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(7, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(8)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(8, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(9)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(9, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(0, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(1, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(2, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(3)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(3, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(4)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(4, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(5)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(5, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(6)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(6, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(7)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(7, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(8)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(8, 1)));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(9)).isEqualTo(new SendLogcatRequest(request.bundleSessionKey, arrayListOf(9, 1)));
     }
 
     private static Bundle createLogExtra(
@@ -142,7 +142,7 @@ public class SendLogcatRequestTest {
 
             SendLogcatRequest request = (SendLogcatRequest) expected;
 
-            if (!actual.bundleId.equals(request.bundleId) || actual.lines.size() != request.lines.size()) {
+            if (!actual.bundleSessionKey.equals(request.bundleSessionKey) || actual.lines.size() != request.lines.size()) {
                 failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to %s", toString(request), toString(actual))));
                 return;
             }
@@ -159,7 +159,7 @@ public class SendLogcatRequestTest {
             StringBuilder builder = new StringBuilder();
             builder.append("{ ");
             builder.append("tid=");
-            builder.append(request.bundleId);
+            builder.append(request.bundleSessionKey);
             builder.append(", lines=[");
             builder.append(String.join(", ", request.lines));
             builder.append("]");

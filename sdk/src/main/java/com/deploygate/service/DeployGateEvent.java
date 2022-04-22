@@ -38,9 +38,9 @@ public interface DeployGateEvent {
     public static final String EXTRA_UID = "uid";
 
     /**
-     * id of a bundle that collects instructions (data)
+     * session key of a bundle that collects instructions (data)
      */
-    public static final String EXTRA_BUNDLE_ID = "bid";
+    public static final String EXTRA_BUNDLE_SESSION_KEY = "bsk";
 
     /**
      * this key shouldn't be used

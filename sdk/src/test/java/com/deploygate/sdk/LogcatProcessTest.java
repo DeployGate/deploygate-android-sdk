@@ -75,7 +75,7 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(10);
@@ -94,7 +94,7 @@ public class LogcatProcessTest {
 
             List<String> generatedLineWithLF = fakeLogcat.getGeneratedLines();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).hasSize(2);
             Truth.assertThat(linesList.get(0)).hasSize(LogcatProcess.MAX_LINES);
@@ -115,7 +115,7 @@ public class LogcatProcessTest {
 
             List<String> generatedLineWithLF = fakeLogcat.getGeneratedLines();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).hasSize(2);
             Truth.assertThat(linesList.get(0)).hasSize(LogcatProcess.MAX_LINES);
@@ -139,7 +139,7 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(10);
@@ -159,7 +159,7 @@ public class LogcatProcessTest {
             List<String> generatedLines = fakeLogcat.getGeneratedLines();
             List<String> generatedLineWithLF = generatedLines.subList(generatedLines.size() - LogcatProcess.MAX_LINES, generatedLines.size());
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(LogcatProcess.MAX_LINES);
@@ -179,7 +179,7 @@ public class LogcatProcessTest {
             List<String> generatedLines = fakeLogcat.getGeneratedLines();
             List<String> generatedLineWithLF = generatedLines.subList(generatedLines.size() - LogcatProcess.MAX_LINES, generatedLines.size());
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(LogcatProcess.MAX_LINES);
@@ -203,7 +203,7 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(10);
@@ -226,7 +226,7 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).isNull();
         } finally {
@@ -247,7 +247,7 @@ public class LogcatProcessTest {
 
             List<String> generatedLines = fakeLogcat.getGeneratedLines();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             // emit the first chunk but second chunk
             Truth.assertThat(linesList).hasSize(1);
@@ -272,7 +272,7 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).hasSize(1);
             Truth.assertThat(linesList.get(0)).hasSize(10);
@@ -295,7 +295,7 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             Truth.assertThat(linesList).isNull();
         } finally {
@@ -314,7 +314,7 @@ public class LogcatProcessTest {
 
             watcher.run();
 
-            List<List<String>> linesList = capture.captured.get(watcher.getBundleId());
+            List<List<String>> linesList = capture.captured.get(watcher.getBundleSessionKey());
 
             // no chunk should be emitted
             Truth.assertThat(linesList).isNull();

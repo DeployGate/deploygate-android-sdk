@@ -21,10 +21,15 @@ interface ILogcatInstructionSerializer {
     /**
      * Create and enqueue a request to send logcat
      *
+     * @param bundleSessionKey
+     *         a bundle session key
      * @param isOneShot
      *         specify true for oneshot logcat, otherwise for streamed logcat
      */
-    boolean requestSendingLogcat(boolean isOneShot);
+    boolean requestSendingLogcat(
+            String bundleSessionKey,
+            boolean isOneShot
+    );
 
     /**
      * Enable the logcat process. Serialization won't be disabled.
@@ -52,8 +57,11 @@ interface ILogcatInstructionSerializer {
         }
 
         @Override
-        public boolean requestSendingLogcat(boolean isOneShot) {
-            Logger.d("Logcat (no-op): requestSendingLogcat(%s)", String.valueOf(isOneShot));
+        public boolean requestSendingLogcat(
+                String bundleSessionKey,
+                boolean isOneShot
+        ) {
+            Logger.d("Logcat (no-op): requestSendingLogcat(%s, %s)", bundleSessionKey != null ? bundleSessionKey : "null", String.valueOf(isOneShot));
             return false;
         }
 

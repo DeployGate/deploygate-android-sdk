@@ -98,6 +98,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
     @Override
     public final synchronized boolean requestSendingLogcat(
+            String bundleSessionKey,
             boolean isOneShot
     ) {
         ensureHandlerPrepared();
@@ -106,7 +107,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             return false;
         }
 
-        Pair<String, String> ids = logcatProcess.execute(isOneShot);
+        Pair<String, String> ids = logcatProcess.execute(bundleSessionKey, isOneShot);
 
         String retiredId = ids.first;
         String newId = ids.second;
@@ -321,8 +322,8 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
                 SendLogcatRequest request
         ) {
             synchronized (requestMap) {
-                if (!requestMap.containsKey(request.bundleId)) {
-                    requestMap.put(request.bundleId, new LinkedList<SendLogcatRequest>());
+                if (!requestMap.containsKey(request.bundleSessionKey)) {
+                    requestMap.put(request.bundleSessionKey, new LinkedList<SendLogcatRequest>());
                 }
             }
 
@@ -375,7 +376,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
                     if (appendRequest(request)) {
                         if (transmitter.hasServiceConnection()) {
-                            sendAllInBuffer(request.bundleId);
+                            sendAllInBuffer(request.bundleSessionKey);
                         }
                     }
 
@@ -392,7 +393,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         private boolean appendRequest(SendLogcatRequest request) {
             synchronized (requestMap) {
-                LinkedList<SendLogcatRequest> requests = requestMap.get(request.bundleId);
+                LinkedList<SendLogcatRequest> requests = requestMap.get(request.bundleSessionKey);
 
                 if (requests == null) {
                     return false;

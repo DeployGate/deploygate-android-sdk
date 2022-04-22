@@ -52,7 +52,10 @@ class LogcatProcess {
      *
      * @return a pair of watcher ids (non-nulls). first is the previous watcher id, second is the new watcher id.
      */
-    Pair<String, String> execute(boolean isOneShot) {
+    Pair<String, String> execute(
+            String bundleSessionKey,
+            boolean isOneShot
+    ) {
         final LogcatWatcher currentWatcher;
         final LogcatWatcher newWatcher;
         final String currentTid;
@@ -63,7 +66,7 @@ class LogcatProcess {
             currentWatcher = latestLogcatWatcher;
 
             if (currentWatcher != null) {
-                currentTid = currentWatcher.bundleId;
+                currentTid = currentWatcher.bundleSessionKey;
             } else {
                 currentTid = UNKNOWN_WATCHER_ID;
             }
@@ -71,12 +74,12 @@ class LogcatProcess {
             if (currentWatcher != null && currentWatcher.isAlive()) {
                 ids = Pair.create(currentTid, currentTid);
             } else {
-                newWatcher = new LogcatWatcher(isOneShot, callback);
+                newWatcher = new LogcatWatcher(bundleSessionKey, isOneShot, callback);
 
                 try {
                     this.latestLogcatWatcher = newWatcher;
                     this.executorService.submit(newWatcher);
-                    ids = Pair.create(currentTid, newWatcher.bundleId);
+                    ids = Pair.create(currentTid, newWatcher.bundleSessionKey);
                 } catch (RejectedExecutionException th) {
                     Logger.e(th, "cannot schedule the logcat worker");
                     this.latestLogcatWatcher = currentWatcher;
@@ -104,7 +107,7 @@ class LogcatProcess {
             }
 
             latestLogcatWatcher.interrupt();
-            return latestLogcatWatcher.bundleId;
+            return latestLogcatWatcher.bundleSessionKey;
         }
     }
 
@@ -114,17 +117,18 @@ class LogcatProcess {
         private static final int STATE_INTERRUPTED = 2;
         private static final int STATE_FINISHED = 3;
 
-        private final String bundleId;
+        private final String bundleSessionKey;
         private final boolean isOneShot;
         private final WeakReference<Callback> callback;
         private final AtomicReference<Process> processRef;
         private final AtomicInteger state;
 
         LogcatWatcher(
+                String bundleSessionKey,
                 boolean isOneShot,
                 Callback callback
         ) {
-            this.bundleId = UniqueId.generate();
+            this.bundleSessionKey = bundleSessionKey;
             this.isOneShot = isOneShot;
             this.callback = new WeakReference<>(callback);
             this.processRef = new AtomicReference<>();
@@ -161,8 +165,8 @@ class LogcatProcess {
          *
          * @return
          */
-        String getBundleId() {
-            return bundleId;
+        String getBundleSessionKey() {
+            return bundleSessionKey;
         }
 
         @Override
@@ -213,10 +217,10 @@ class LogcatProcess {
                     if (isOneShot) {
                         continue;
                     } else if (logcatBuf.size() >= MAX_LINES) {
-                        callback.emit(bundleId, toArrayList(logcatBuf));
+                        callback.emit(bundleSessionKey, toArrayList(logcatBuf));
                         logcatBuf = createBuffer(MAX_LINES); // Don't reuse to make sure releasing the reference
                     } else if (!bufferedReader.ready()) {
-                        callback.emit(bundleId, toArrayList(logcatBuf));
+                        callback.emit(bundleSessionKey, toArrayList(logcatBuf));
                         logcatBuf = createBuffer(MAX_LINES); // Don't reuse to make sure releasing the reference
                     } else {
                         continue;
@@ -233,7 +237,7 @@ class LogcatProcess {
                     Callback callback = this.callback.get();
 
                     if (callback != null) {
-                        callback.emit(bundleId, toArrayList(logcatBuf));
+                        callback.emit(bundleSessionKey, toArrayList(logcatBuf));
                     }
                 }
 
