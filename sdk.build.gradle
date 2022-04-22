@@ -11,6 +11,7 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName project.version
+        manifestPlaceholders = [sdkVersion:"4"]
     }
 
     buildTypes {
@@ -29,6 +30,9 @@ android {
     }
 
     testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
         unitTests.all {
             jvmArgs "-Xmx1g"
         }

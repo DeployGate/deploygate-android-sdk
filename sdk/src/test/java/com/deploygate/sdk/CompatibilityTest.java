@@ -5,63 +5,36 @@ import com.google.common.truth.Truth;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 @RunWith(JUnit4.class)
 public class CompatibilityTest {
 
     @Test
-    public void check_isUpdateMessageOfBuildSupported() {
+    public void check_SUPPORT_UPDATE_MESSAGE_OF_BUILD() {
         Truth.assertThat(Compatibility.ClientVersion.SUPPORT_UPDATE_MESSAGE_OF_BUILD).isEqualTo(39);
-
-        try (MockedStatic<DeployGate> mocked = Mockito.mockStatic(DeployGate.class)) {
-            mocked.when(new MockedStatic.Verification() {
-                @Override
-                public void apply() throws Throwable {
-                    DeployGate.getDeployGateVersionCode();
-                }
-            }).thenReturn(38, 39, 40);
-
-            Truth.assertThat(Compatibility.isUpdateMessageOfBuildSupported()).isFalse();
-            Truth.assertThat(Compatibility.isUpdateMessageOfBuildSupported()).isTrue();
-            Truth.assertThat(Compatibility.isUpdateMessageOfBuildSupported()).isTrue();
-        }
     }
 
     @Test
-    public void check_isSerializedExceptionSupported() {
+    public void check_SUPPORT_SERIALIZED_EXCEPTION() {
         Truth.assertThat(Compatibility.ClientVersion.SUPPORT_SERIALIZED_EXCEPTION).isEqualTo(42);
+    }
 
-        try (MockedStatic<DeployGate> mocked = Mockito.mockStatic(DeployGate.class)) {
-            mocked.when(new MockedStatic.Verification() {
-                @Override
-                public void apply() throws Throwable {
-                    DeployGate.getDeployGateVersionCode();
-                }
-            }).thenReturn(41, 42, 43);
+    @Test
+    public void check_bitMask_uniqueness() {
+        for (final Compatibility c : Compatibility.values()) {
+            int tmp = c.bitMask;
 
-            Truth.assertThat(Compatibility.isSerializedExceptionSupported()).isFalse();
-            Truth.assertThat(Compatibility.isSerializedExceptionSupported()).isTrue();
-            Truth.assertThat(Compatibility.isSerializedExceptionSupported()).isTrue();
+            while (tmp != 1) {
+                Truth.assertThat(tmp & 1).isEqualTo(0);
+                tmp >>>= 1;
+            }
         }
     }
 
     @Test
-    public void check_isLogcatBundleSupported() {
-        Truth.assertThat(Compatibility.ClientVersion.SUPPORT_LOGCAT_BUNDLE).isEqualTo(Integer.MAX_VALUE);
-
-        try (MockedStatic<DeployGate> mocked = Mockito.mockStatic(DeployGate.class)) {
-            mocked.when(new MockedStatic.Verification() {
-                @Override
-                public void apply() throws Throwable {
-                    DeployGate.getDeployGateVersionCode();
-                }
-            }).thenReturn(Integer.MAX_VALUE - 1, Integer.MAX_VALUE, Integer.MAX_VALUE);
-
-            Truth.assertThat(Compatibility.isLogcatBundleSupported()).isFalse();
-            Truth.assertThat(Compatibility.isLogcatBundleSupported()).isTrue();
-            Truth.assertThat(Compatibility.isLogcatBundleSupported()).isTrue();
-        }
+    public void check_bitMask_value() {
+        Truth.assertThat(Compatibility.UPDATE_MESSAGE_OF_BUILD.bitMask).isEqualTo(1);
+        Truth.assertThat(Compatibility.SERIALIZED_EXCEPTION.bitMask).isEqualTo(2);
+        Truth.assertThat(Compatibility.LOGCAT_BUNDLE.bitMask).isEqualTo(4);
     }
 }

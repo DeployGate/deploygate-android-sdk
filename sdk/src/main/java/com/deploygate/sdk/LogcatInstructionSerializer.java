@@ -193,7 +193,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             }
 
             if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
-                if (Compatibility.isLogcatBundleSupported() && (e instanceof TransactionTooLargeException)) {
+                if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE) && (e instanceof TransactionTooLargeException)) {
                     return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
                 }
             }

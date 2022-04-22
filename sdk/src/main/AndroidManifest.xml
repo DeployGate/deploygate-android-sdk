@@ -8,6 +8,11 @@
             android:name=".DeployGateProvider"
             android:exported="false"
             />
+
+        <meta-data
+            android:name="com.deploygate.sdk.version"
+            android:value="${sdkVersion}"
+            />
     </application>
     <queries>
         <package android:name="com.deploygate" />

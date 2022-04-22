@@ -1,6 +1,5 @@
 package com.deploygate.sdk;
 
-import android.Manifest.permission;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -8,11 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,8 +18,6 @@ import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
@@ -45,25 +37,16 @@ import java.util.concurrent.CountDownLatch;
  */
 public class DeployGate {
     private static final String TAG = "DeployGate";
-    private static final int SDK_VERSION = 4;
 
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
 
-    private static final String[] DEPLOYGATE_FINGERPRINTS = new String[]{
-            // deploygate release
-            "2f97f647645cb762bf5fc1445599a954e6ad76e7",
-            // mba debug
-            "c1f285f69cc02a397135ed182aa79af53d5d20a1",
-            // jenkins debug
-            "234eff4a1600a7aa78bf68adfbb15786e886ae1a",
-            };
-
     private static DeployGate sInstance;
 
     private final Context mApplicationContext;
+    private final DeployGateClient mDeployGateClient;
+    private final HostApp mHostApp;
     private final Handler mHandler;
-    private final boolean mIsLogcatSupported;
     private final ILogcatInstructionSerializer mLogcatInstructionSerializer;
     private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
@@ -81,7 +64,6 @@ public class DeployGate {
     private int mCurrentRevision;
     private String mDistributionId;
     private String mDistributionTitle;
-    private int mDeployGateVersionCode;
 
     private boolean mAppUpdateAvailable;
     private int mAppUpdateRevision;
@@ -98,7 +80,7 @@ public class DeployGate {
                 Bundle extras
         ) throws RemoteException {
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
-                onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false), extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false), extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME), extras.getString(DeployGateEvent.EXTRA_DISTRIBUTION_USER_NAME), extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false), extras.getString(DeployGateEvent.EXTRA_AUTHOR), extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_ID), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_TITLE), extras.getInt(DeployGateEvent.EXTRA_DEPLOYGATE_VERSION_CODE, 0));
+                onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false), extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false), extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME), extras.getString(DeployGateEvent.EXTRA_DISTRIBUTION_USER_NAME), extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false), extras.getString(DeployGateEvent.EXTRA_AUTHOR), extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_ID), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_TITLE));
             } else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
                 onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL), extras.getString(DeployGateEvent.EXTRA_VERSION_NAME), extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE), extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE));
             } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
@@ -119,8 +101,7 @@ public class DeployGate {
                 final String author,
                 int currentRevision,
                 String distributionId,
-                String distributionTitle,
-                int deployGateVersionCode
+                String distributionTitle
         ) throws RemoteException {
             Log.v(TAG, "DeployGate service initialized");
             mAppIsManaged = isManaged;
@@ -129,7 +110,6 @@ public class DeployGate {
             mLoginUsername = loginUsername;
             mDistributionUserName = distributionUserName;
             mAuthor = author;
-            mDeployGateVersionCode = deployGateVersionCode;
             mCurrentRevision = currentRevision;
             mDistributionId = distributionId;
             mDistributionTitle = distributionTitle;
@@ -145,6 +125,12 @@ public class DeployGate {
             });
 
             mIsDeployGateAvailable = true;
+
+            mCustomLogInstructionSerializer.setDisabled(false);
+            mCustomLogInstructionSerializer.connect(mRemoteService);
+            mLogcatInstructionSerializer.setEnabled(true);
+            mLogcatInstructionSerializer.connect(mRemoteService);
+
             mInitializedLatch.countDown();
         }
 
@@ -204,13 +190,15 @@ public class DeployGate {
             Context applicationContext,
             String author,
             DeployGateCallback callback,
-            CustomLogConfiguration customLogConfiguration
+            CustomLogConfiguration customLogConfiguration,
+            HostApp hostApp
     ) {
         mApplicationContext = applicationContext;
+        mDeployGateClient = new DeployGateClient(applicationContext, DEPLOYGATE_PACKAGE);
+        mHostApp = hostApp;
         mHandler = new Handler();
-        mIsLogcatSupported = canLogCat(applicationContext);
-        mLogcatInstructionSerializer = mIsLogcatSupported ? new LogcatInstructionSerializer(mApplicationContext.getPackageName()) : ILogcatInstructionSerializer.NULL_INSTANCE;
-        mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mApplicationContext.getPackageName(), customLogConfiguration);
+        mLogcatInstructionSerializer = mHostApp.canUseLogcat ? new LogcatInstructionSerializer(mHostApp.packageName) : ILogcatInstructionSerializer.NULL_INSTANCE;
+        mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, customLogConfiguration);
         mCallbacks = new HashSet<DeployGateCallback>();
         mExpectedAuthor = author;
 
@@ -225,10 +213,8 @@ public class DeployGate {
     }
 
     private boolean initService(boolean isBoot) {
-        if (isDeployGateAvailable()) {
+        if (mDeployGateClient.isInstalled) {
             Log.v(TAG, "DeployGate installation detected. Initializing.");
-            mCustomLogInstructionSerializer.setDisabled(false);
-            mLogcatInstructionSerializer.setEnabled(true);
             bindToService(isBoot);
             return true;
         } else {
@@ -242,19 +228,6 @@ public class DeployGate {
         }
     }
 
-    private boolean isDeployGateAvailable() {
-        String sig = getDeployGatePackageSignature();
-        if (sig == null) {
-            return false;
-        }
-        for (String value : DEPLOYGATE_FINGERPRINTS) {
-            if (value.equals(sig)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void prepareBroadcastReceiver() {
         IntentFilter filter = new IntentFilter(ACTION_DEPLOYGATE_STARTED);
         mApplicationContext.registerReceiver(new BroadcastReceiver() {
@@ -266,7 +239,7 @@ public class DeployGate {
                 if (intent == null) {
                     return;
                 }
-                if (isDeployGateAvailable()) {
+                if (mDeployGateClient.isInstalled) {
                     bindToService(false);
                 }
             }
@@ -299,51 +272,14 @@ public class DeployGate {
     private void requestServiceInit(final boolean isBoot) {
         Bundle args = new Bundle();
         args.putBoolean(DeployGateEvent.EXTRA_IS_BOOT, isBoot);
-        args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, mIsLogcatSupported);
+        args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, mHostApp.canUseLogcat);
         args.putString(DeployGateEvent.EXTRA_EXPECTED_AUTHOR, mExpectedAuthor);
-        args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, SDK_VERSION);
+        args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, mHostApp.sdkVersion);
         try {
-            mRemoteService.init(mRemoteCallback, mApplicationContext.getPackageName(), args);
-            mCustomLogInstructionSerializer.connect(mRemoteService);
-            mLogcatInstructionSerializer.connect(mRemoteService);
+            mRemoteService.init(mRemoteCallback, mHostApp.packageName, args);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
         }
-    }
-
-    private String getDeployGatePackageSignature() {
-        PackageInfo info;
-        try {
-            info = mApplicationContext.getPackageManager().getPackageInfo(DEPLOYGATE_PACKAGE, PackageManager.GET_SIGNATURES);
-        } catch (NameNotFoundException e) {
-            return null;
-        }
-        if (info == null || info.signatures == null || info.signatures.length == 0) {
-            return null;
-        }
-
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e) {
-            Log.e(TAG, "SHA1 is not supported on this platform?", e);
-            return null;
-        }
-
-        byte[] digest = md.digest(info.signatures[0].toByteArray());
-        StringBuilder result = new StringBuilder(40);
-        for (int i = 0; i < digest.length; i++) {
-            result.append(Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1));
-        }
-        return result.toString();
-    }
-
-    private static boolean canLogCat(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            return true;
-        }
-
-        return context.getPackageManager().checkPermission(permission.READ_LOGS, context.getPackageName()) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -591,12 +527,14 @@ public class DeployGate {
             return;
         }
 
-        if (!forceApplyOnReleaseBuild && !isDebuggable(app.getApplicationContext())) {
+        HostApp hostApp = new HostApp(app.getApplicationContext());
+
+        if (!forceApplyOnReleaseBuild && !hostApp.debuggable) {
             return;
         }
 
         Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread.getDefaultUncaughtExceptionHandler()));
-        sInstance = new DeployGate(app.getApplicationContext(), author, callback, customLogConfiguration);
+        sInstance = new DeployGate(app.getApplicationContext(), author, callback, customLogConfiguration, hostApp);
     }
 
     /**
@@ -929,20 +867,6 @@ public class DeployGate {
         }
     }
 
-    private static boolean isDebuggable(Context context) {
-        PackageManager manager = context.getPackageManager();
-        ApplicationInfo appInfo = null;
-        try {
-            appInfo = manager.getApplicationInfo(context.getPackageName(), 0);
-        } catch (NameNotFoundException e) {
-            return false;
-        }
-        if ((appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == ApplicationInfo.FLAG_DEBUGGABLE) {
-            return true;
-        }
-        return false;
-    }
-
     static DeployGate getInstance() {
         return sInstance;
     }
@@ -954,7 +878,7 @@ public class DeployGate {
 
         Bundle extras = new Bundle();
         try {
-            if (Compatibility.isSerializedExceptionSupported()) {
+            if (mDeployGateClient.isSupported(Compatibility.SERIALIZED_EXCEPTION)) {
                 Throwable rootCause = getRootCause(ex);
                 String msg = rootCause.getMessage();
                 extras.putString(DeployGateEvent.EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME, rootCause.getClass().getName());
@@ -964,7 +888,7 @@ public class DeployGate {
                 extras.putSerializable(DeployGateEvent.EXTRA_EXCEPTION, ex);
             }
 
-            mRemoteService.sendEvent(mApplicationContext.getPackageName(), DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
+            mRemoteService.sendEvent(mHostApp.packageName, DeployGateEvent.ACTION_SEND_CRASH_REPORT, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to send crash report: " + e.getMessage());
         }
@@ -988,6 +912,14 @@ public class DeployGate {
             String body
     ) {
         mCustomLogInstructionSerializer.requestSendingLog(new CustomLog(type, body));
+    }
+
+    static boolean isFeatureSupported(Compatibility compatibility) {
+        if (sInstance == null) {
+            return false;
+        }
+
+        return sInstance.mDeployGateClient.isSupported(compatibility);
     }
 
     /**
@@ -1088,18 +1020,30 @@ public class DeployGate {
     }
 
     /**
-     * Returns android:versionCode of DeployGate app.
-     *
-     * @return Version code of DeployGate, or 0 if DeployGate is older than v1.7.0 (39)
-     *
-     * @since r4
+     * Use {@link DeployGate#getDeployGateLongVersionCode}
      */
+    @Deprecated
     public static int getDeployGateVersionCode() {
         if (sInstance == null) {
             return 0;
         }
 
-        return sInstance.mDeployGateVersionCode;
+        return (int) sInstance.mDeployGateClient.versionCode;
+    }
+
+    /**
+     * Returns android:versionCode of DeployGate app.
+     *
+     * @return Version code of DeployGate, or 0 if DeployGate is older than v1.7.0 (39)
+     *
+     * @since 4.4.0 FIXME
+     */
+    public static long getDeployGateLongVersionCode() {
+        if (sInstance == null) {
+            return 0;
+        }
+
+        return sInstance.mDeployGateClient.versionCode;
     }
 
     /**
@@ -1176,7 +1120,7 @@ public class DeployGate {
      * @since r4
      */
     public static String getUpdateMessage() {
-        if (sInstance == null || !Compatibility.isUpdateMessageOfBuildSupported()) {
+        if (sInstance == null || !isFeatureSupported(Compatibility.UPDATE_MESSAGE_OF_BUILD)) {
             return null;
         }
 
@@ -1255,7 +1199,7 @@ public class DeployGate {
             return;
         }
         try {
-            mRemoteService.sendEvent(mApplicationContext.getPackageName(), action, extras);
+            mRemoteService.sendEvent(mHostApp.packageName, action, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to invoke " + action + " action: " + e.getMessage());
         }
