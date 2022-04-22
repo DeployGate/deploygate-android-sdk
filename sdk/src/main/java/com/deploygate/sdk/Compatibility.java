@@ -1,14 +1,27 @@
 package com.deploygate.sdk;
 
 enum Compatibility {
-    UPDATE_MESSAGE_OF_BUILD(0b1),
-    SERIALIZED_EXCEPTION(0b10),
-    LOGCAT_BUNDLE(0b100);
+    UPDATE_MESSAGE_OF_BUILD(1),
+    SERIALIZED_EXCEPTION(1 << 1),
+    LOGCAT_BUNDLE(1 << 2);
 
     final int bitMask;
 
     Compatibility(int bitMask) {
         this.bitMask = bitMask;
+    }
+
+    /**
+     * @return sum of all bits
+     */
+    static int all() {
+        int bit = 0;
+
+        for (Compatibility compatibility : Compatibility.values()) {
+            bit |= compatibility.bitMask;
+        }
+
+        return bit;
     }
 
     /**

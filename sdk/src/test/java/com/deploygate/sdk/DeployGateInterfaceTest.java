@@ -275,6 +275,11 @@ public class DeployGateInterfaceTest {
     }
 
     @Test
+    public void getDeployGateLongVersionCode() {
+        Truth.assertThat(DeployGate.getDeployGateLongVersionCode()).isEqualTo(0);
+    }
+
+    @Test
     public void hasUpdate() {
         Truth.assertThat(DeployGate.hasUpdate()).isFalse();
     }

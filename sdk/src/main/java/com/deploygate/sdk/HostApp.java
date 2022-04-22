@@ -35,7 +35,7 @@ class HostApp {
             return;
         }
 
-        this.debuggable = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) > 0;
+        this.debuggable = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             this.canUseLogcat = true;

@@ -24,10 +24,17 @@ public class CompatibilityTest {
         for (final Compatibility c : Compatibility.values()) {
             int tmp = c.bitMask;
 
-            while (tmp > 1) {
-                Truth.assertThat(tmp % 2).isEqualTo(0);
-                tmp /= 2;
+            while (tmp != 1) {
+                Truth.assertThat(tmp & 1).isEqualTo(0);
+                tmp >>>= 1;
             }
         }
+    }
+
+    @Test
+    public void check_bitMask_value() {
+        Truth.assertThat(Compatibility.UPDATE_MESSAGE_OF_BUILD.bitMask).isEqualTo(1);
+        Truth.assertThat(Compatibility.SERIALIZED_EXCEPTION.bitMask).isEqualTo(2);
+        Truth.assertThat(Compatibility.LOGCAT_BUNDLE.bitMask).isEqualTo(4);
     }
 }

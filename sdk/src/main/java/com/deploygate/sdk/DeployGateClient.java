@@ -23,7 +23,7 @@ class DeployGateClient {
 
     public final long versionCode;
     public final boolean isInstalled;
-    private final long featuresFlag;
+    private final int featuresFlag;
 
     @SuppressLint("PackageManagerGetSignatures")
     DeployGateClient(
@@ -45,8 +45,10 @@ class DeployGateClient {
             Logger.w("deploygate app is not found");
         }
 
-        if (info != null) {
-            this.isInstalled = checkSignature(info);
+        Signature[] signatures = getSignatures(info);
+
+        if (info != null && checkSignature(signatures)) {
+            this.isInstalled = true;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 this.versionCode = info.getLongVersionCode();
@@ -54,16 +56,20 @@ class DeployGateClient {
                 this.versionCode = info.versionCode;
             }
 
-            this.featuresFlag = info.applicationInfo.metaData.getLong("com.deploygate.features", 0);
+            this.featuresFlag = info.applicationInfo.metaData.getInt("com.deploygate.features", 0);
         } else {
             this.isInstalled = false;
             this.versionCode = 0;
-            this.featuresFlag = 0;
+            this.featuresFlag = -1;
         }
     }
 
     boolean isSupported(Compatibility compatibility) {
-        if (featuresFlag <= 0) {
+        if (featuresFlag < 0) {
+            return false;
+        }
+
+        if (featuresFlag == 0) {
             switch (compatibility) {
                 case UPDATE_MESSAGE_OF_BUILD:
                     return versionCode >= Compatibility.ClientVersion.SUPPORT_UPDATE_MESSAGE_OF_BUILD;
@@ -78,22 +84,14 @@ class DeployGateClient {
     }
 
     /**
-     * Check if the whitelist contains at least one of signing information.
-     * Returning *true* may contain false-positive API 19 or lower. ref: FakeID
-     *
      * @param info
      *         com.deploygate's package info
      *
-     * @return true if at least one of signature is in the whitelist, otherwise false.
+     * @return signature array that is not null but may be zero-length
      */
-    private static boolean checkSignature(PackageInfo info) {
-        final MessageDigest md;
-
-        try {
-            md = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e) {
-            Logger.e("SHA1 is not supported on this platform?", e);
-            return false;
+    private Signature[] getSignatures(PackageInfo info) {
+        if (info == null) {
+            return new Signature[0];
         }
 
         final Signature[] signatures;
@@ -102,7 +100,7 @@ class DeployGateClient {
             SigningInfo signingInfo = info.signingInfo;
 
             if (signingInfo == null) {
-                return false;
+                return new Signature[0];
             }
 
             if (signingInfo.hasMultipleSigners()) {
@@ -114,7 +112,25 @@ class DeployGateClient {
             signatures = info.signatures;
         }
 
-        if (signatures == null) {
+        return signatures != null ? signatures : new Signature[0];
+    }
+
+    /**
+     * Check if the whitelist contains at least one of signing information.
+     * Returning *true* may contain false-positive API 19 or lower. ref: FakeID
+     *
+     * @param signatures
+     *         an array of signatures
+     *
+     * @return true if at least one of signature is in the whitelist, otherwise false.
+     */
+    static boolean checkSignature(Signature[] signatures) {
+        final MessageDigest md;
+
+        try {
+            md = MessageDigest.getInstance("SHA1");
+        } catch (NoSuchAlgorithmException e) {
+            Logger.e("SHA1 is not supported on this platform?", e);
             return false;
         }
 
