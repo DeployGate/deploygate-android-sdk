@@ -6,7 +6,7 @@ import android.os.SystemClock;
 import com.deploygate.service.DeployGateEvent;
 
 class CustomLog {
-    public final String uid;
+    public final String cid;
     public final String type;
     public final String body;
     private final long elapsedTime;
@@ -18,7 +18,7 @@ class CustomLog {
     ) {
         this.type = type;
         this.body = body;
-        this.uid = UniqueId.generate();
+        this.cid = ClientId.generate();
         this.elapsedTime = SystemClock.elapsedRealtime();
         this.retryCount = 0;
     }
@@ -35,7 +35,7 @@ class CustomLog {
      */
     Bundle toExtras() {
         Bundle extras = new Bundle();
-        extras.putSerializable(DeployGateEvent.EXTRA_UID, uid);
+        extras.putSerializable(DeployGateEvent.EXTRA_CID, cid);
         extras.putSerializable(DeployGateEvent.EXTRA_LOG, body);
         extras.putSerializable(DeployGateEvent.EXTRA_LOG_TYPE, type);
         extras.putLong(DeployGateEvent.EXTRA_BUFFERED_AT_IN_MILLI_SECONDS, elapsedTime);

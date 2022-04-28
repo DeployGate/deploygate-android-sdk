@@ -67,12 +67,17 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         this.logcatProcess = new LogcatProcess(new LogcatProcess.Callback() {
             @Override
             public void emit(
-                    String bundleId,
+                    String bundleSessionKey,
                     ArrayList<String> logcatLines
             ) {
                 ensureHandlerPrepared();
 
-                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(bundleId, logcatLines));
+                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(bundleSessionKey, logcatLines));
+            }
+
+            @Override
+            public void onFinished(String bundleSessionKey) {
+                handler.enqueueSendLogcatMessageInstruction(SendLogcatRequest.createTermination(bundleSessionKey));
             }
         });
         this.thread = new HandlerThread("deploygate-sdk-logcat");
@@ -194,8 +199,11 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             }
 
             if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
-                if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE) && (e instanceof TransactionTooLargeException)) {
-                    return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
+                if (e instanceof TransactionTooLargeException) {
+                    if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE) && !ClientId.isValid(request.bundleSessionKey)) {
+                        // bundle logcat is not only supported by SDK requests
+                        return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
+                    }
                 }
             }
 

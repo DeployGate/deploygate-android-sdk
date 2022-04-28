@@ -71,7 +71,7 @@ public class LogcatProcessTest {
         try {
             fakeLogcat = new FakeLogcat(10);
 
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bsk1", false, capture);
 
             watcher.run();
 
@@ -88,7 +88,7 @@ public class LogcatProcessTest {
 
         try {
             fakeLogcat = new FakeLogcat(501);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks2", false, capture);
 
             watcher.run();
 
@@ -109,7 +109,7 @@ public class LogcatProcessTest {
 
         try {
             fakeLogcat = new FakeLogcat(1000);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks3", false, capture);
 
             watcher.run();
 
@@ -135,7 +135,7 @@ public class LogcatProcessTest {
 
         try {
             fakeLogcat = new FakeLogcat(10);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(true, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks1", true, capture);
 
             watcher.run();
 
@@ -152,7 +152,7 @@ public class LogcatProcessTest {
 
         try {
             fakeLogcat = new FakeLogcat(501);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(true, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks2", true, capture);
 
             watcher.run();
 
@@ -172,7 +172,7 @@ public class LogcatProcessTest {
 
         try {
             fakeLogcat = new FakeLogcat(1000);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(true, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks3", true, capture);
 
             watcher.run();
 
@@ -199,7 +199,7 @@ public class LogcatProcessTest {
             // call the method for the finished process
 
             fakeLogcat = new FakeLogcat(10);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks1", false, capture);
 
             watcher.run();
 
@@ -220,7 +220,7 @@ public class LogcatProcessTest {
             // interrupt the on-going process that read lines less than MAX_LINES
 
             fakeLogcat = new FakeLogcat(20, 10);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks2", false, capture);
 
             destroyWorkerAfter(watcher, 300, TimeUnit.MILLISECONDS);
 
@@ -239,7 +239,7 @@ public class LogcatProcessTest {
             // interrupt the on-going process that read many lines more than MAX_LINES
 
             fakeLogcat = new FakeLogcat(550, 549);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(false, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks3", false, capture);
 
             destroyWorkerAfter(watcher, 500, TimeUnit.MILLISECONDS);
 
@@ -268,7 +268,7 @@ public class LogcatProcessTest {
             // call the method for the finished process
 
             fakeLogcat = new FakeLogcat(10);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(true, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks1", true, capture);
 
             watcher.run();
 
@@ -289,7 +289,7 @@ public class LogcatProcessTest {
             // interrupt the on-going process that read lines less than MAX_LINES
 
             fakeLogcat = new FakeLogcat(20, 10);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(true, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks2", true, capture);
 
             destroyWorkerAfter(watcher, 300, TimeUnit.MILLISECONDS);
 
@@ -308,7 +308,7 @@ public class LogcatProcessTest {
             // interrupt the on-going process that read many lines more than MAX_LINES
 
             fakeLogcat = new FakeLogcat(550, 549);
-            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher(true, capture);
+            LogcatProcess.LogcatWatcher watcher = new LogcatProcess.LogcatWatcher("bks3", true, capture);
 
             destroyWorkerAfter(watcher, 300, TimeUnit.MILLISECONDS);
 
@@ -346,13 +346,14 @@ public class LogcatProcessTest {
 
     private static class CaptureCallback implements LogcatProcess.Callback {
         private final Map<String, List<List<String>>> captured = new HashMap<>();
+        private final Map<String, Boolean> finished = new HashMap<>();
 
         @Override
         public void emit(
-                String bundleId,
+                String bundleSessionKey,
                 ArrayList<String> logcatLines
         ) {
-            List<List<String>> linesList = captured.get(bundleId);
+            List<List<String>> linesList = captured.get(bundleSessionKey);
 
             if (linesList == null) {
                 linesList = new ArrayList<>();
@@ -360,7 +361,12 @@ public class LogcatProcessTest {
 
             linesList.add(logcatLines);
 
-            captured.put(bundleId, linesList);
+            captured.put(bundleSessionKey, linesList);
+        }
+
+        @Override
+        public void onFinished(String bundleSessionKey) {
+            finished.put(bundleSessionKey, true);
         }
     }
 }

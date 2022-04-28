@@ -23,9 +23,10 @@ import java.util.concurrent.atomic.AtomicReference;
 class LogcatProcess {
     interface Callback {
         void emit(
-                String tid,
+                String bundleSessionKey,
                 ArrayList<String> logcatLines
         );
+        void onFinished(String bundleSessionKey);
     }
 
     static final String UNKNOWN_WATCHER_ID = "UNKNOWN";
@@ -128,7 +129,7 @@ class LogcatProcess {
                 boolean isOneShot,
                 Callback callback
         ) {
-            this.bundleSessionKey = bundleSessionKey;
+            this.bundleSessionKey = bundleSessionKey != null ? bundleSessionKey : ClientId.generate();
             this.isOneShot = isOneShot;
             this.callback = new WeakReference<>(callback);
             this.processRef = new AtomicReference<>();
@@ -267,6 +268,12 @@ class LogcatProcess {
                     } catch (Throwable th) {
                         Logger.e(th, "an unexpected error happened when destroying the process");
                     }
+                }
+
+                Callback callback = this.callback.get();
+
+                if (callback != null) {
+                    callback.onFinished(bundleSessionKey);
                 }
             }
         }

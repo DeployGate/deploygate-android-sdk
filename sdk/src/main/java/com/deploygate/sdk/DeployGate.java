@@ -84,11 +84,13 @@ public class DeployGate {
             } else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
                 onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL), extras.getString(DeployGateEvent.EXTRA_VERSION_NAME), extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE), extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE));
             } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
-                onOneshotLogcat();
+                String bundleSessionKey = extras.getString(DeployGateEvent.EXTRA_BUNDLE_SESSION_KEY);
+                onOneshotLogcat(bundleSessionKey);
             } else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
-                onEnableStreamedLogcat(true);
+                String bundleSessionKey = extras.getString(DeployGateEvent.EXTRA_BUNDLE_SESSION_KEY);
+                onEnableStreamedLogcat(bundleSessionKey);
             } else if (DeployGateEvent.ACTION_DISABLE_LOGCAT.equals(action)) {
-                onEnableStreamedLogcat(false);
+                onDisableStreamedLogcat();
             }
         }
 
@@ -157,16 +159,25 @@ public class DeployGate {
         }
     };
 
-    private void onOneshotLogcat() {
-        mLogcatInstructionSerializer.requestSendingLogcat(true);
+    private void requestOneshotLogcat() {
+        if (mRemoteService != null) {
+            CreateOneshotLogcatRequest request = new CreateOneshotLogcatRequest();
+            invokeAction(DeployGateEvent.ACTION_CREATE_ONESHOT_LOGCAT, request.toExtras());
+        } else {
+            mLogcatInstructionSerializer.requestSendingLogcat(null, true);
+        }
     }
 
-    private void onEnableStreamedLogcat(boolean isEnabled) {
-        if (isEnabled) {
-            mLogcatInstructionSerializer.requestSendingLogcat(false);
-        } else {
-            mLogcatInstructionSerializer.cancel();
-        }
+    private void onOneshotLogcat(String bundleSessionKey) {
+        mLogcatInstructionSerializer.requestSendingLogcat(bundleSessionKey, true);
+    }
+
+    private void onEnableStreamedLogcat(String bundleSessionKey) {
+        mLogcatInstructionSerializer.requestSendingLogcat(bundleSessionKey, false);
+    }
+
+    private void onDisableStreamedLogcat() {
+       mLogcatInstructionSerializer.cancel();
     }
 
     void callbackDeployGateUnavailable() {
@@ -279,6 +290,20 @@ public class DeployGate {
             mRemoteService.init(mRemoteCallback, mHostApp.packageName, args);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
+        }
+    }
+
+    private void invokeAction(
+            String action,
+            Bundle extras
+    ) {
+        if (mRemoteService == null) {
+            return;
+        }
+        try {
+            mRemoteService.sendEvent(mHostApp.packageName, action, extras);
+        } catch (RemoteException e) {
+            Log.w(TAG, "failed to invoke " + action + " action: " + e.getMessage());
         }
     }
 
@@ -933,7 +958,11 @@ public class DeployGate {
      */
     public static void requestLogCat() {
         if (sInstance != null) {
-            sInstance.onOneshotLogcat();
+            if (sInstance.mDeployGateClient.isSupported(Compatibility.LOGCAT_BUNDLE)) {
+                sInstance.requestOneshotLogcat();
+            } else {
+                sInstance.onOneshotLogcat(null);
+            }
         }
     }
 
@@ -1189,20 +1218,6 @@ public class DeployGate {
         Bundle extras = new Bundle();
         extras.putString(DeployGateEvent.EXTRA_COMMENT, defaultComment);
         sInstance.invokeAction(DeployGateEvent.ACTION_COMPOSE_COMMENT, extras);
-    }
-
-    private void invokeAction(
-            String action,
-            Bundle extras
-    ) {
-        if (mRemoteService == null) {
-            return;
-        }
-        try {
-            mRemoteService.sendEvent(mHostApp.packageName, action, extras);
-        } catch (RemoteException e) {
-            Log.w(TAG, "failed to invoke " + action + " action: " + e.getMessage());
-        }
     }
 
     /**

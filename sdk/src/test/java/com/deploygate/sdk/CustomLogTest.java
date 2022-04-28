@@ -20,11 +20,11 @@ public class CustomLogTest {
 
     @Test
     public void CustomLog_toExtras_must_be_valid_format() {
-        try (MockedStatic<UniqueId> uidMock = Mockito.mockStatic(UniqueId.class)) {
-            uidMock.when(new MockedStatic.Verification() {
+        try (MockedStatic<ClientId> cidMock = Mockito.mockStatic(ClientId.class)) {
+            cidMock.when(new MockedStatic.Verification() {
                 @Override
                 public void apply() throws Throwable {
-                    UniqueId.generate();
+                    ClientId.generate();
                 }
             }).thenReturn("unique_id");
 
@@ -44,10 +44,10 @@ public class CustomLogTest {
             long bufferedAt
     ) {
         Bundle bundle = new Bundle();
-        bundle.putString("uid", "unique_id");
+        bundle.putString("e.cid", "unique_id");
         bundle.putString("logType", type);
         bundle.putString("log", body);
-        bundle.putLong("bufferedAt", bufferedAt);
+        bundle.putLong("e.bufferedAt", bufferedAt);
         return bundle;
     }
 }
