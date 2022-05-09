@@ -26,6 +26,7 @@ class LogcatProcess {
                 String bundleSessionKey,
                 ArrayList<String> logcatLines
         );
+
         void onFinished(String bundleSessionKey);
     }
 
@@ -129,7 +130,7 @@ class LogcatProcess {
                 boolean isOneShot,
                 Callback callback
         ) {
-            this.bundleSessionKey = bundleSessionKey != null ? bundleSessionKey : ClientId.generate();
+            this.bundleSessionKey = bundleSessionKey;
             this.isOneShot = isOneShot;
             this.callback = new WeakReference<>(callback);
             this.processRef = new AtomicReference<>();

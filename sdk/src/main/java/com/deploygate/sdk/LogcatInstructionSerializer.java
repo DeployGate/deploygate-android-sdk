@@ -112,6 +112,11 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             return false;
         }
 
+        if (TextUtils.isEmpty(bundleSessionKey)) {
+            Logger.e("invalid bundle session key was found. This may happen due to implementation failures on sdk-side.");
+            return false;
+        }
+
         Pair<String, String> ids = logcatProcess.execute(bundleSessionKey, isOneShot);
 
         String retiredId = ids.first;
@@ -136,9 +141,9 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         isEnabled = enabled;
 
         if (isEnabled) {
-            Logger.d("Disabled logcat instruction serializer");
-        } else {
             Logger.d("Enabled logcat instruction serializer");
+        } else {
+            Logger.d("Disabled logcat instruction serializer");
         }
     }
 
@@ -200,8 +205,12 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
             if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
                 if (e instanceof TransactionTooLargeException) {
-                    if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE) && !ClientId.isValid(request.bundleSessionKey)) {
-                        // bundle logcat is not only supported by SDK requests
+                    if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE)) {
+                        if (ClientId.isValid(request.bundleSessionKey)) {
+                            // SDK-origin requests do not support bundle logcat
+                            return SEND_LOGCAT_RESULT_FAILURE_RETRIABLE;
+                        }
+
                         return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
                     }
                 }
