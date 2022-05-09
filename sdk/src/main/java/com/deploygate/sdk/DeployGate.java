@@ -89,28 +89,17 @@ public class DeployGate {
             } else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
                 onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL), extras.getString(DeployGateEvent.EXTRA_VERSION_NAME), extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE), extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE));
             } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
-                if (mDeployGateClient.isSupported(Compatibility.LOGCAT_BUNDLE)) {
-                    String bundleSessionKey = extras.getString(DeployGateEvent.EXTRA_BUNDLE_SESSION_KEY);
-
-                    if (TextUtils.isEmpty(bundleSessionKey)) {
-                        Logger.w("%s is missing in the extra", DeployGateEvent.EXTRA_BUNDLE_SESSION_KEY);
-                        return;
-                    }
-
-                    onOneshotBundleLogcat(bundleSessionKey);
-                } else {
-                    onOneshotNonBundleLogcat();
-                }
+                onOneshotLogcat();
             } else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
-                if (mDeployGateClient.isSupported(Compatibility.LOGCAT_BUNDLE)) {
-                    String bundleSessionKey = extras.getString(DeployGateEvent.EXTRA_BUNDLE_SESSION_KEY);
+                if (mDeployGateClient.isSupported(Compatibility.STREAMED_LOGCAT)) {
+                    String sessionKey = extras.getString(DeployGateEvent.EXTRA_LOGCAT_STREAM_SESSION_KEY);
 
-                    if (TextUtils.isEmpty(bundleSessionKey)) {
-                        Logger.w("%s is missing in the extra", DeployGateEvent.EXTRA_BUNDLE_SESSION_KEY);
+                    if (TextUtils.isEmpty(sessionKey)) {
+                        Logger.w("%s is missing in the extra", DeployGateEvent.EXTRA_LOGCAT_STREAM_SESSION_KEY);
                         return;
                     }
 
-                    onEnableStreamedLogcat(bundleSessionKey);
+                    onEnableStreamedLogcat(sessionKey);
                 } else {
                     Logger.w("streamed logcat is not supported");
                 }
@@ -185,39 +174,24 @@ public class DeployGate {
     };
 
     private void requestOneshotLogcat() {
-        if (!mDeployGateClient.isSupported(Compatibility.LOGCAT_BUNDLE) || mRemoteService == null) {
-            // Publish an oneshot request from sdk
-            onOneshotNonBundleLogcat();
-            return;
-        }
-
-        CreateOneshotLogcatRequest request = new CreateOneshotLogcatRequest();
-        invokeAction(DeployGateEvent.ACTION_CREATE_ONESHOT_LOGCAT, request.toExtras());
+        onOneshotLogcat();
     }
 
-    private void onOneshotNonBundleLogcat() {
-        mLogcatInstructionSerializer.requestSendingLogcat(ClientId.generate(), true);
+    private void onOneshotLogcat() {
+        mLogcatInstructionSerializer.requestOneshotLogcat();
     }
 
-    /**
-     * @param bundleSessionKey
-     *         specify null when creating sdk-origin oneshot requests
-     */
-    private void onOneshotBundleLogcat(String bundleSessionKey) {
-        mLogcatInstructionSerializer.requestSendingLogcat(bundleSessionKey, true);
-    }
-
-    private void onEnableStreamedLogcat(String bundleSessionKey) {
-        if (TextUtils.isEmpty(bundleSessionKey)) {
+    private void onEnableStreamedLogcat(String streamSessionKey) {
+        if (TextUtils.isEmpty(streamSessionKey)) {
             Logger.w("sdk-origin streamed logcat requests are forbidden");
             return;
         }
 
-        mLogcatInstructionSerializer.requestSendingLogcat(bundleSessionKey, false);
+        mLogcatInstructionSerializer.requestStreamedLogcat(streamSessionKey);
     }
 
     private void onDisableStreamedLogcat() {
-        mLogcatInstructionSerializer.cancel();
+        mLogcatInstructionSerializer.stopStream();
     }
 
     void callbackDeployGateUnavailable() {

@@ -19,16 +19,15 @@ interface ILogcatInstructionSerializer {
     void disconnect();
 
     /**
-     * Create and enqueue a request to send logcat
-     *
-     * @param bundleSessionKey
-     *         a bundle session key (non-null)
-     * @param isOneShot
-     *         specify true for oneshot logcat, otherwise for streamed logcat
+     * Create and enqueue a request to start sending oneshot logcat
      */
-    boolean requestSendingLogcat(
-            String bundleSessionKey,
-            boolean isOneShot
+    boolean requestOneshotLogcat();
+
+    /**
+     * Create and enqueue a request to start sending streamed logcat
+     */
+    boolean requestStreamedLogcat(
+            String sessionKey
     );
 
     /**
@@ -40,9 +39,9 @@ interface ILogcatInstructionSerializer {
     void setEnabled(boolean enabled);
 
     /**
-     * Cancel the on-going logcat process
+     * Cancel the on-going streamed logcat process
      */
-    void cancel();
+    void stopStream();
 
     ILogcatInstructionSerializer NULL_INSTANCE = new ILogcatInstructionSerializer() {
 
@@ -57,11 +56,14 @@ interface ILogcatInstructionSerializer {
         }
 
         @Override
-        public boolean requestSendingLogcat(
-                String bundleSessionKey,
-                boolean isOneShot
-        ) {
-            Logger.d("Logcat (no-op): requestSendingLogcat(%s, %s)", bundleSessionKey, String.valueOf(isOneShot));
+        public boolean requestOneshotLogcat() {
+            Logger.d("Logcat (no-op): requestOneshotLogcat");
+            return false;
+        }
+
+        @Override
+        public boolean requestStreamedLogcat(String sessionKey) {
+            Logger.d("Logcat (no-op): requestStreamedLogcat(%s)", sessionKey);
             return false;
         }
 
@@ -71,8 +73,8 @@ interface ILogcatInstructionSerializer {
         }
 
         @Override
-        public void cancel() {
-            Logger.d("Logcat (no-op): cancel");
+        public void stopStream() {
+            Logger.d("Logcat (no-op): stopStream");
         }
     };
 }

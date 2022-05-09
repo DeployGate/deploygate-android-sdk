@@ -11,32 +11,63 @@ import java.util.List;
 import java.util.Locale;
 
 class SendLogcatRequest {
-    public static final SendLogcatRequest createTermination(String bundleSessionKey) {
-        return new SendLogcatRequest(bundleSessionKey, new ArrayList<String>(), true);
+    enum Position {
+        Beginning,
+        Content,
+        Termination;
+
+        private String label() {
+            switch (this) {
+                case Beginning:
+                    return "beginning";
+                case Content:
+                    return "content";
+                case Termination:
+                    return "termination";
+                default:
+                    throw new IllegalStateException(String.format(Locale.US, "%s is not mapped", name()));
+            }
+        }
     }
 
-    public final String bundleSessionKey;
+    public static SendLogcatRequest createTermination(String processId) {
+        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Termination);
+    }
+
+    public static SendLogcatRequest createBeginning(String processId) {
+        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Beginning);
+    }
+
+    public final String pid;
     public final String cid;
     public final ArrayList<String> lines;
-    public final boolean isBundleTermination;
+    public final Position position;
     private int retryCount;
 
     SendLogcatRequest(
-            String bundleSessionKey,
+            String pid,
             List<String> lines
     ) {
-        this(bundleSessionKey, lines, false);
+        this(pid, lines, Position.Content);
     }
 
+    /**
+     * @param pid
+     *         a process id. non-null
+     * @param lines
+     *         logcat contents if available. Zero value is an empty list.
+     * @param position
+     *         a position of this request. non-null
+     */
     private SendLogcatRequest(
-            String bundleSessionKey,
+            String pid,
             List<String> lines,
-            boolean isBundleTermination
+            Position position
     ) {
-        this.bundleSessionKey = bundleSessionKey;
+        this.pid = pid;
         this.cid = ClientId.generate();
         this.lines = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
-        this.isBundleTermination = isBundleTermination;
+        this.position = position;
     }
 
     /**
@@ -51,7 +82,7 @@ class SendLogcatRequest {
             throw new IllegalArgumentException(String.format(Locale.US, "split count must be greater than 1 but %d", count));
         }
 
-        if (count == 1 || isBundleTermination) {
+        if (count == 1 || position != Position.Content) {
             return Collections.singletonList(this);
         }
 
@@ -67,7 +98,7 @@ class SendLogcatRequest {
         for (int i = 0, offset = 0, step = size / count; i < count; i++, offset += step) {
             final int endIndex = (i == count - 1) ? size : offset + step;
 
-            splits.add(new SendLogcatRequest(bundleSessionKey, lines.subList(offset, endIndex), false));
+            splits.add(new SendLogcatRequest(pid, lines.subList(offset, endIndex), Position.Content));
         }
 
         return splits;
@@ -76,10 +107,10 @@ class SendLogcatRequest {
     Bundle toExtras() {
         Bundle extras = new Bundle();
 
-        extras.putString(DeployGateEvent.EXTRA_BUNDLE_SESSION_KEY, bundleSessionKey);
+        extras.putString(DeployGateEvent.EXTRA_INSTRUCTION_GROUP_ID, pid);
         extras.putString(DeployGateEvent.EXTRA_CID, cid);
         extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
-        extras.putBoolean(DeployGateEvent.EXTRA_IS_BUNDLE_TERMINATION, isBundleTermination);
+        extras.putString(DeployGateEvent.EXTRA_BUNDLE_POSITION, position.label());
 
         return extras;
     }

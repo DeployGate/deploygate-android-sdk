@@ -17,7 +17,6 @@ public interface DeployGateEvent {
     public static final String ACTION_ENABLE_LOGCAT = "enableLogcat";
     public static final String ACTION_DISABLE_LOGCAT = "disableLogcat";
     public static final String ACTION_ONESHOT_LOGCAT = "oneshotLogcat";
-    public static final String ACTION_CREATE_ONESHOT_LOGCAT = "a.create-oneshot-logcat";
 
     public static final String ACTION_SEND_LOGCAT = "sendLogcat";
     public static final String ACTION_SEND_CRASH_REPORT = "reportCrash";
@@ -49,14 +48,19 @@ public interface DeployGateEvent {
     public static final String EXTRA_CID = "e.cid";
 
     /**
-     * session key of a bundle that collects instructions (data)
+     * a group id that collects instructions
      */
-    public static final String EXTRA_BUNDLE_SESSION_KEY = "e.bundle-session-key";
+    public static final String EXTRA_INSTRUCTION_GROUP_ID = "e.gid";
 
     /**
-     * a marker for terminating the bundle
+     * session key of a logcat-stream
      */
-    public static final String EXTRA_IS_BUNDLE_TERMINATION = "e.is-bundle-termination";
+    public static final String EXTRA_LOGCAT_STREAM_SESSION_KEY = "e.logcat-stream-session-key";
+
+    /**
+     * a marker of the bundle positioning
+     */
+    public static final String EXTRA_BUNDLE_POSITION = "e.bundle-position";
 
     /**
      * buffered-at in sdk-side, depends on device-clock.

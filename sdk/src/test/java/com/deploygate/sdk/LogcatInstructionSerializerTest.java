@@ -101,7 +101,7 @@ public class LogcatInstructionSerializerTest {
     public void sendSingleChunk_always_returns_retriable_status_if_service_is_none() throws RemoteException {
         instructionSerializer = new LogcatInstructionSerializer(PACKAGE_NAME);
 
-        instructionSerializer.requestSendingLogcat("bsk", true);
+        instructionSerializer.requestOneshotLogcat();
 
         SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
         SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
@@ -160,7 +160,7 @@ public class LogcatInstructionSerializerTest {
         // Don't connect a service
 
         for (int i = 0; i < 10; i++) {
-            instructionSerializer.requestSendingLogcat("bsk", true);
+            instructionSerializer.requestStreamedLogcat("bsk");
         }
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
@@ -168,7 +168,7 @@ public class LogcatInstructionSerializerTest {
         // don't fail
 
         for (int i = 0; i < 10; i++) {
-            instructionSerializer.requestSendingLogcat(null, true);
+            instructionSerializer.requestOneshotLogcat();
         }
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
@@ -183,14 +183,22 @@ public class LogcatInstructionSerializerTest {
         instructionSerializer.setEnabled(false);
 
         for (int i = 0; i < 30; i++) {
-            Truth.assertThat(instructionSerializer.requestSendingLogcat("bsk", i % 2 == 0)).isFalse();
+            if (i % 2 == 0) {
+                Truth.assertThat(instructionSerializer.requestOneshotLogcat()).isFalse();
+            } else {
+                Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+            }
         }
 
         // Even if a service connection is established, this does nothing.
         instructionSerializer.connect(service);
 
         for (int i = 0; i < 30; i++) {
-            Truth.assertThat(instructionSerializer.requestSendingLogcat("bsk", i % 2 == 0)).isFalse();
+            if (i % 2 == 0) {
+                Truth.assertThat(instructionSerializer.requestOneshotLogcat()).isFalse();
+            } else {
+                Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+            }
         }
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
