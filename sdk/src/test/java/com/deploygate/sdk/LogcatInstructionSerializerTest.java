@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.deploygate.sdk.mockito.BundleMatcher.eq;
+import static com.deploygate.sdk.mockito.BundleMatcher.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -127,11 +128,16 @@ public class LogcatInstructionSerializerTest {
         SendLogcatRequest successAfterRetries = new SendLogcatRequest("successAfterRetries", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
         SendLogcatRequest retryExceeded = new SendLogcatRequest("retryExceeded", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
         SendLogcatRequest chunkRequest = new SendLogcatRequest("chunkRequest", new ArrayList<>(Arrays.asList("line10", "line11", "line12")));
+        SendLogcatRequest beginningRequest = SendLogcatRequest.createBeginning("beginningRequest");
+        SendLogcatRequest terminationRequest = SendLogcatRequest.createTermination("terminationRequest");
 
-        doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), BundleMatcher.eq(noIssue.toExtras()));
+        doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(noIssue.toExtras()));
         doThrow(RemoteException.class).doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(successAfterRetries.toExtras()));
         doThrow(RemoteException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(retryExceeded.toExtras()));
         doThrow(TransactionTooLargeException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(chunkRequest.toExtras()));
+
+        doThrow(TransactionTooLargeException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(beginningRequest.toExtras()));
+        doThrow(TransactionTooLargeException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(terminationRequest.toExtras()));
 
         Truth.assertThat(instructionSerializer.sendSingleChunk(noIssue)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_SUCCESS);
         Truth.assertThat(instructionSerializer.sendSingleChunk(successAfterRetries)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
@@ -146,10 +152,24 @@ public class LogcatInstructionSerializerTest {
                 public void apply() throws Throwable {
                     DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE);
                 }
-            }).thenReturn(false, true);
+            }).thenReturn(false);
 
+            Truth.assertThat(instructionSerializer.sendSingleChunk(beginningRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_SUCCESS);
             Truth.assertThat(instructionSerializer.sendSingleChunk(chunkRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+            Truth.assertThat(instructionSerializer.sendSingleChunk(terminationRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_SUCCESS);
+        }
+
+        try (MockedStatic<DeployGate> mocked = Mockito.mockStatic(DeployGate.class)) {
+            mocked.when(new MockedStatic.Verification() {
+                @Override
+                public void apply() throws Throwable {
+                    DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE);
+                }
+            }).thenReturn(true);
+
+            Truth.assertThat(instructionSerializer.sendSingleChunk(beginningRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
             Truth.assertThat(instructionSerializer.sendSingleChunk(chunkRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE);
+            Truth.assertThat(instructionSerializer.sendSingleChunk(terminationRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
         }
     }
 

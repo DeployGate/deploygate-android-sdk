@@ -173,7 +173,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             return SEND_LOGCAT_RESULT_FAILURE_RETRIABLE;
         }
 
-        if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE)) {
+        if (!DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE)) {
             if (request.position != SendLogcatRequest.Position.Content) {
                 // skip these requests
                 return SEND_LOGCAT_RESULT_SUCCESS;
@@ -195,10 +195,12 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
                 Logger.w("failed to send custom log %d times: %s", currentAttempts + 1, e.getMessage());
             }
 
-            if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
-                if (e instanceof TransactionTooLargeException) {
-                    if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE)) {
-                        return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
+            if (request.position == SendLogcatRequest.Position.Content) {
+                if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
+                    if (e instanceof TransactionTooLargeException) {
+                        if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE)) {
+                            return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
+                        }
                     }
                 }
             }
@@ -354,8 +356,8 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
                 SendLogcatRequest request
         ) {
             synchronized (requestMap) {
-                if (!requestMap.containsKey(request.pid)) {
-                    requestMap.put(request.pid, new LinkedList<SendLogcatRequest>());
+                if (!requestMap.containsKey(request.gid)) {
+                    requestMap.put(request.gid, new LinkedList<SendLogcatRequest>());
                 }
             }
 
@@ -408,7 +410,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
                     if (appendRequest(request)) {
                         if (transmitter.hasServiceConnection()) {
-                            sendAllInBuffer(request.pid);
+                            sendAllInBuffer(request.gid);
                         }
                     }
 
@@ -425,7 +427,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         private boolean appendRequest(SendLogcatRequest request) {
             synchronized (requestMap) {
-                LinkedList<SendLogcatRequest> requests = requestMap.get(request.pid);
+                LinkedList<SendLogcatRequest> requests = requestMap.get(request.gid);
 
                 if (requests == null) {
                     return false;

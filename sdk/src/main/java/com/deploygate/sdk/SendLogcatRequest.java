@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-class SendLogcatRequest {
+class SendLogcatRequest extends Instruction {
     enum Position {
         Beginning,
         Content,
@@ -38,8 +38,6 @@ class SendLogcatRequest {
         return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Beginning);
     }
 
-    public final String pid;
-    public final String cid;
     public final ArrayList<String> lines;
     public final Position position;
     private int retryCount;
@@ -64,8 +62,7 @@ class SendLogcatRequest {
             List<String> lines,
             Position position
     ) {
-        this.pid = pid;
-        this.cid = ClientId.generate();
+        super(pid);
         this.lines = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
         this.position = position;
     }
@@ -98,20 +95,15 @@ class SendLogcatRequest {
         for (int i = 0, offset = 0, step = size / count; i < count; i++, offset += step) {
             final int endIndex = (i == count - 1) ? size : offset + step;
 
-            splits.add(new SendLogcatRequest(pid, lines.subList(offset, endIndex), Position.Content));
+            splits.add(new SendLogcatRequest(gid, lines.subList(offset, endIndex), Position.Content));
         }
 
         return splits;
     }
 
-    Bundle toExtras() {
-        Bundle extras = new Bundle();
-
-        extras.putString(DeployGateEvent.EXTRA_INSTRUCTION_GROUP_ID, pid);
-        extras.putString(DeployGateEvent.EXTRA_CID, cid);
+    @Override
+    void applyValues(Bundle extras) {
         extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
         extras.putString(DeployGateEvent.EXTRA_BUNDLE_POSITION, position.label());
-
-        return extras;
     }
 }
