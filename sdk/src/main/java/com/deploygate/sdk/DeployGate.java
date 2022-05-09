@@ -104,7 +104,11 @@ public class DeployGate {
                     Logger.w("streamed logcat is not supported");
                 }
             } else if (DeployGateEvent.ACTION_DISABLE_LOGCAT.equals(action)) {
-                onDisableStreamedLogcat();
+                if (mDeployGateClient.isSupported(Compatibility.STREAMED_LOGCAT)) {
+                    onDisableStreamedLogcat();
+                } else {
+                    Logger.w("streamed logcat is not supported");
+                }
             }
         }
 
