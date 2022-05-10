@@ -9,7 +9,7 @@ class ClientId {
     private static final String CLIENT_ID_PREFIX = "c:";
 
     static String generate() {
-        return String.format(Locale.US, "%s:%s", CLIENT_ID_PREFIX, UUID.randomUUID().toString());
+        return String.format(Locale.US, "%s%s", CLIENT_ID_PREFIX, UUID.randomUUID().toString());
     }
 
     static boolean isValid(String id) {
