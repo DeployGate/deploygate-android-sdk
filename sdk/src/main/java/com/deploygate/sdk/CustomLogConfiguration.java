@@ -1,8 +1,11 @@
 package com.deploygate.sdk;
 
 import com.deploygate.sdk.internal.Logger;
+import com.deploygate.sdk.internal.annotations.Experimental;
 
+@Experimental
 public class CustomLogConfiguration {
+    @Experimental
     public enum Backpressure {
         /**
          * SDK rejects new logs if buffer size is exceeded
@@ -43,6 +46,7 @@ public class CustomLogConfiguration {
         this.bufferSize = bufferSize;
     }
 
+    @Experimental
     public static class Builder {
         private Backpressure backpressure = Backpressure.DROP_BUFFER_BY_OLDEST;
         private int bufferSize = DEFAULT_BUFFER_SIZE;
