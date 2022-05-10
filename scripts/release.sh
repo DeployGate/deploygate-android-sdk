@@ -4,5 +4,5 @@ set -euo pipefail
 
 ./gradlew clean \
     sdk:verifyBytecodeVersionRelease sdkMock:verifyBytecodeVersionRelease \
-    sdk:publishToMavenRepository sdkMock:publishToMavenRepository \
+    sdk:publishReleasePublicationToMavenRepository sdkMock:publishReleasePublicationToMavenRepository \
     --stacktrace
