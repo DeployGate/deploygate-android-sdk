@@ -46,6 +46,8 @@ jobs:
               --url 'https://deploygate.com/api/users/${{ secrets.SHARED_DEPLOYGATE_APP_OWNER_NAME_FOR_PUBLIC_REPO }}/apps' | \
               jq -r '"\(.results.package_name) \(.results.distribution.url)"'
           done < <(find ./sample/build/outputs/bundle -name "*.aab")
+      - name: Check javadocs
+        run: ./gradlew sdk:generateJavadocForReleasePublication sdkMock:generateJavadocForReleasePublication
 
   distribute-stable:
     runs-on: ubuntu-latest

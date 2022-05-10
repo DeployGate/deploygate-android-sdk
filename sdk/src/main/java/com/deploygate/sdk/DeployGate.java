@@ -556,7 +556,7 @@ public class DeployGate {
      * @param customLogConfiguration
      *         set a configuration for custom logging
      *
-     * @since r4.4
+     * @since 4.4.0
      */
     public static void install(
             Application app,
@@ -1064,6 +1064,8 @@ public class DeployGate {
 
     /**
      * Use {@link DeployGate#getDeployGateLongVersionCode}
+     *
+     * @return Version code of DeployGate in integer. Please refer to {@link DeployGate#getDeployGateLongVersionCode()}
      */
     @Deprecated
     public static int getDeployGateVersionCode() {
@@ -1079,7 +1081,7 @@ public class DeployGate {
      *
      * @return Version code of DeployGate, or 0 if DeployGate is older than v1.7.0 (39)
      *
-     * @since 4.4.0 FIXME
+     * @since 4.4.0
      */
     public static long getDeployGateLongVersionCode() {
         if (sInstance == null) {
