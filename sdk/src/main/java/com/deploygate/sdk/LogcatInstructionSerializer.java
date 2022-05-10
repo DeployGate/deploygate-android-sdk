@@ -66,13 +66,23 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         this.logcatProcess = new LogcatProcess(new LogcatProcess.Callback() {
             @Override
+            public void onStarted(String processId) {
+                handler.enqueueSendLogcatMessageInstruction(SendLogcatRequest.createBeginning(processId));
+            }
+
+            @Override
             public void emit(
-                    String bundleId,
+                    String processId,
                     ArrayList<String> logcatLines
             ) {
                 ensureHandlerPrepared();
 
-                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(bundleId, logcatLines));
+                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(processId, logcatLines));
+            }
+
+            @Override
+            public void onFinished(String processId) {
+                handler.enqueueSendLogcatMessageInstruction(SendLogcatRequest.createTermination(processId));
             }
         });
         this.thread = new HandlerThread("deploygate-sdk-logcat");
@@ -92,37 +102,23 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
     @Override
     public final void disconnect() {
-        cancel();
+        stopStream();
         this.service = null;
     }
 
     @Override
-    public final synchronized boolean requestSendingLogcat(
-            boolean isOneShot
-    ) {
-        ensureHandlerPrepared();
+    public final synchronized boolean requestOneshotLogcat() {
+        return requestLogcat(null);
+    }
 
-        if (!isEnabled) {
+    @Override
+    public boolean requestStreamedLogcat(String sessionKey) {
+        if (TextUtils.isEmpty(sessionKey)) {
+            Logger.w("non-blank stream key is required");
             return false;
         }
 
-        Pair<String, String> ids = logcatProcess.execute(isOneShot);
-
-        String retiredId = ids.first;
-        String newId = ids.second;
-
-        if (retiredId.equals(newId)) {
-            // nothing is executed
-            return false;
-        }
-
-        if (!LogcatProcess.UNKNOWN_WATCHER_ID.equals(retiredId)) {
-            // the previous on-going execution has been retied
-            handler.cancelPendingSendLogcatInstruction(retiredId);
-        }
-
-        // check if the new execution has been started
-        return !LogcatProcess.UNKNOWN_WATCHER_ID.equals(newId);
+        return requestLogcat(sessionKey);
     }
 
     @Override
@@ -130,14 +126,14 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         isEnabled = enabled;
 
         if (isEnabled) {
-            Logger.d("Disabled logcat instruction serializer");
-        } else {
             Logger.d("Enabled logcat instruction serializer");
+        } else {
+            Logger.d("Disabled logcat instruction serializer");
         }
     }
 
     @Override
-    public final void cancel() {
+    public final void stopStream() {
         ensureHandlerPrepared();
 
         logcatProcess.stop();
@@ -177,6 +173,13 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             return SEND_LOGCAT_RESULT_FAILURE_RETRIABLE;
         }
 
+        if (!DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE)) {
+            if (request.position != SendLogcatRequest.Position.Content) {
+                // skip these requests
+                return SEND_LOGCAT_RESULT_SUCCESS;
+            }
+        }
+
         Bundle extras = request.toExtras();
 
         try {
@@ -192,14 +195,50 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
                 Logger.w("failed to send custom log %d times: %s", currentAttempts + 1, e.getMessage());
             }
 
-            if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
-                if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE) && (e instanceof TransactionTooLargeException)) {
-                    return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
+            if (request.position == SendLogcatRequest.Position.Content) {
+                if (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 <= Build.VERSION.SDK_INT) {
+                    if (e instanceof TransactionTooLargeException) {
+                        if (DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE)) {
+                            return SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE;
+                        }
+                    }
                 }
             }
 
             return SEND_LOGCAT_RESULT_FAILURE_RETRIABLE;
         }
+    }
+
+    /**
+     * @param streamSessionKey
+     *         nullable. sdk can not generate this key.
+     *
+     * @return true if new process has lauched
+     */
+    private boolean requestLogcat(String streamSessionKey) {
+        ensureHandlerPrepared();
+
+        if (!isEnabled) {
+            return false;
+        }
+
+        Pair<String, String> ids = logcatProcess.execute(streamSessionKey);
+
+        String retiredId = ids.first;
+        String newId = ids.second;
+
+        if (retiredId.equals(newId)) {
+            // nothing is executed
+            return false;
+        }
+
+        if (!LogcatProcess.UNKNOWN_PROCESS_ID.equals(retiredId)) {
+            // the previous on-going execution has been retied
+            handler.cancelPendingSendLogcatInstruction(retiredId);
+        }
+
+        // check if the new execution has been started
+        return !LogcatProcess.UNKNOWN_PROCESS_ID.equals(newId);
     }
 
     private void ensureHandlerPrepared() {
@@ -255,15 +294,11 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         return handler;
     }
 
-    boolean hasHandlerPrepared() {
-        return handler != null;
-    }
-
     /**
      * Halt the process and the thread. Any of methods are not guaranteed after calling this.
      */
     void halt() {
-        cancel();
+        stopStream();
 
         thread.interrupt();
 
@@ -321,8 +356,8 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
                 SendLogcatRequest request
         ) {
             synchronized (requestMap) {
-                if (!requestMap.containsKey(request.bundleId)) {
-                    requestMap.put(request.bundleId, new LinkedList<SendLogcatRequest>());
+                if (!requestMap.containsKey(request.gid)) {
+                    requestMap.put(request.gid, new LinkedList<SendLogcatRequest>());
                 }
             }
 
@@ -375,7 +410,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
                     if (appendRequest(request)) {
                         if (transmitter.hasServiceConnection()) {
-                            sendAllInBuffer(request.bundleId);
+                            sendAllInBuffer(request.gid);
                         }
                     }
 
@@ -392,7 +427,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         private boolean appendRequest(SendLogcatRequest request) {
             synchronized (requestMap) {
-                LinkedList<SendLogcatRequest> requests = requestMap.get(request.bundleId);
+                LinkedList<SendLogcatRequest> requests = requestMap.get(request.gid);
 
                 if (requests == null) {
                     return false;

@@ -1,6 +1,17 @@
 package com.deploygate.service;
 
 public interface DeployGateEvent {
+    // old format is too ambiguous so we are going to make it clear and safer.
+    //
+    // all values should be <namespace>.<content> since writing this comment :)
+    //
+    // namespace:
+    //   ACTION => a
+    //   EXTRA => e
+    //
+    // content:
+    //   should be hyphen-separated string and be lower cases
+
     public static final String ACTION_INIT = "init";
     public static final String ACTION_UPDATE_AVAILABLE = "update";
     public static final String ACTION_ENABLE_LOGCAT = "enableLogcat";
@@ -30,17 +41,31 @@ public interface DeployGateEvent {
     public static final String EXTRA_IS_BOOT = "isBoot";
     public static final String EXTRA_LOG = "log";
     public static final String EXTRA_LOG_TYPE = "logType";
-    public static final String EXTRA_BUFFERED_AT_IN_MILLI_SECONDS = "bufferedAt";
 
     /**
-     * the unique id to identify data
+     * the unique id generated on the client side to identify data
      */
-    public static final String EXTRA_UID = "uid";
+    public static final String EXTRA_CID = "e.cid";
 
     /**
-     * id of a bundle that collects instructions (data)
+     * a group id that collects instructions
      */
-    public static final String EXTRA_BUNDLE_ID = "bid";
+    public static final String EXTRA_INSTRUCTION_GROUP_ID = "e.gid";
+
+    /**
+     * session key of a logcat-stream
+     */
+    public static final String EXTRA_LOGCAT_STREAM_SESSION_KEY = "e.logcat-stream-session-key";
+
+    /**
+     * a marker of the bundle positioning
+     */
+    public static final String EXTRA_BUNDLE_POSITION = "e.bundle-position";
+
+    /**
+     * buffered-at in sdk-side, depends on device-clock.
+     */
+    public static final String EXTRA_BUFFERED_AT_IN_MILLI_SECONDS = "e.bufferedAt";
 
     /**
      * this key shouldn't be used

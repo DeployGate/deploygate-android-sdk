@@ -3,7 +3,8 @@ package com.deploygate.sdk;
 enum Compatibility {
     UPDATE_MESSAGE_OF_BUILD(1),
     SERIALIZED_EXCEPTION(1 << 1),
-    LOGCAT_BUNDLE(1 << 2);
+    LOGCAT_BUNDLE(1 << 2),
+    STREAMED_LOGCAT(1 << 3);
 
     final int bitMask;
 

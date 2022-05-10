@@ -27,75 +27,116 @@ public class SendLogcatRequestTest {
 
     @Test
     public void toExtras_must_be_valid_format() {
-        try (MockedStatic<UniqueId> uidMock = Mockito.mockStatic(UniqueId.class)) {
-            uidMock.when(new MockedStatic.Verification() {
+        try (MockedStatic<ClientId> cidMock = Mockito.mockStatic(ClientId.class)) {
+            cidMock.when(new MockedStatic.Verification() {
                 @Override
                 public void apply() throws Throwable {
-                    UniqueId.generate();
+                    ClientId.generate();
                 }
             }).thenReturn("unique_id");
 
-            SendLogcatRequest request = new SendLogcatRequest("tid", new ArrayList<>(Arrays.asList("1", "2")));
+            SendLogcatRequest beginning = SendLogcatRequest.createBeginning("bsk1");
 
-            BundleSubject.assertThat(request.toExtras()).isEqualTo(createLogExtra("tid", "unique_id", new ArrayList<>(Arrays.asList("1", "2"))));
+            BundleSubject.assertThat(beginning.toExtras()).isEqualTo(createLogExtra("bsk1", "unique_id", new ArrayList<String>(), "beginning"));
+
+            SendLogcatRequest content = new SendLogcatRequest("bsk2", new ArrayList<>(Arrays.asList("1", "2")));
+
+            BundleSubject.assertThat(content.toExtras()).isEqualTo(createLogExtra("bsk2", "unique_id", new ArrayList<>(Arrays.asList("1", "2")), "content"));
+
+            SendLogcatRequest termination = SendLogcatRequest.createTermination("bsk3");
+
+            BundleSubject.assertThat(termination.toExtras()).isEqualTo(createLogExtra("bsk3", "unique_id", new ArrayList<String>(), "termination"));
         }
     }
 
     @Test
     public void splitInto_create_n_sublist() {
-        SendLogcatRequest request = new SendLogcatRequest("tid", arrayListOf(0, 10));
+        SendLogcatRequest request = new SendLogcatRequest("bsk", arrayListOf(0, 10));
+
+        List<SendLogcatRequest> singleRequests = request.splitInto(1);
+
+        // 1 のときは split しない
+        Truth.assertThat(singleRequests).hasSize(1);
+        SendLogcatRequestSubject.assertThat(singleRequests.get(0)).isEqualTo(request);
+
+        List<SendLogcatRequest> twoRequests = request.splitInto(2);
+        Truth.assertThat(twoRequests).hasSize(2);
+        SendLogcatRequestSubject.assertThat(twoRequests.get(0)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(0, 5));
+        SendLogcatRequestSubject.assertThat(twoRequests.get(1)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(5, 5));
+
+        List<SendLogcatRequest> threeRequests = request.splitInto(3);
+        Truth.assertThat(threeRequests).hasSize(3);
+        SendLogcatRequestSubject.assertThat(threeRequests.get(0)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(0, 3));
+        SendLogcatRequestSubject.assertThat(threeRequests.get(1)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(3, 3));
+        SendLogcatRequestSubject.assertThat(threeRequests.get(2)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(6, 4));
+
+        List<SendLogcatRequest> nineRequests = request.splitInto(9);
+        Truth.assertThat(nineRequests).hasSize(9);
+        SendLogcatRequestSubject.assertThat(nineRequests.get(0)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(0, 1));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(1)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(1, 1));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(2)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(2, 1));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(3)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(3, 1));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(4)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(4, 1));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(5)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(5, 1));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(6)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(6, 1));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(7)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(7, 1));
+        SendLogcatRequestSubject.assertThat(nineRequests.get(8)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(8, 2));
+
+        List<SendLogcatRequest> overSplitRequests = request.splitInto(11);
+        Truth.assertThat(overSplitRequests).hasSize(10);
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(0)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(0, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(1)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(1, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(2)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(2, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(3)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(3, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(4)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(4, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(5)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(5, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(6)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(6, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(7)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(7, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(8)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(8, 1));
+        SendLogcatRequestSubject.assertThat(overSplitRequests.get(9)).isSameInBundle(request.gid, SendLogcatRequest.Position.Content, arrayListOf(9, 1));
+    }
+
+    @Test
+    public void beginning_splitInto_create_n_sublist() {
+        SendLogcatRequest request = SendLogcatRequest.createBeginning("bsk");
 
         List<SendLogcatRequest> singleRequests = request.splitInto(1);
 
         Truth.assertThat(singleRequests).hasSize(1);
         SendLogcatRequestSubject.assertThat(singleRequests.get(0)).isEqualTo(request);
 
+        // split 出来ない
         List<SendLogcatRequest> twoRequests = request.splitInto(2);
-        Truth.assertThat(twoRequests).hasSize(2);
-        SendLogcatRequestSubject.assertThat(twoRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(0, 5)));
-        SendLogcatRequestSubject.assertThat(twoRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(5, 5)));
+        Truth.assertThat(twoRequests).hasSize(1);
+        SendLogcatRequestSubject.assertThat(twoRequests.get(0)).isEqualTo(request);
+    }
 
-        List<SendLogcatRequest> threeRequests = request.splitInto(3);
-        Truth.assertThat(threeRequests).hasSize(3);
-        SendLogcatRequestSubject.assertThat(threeRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(0, 3)));
-        SendLogcatRequestSubject.assertThat(threeRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(3, 3)));
-        SendLogcatRequestSubject.assertThat(threeRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(6, 4)));
+    @Test
+    public void termination_splitInto_create_n_sublist() {
+        SendLogcatRequest request = SendLogcatRequest.createTermination("bsk");
 
-        List<SendLogcatRequest> nineRequests = request.splitInto(9);
-        Truth.assertThat(nineRequests).hasSize(9);
-        SendLogcatRequestSubject.assertThat(nineRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(0, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(1, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(2, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(3)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(3, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(4)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(4, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(5)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(5, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(6)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(6, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(7)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(7, 1)));
-        SendLogcatRequestSubject.assertThat(nineRequests.get(8)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(8, 2)));
+        List<SendLogcatRequest> singleRequests = request.splitInto(1);
 
-        List<SendLogcatRequest> overSplitRequests = request.splitInto(11);
-        Truth.assertThat(overSplitRequests).hasSize(10);
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(0)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(0, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(1)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(1, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(2)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(2, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(3)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(3, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(4)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(4, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(5)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(5, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(6)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(6, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(7)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(7, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(8)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(8, 1)));
-        SendLogcatRequestSubject.assertThat(overSplitRequests.get(9)).isEqualTo(new SendLogcatRequest(request.bundleId, arrayListOf(9, 1)));
+        Truth.assertThat(singleRequests).hasSize(1);
+        SendLogcatRequestSubject.assertThat(singleRequests.get(0)).isEqualTo(request);
+
+        // split 出来ない
+        List<SendLogcatRequest> twoRequests = request.splitInto(2);
+        Truth.assertThat(twoRequests).hasSize(1);
+        SendLogcatRequestSubject.assertThat(twoRequests.get(0)).isEqualTo(request);
     }
 
     private static Bundle createLogExtra(
-            String bundleId,
-            String uid,
-            ArrayList<String> lines
+            String gid,
+            String cid,
+            ArrayList<String> lines,
+            String positionLabel
     ) {
         Bundle bundle = new Bundle();
-        bundle.putString("bid", bundleId);
-        bundle.putString("uid", uid);
+        bundle.putString("e.gid", gid);
+        bundle.putString("e.cid", cid);
         bundle.putStringArrayList("log", lines);
+        bundle.putString("e.bundle-position", positionLabel);
         return bundle;
     }
 
@@ -136,30 +177,52 @@ public class SendLogcatRequestTest {
             this.actual = actual;
         }
 
+        public void isSameInBundle(String expectedKey, SendLogcatRequest.Position expectedPosition, List<String> expectedLines) {
+            if (!actual.gid.equals(expectedKey)) {
+                failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected of %s", expectedKey, toString(actual))));
+                return;
+            }
+
+            if (actual.position != expectedPosition) {
+                failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to %s", actual.position.name(), expectedPosition.name())));
+                return;
+            }
+
+            if (actual.lines.size() != expectedLines.size()) {
+                failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to be exactly included in %s", String.join(", ", expectedLines), toString(actual))));
+                return;
+            }
+
+            for (int i = 0; i < expectedLines.size(); i++) {
+                if (!expectedLines.get(i).equals(actual.lines.get(i))) {
+                    failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to be exactly included in %s", String.join(", ", expectedLines), toString(actual))));
+                    return;
+                }
+            }
+        }
+
         @Override
         public void isEqualTo(Object expected) {
             Truth.assertThat(expected).isInstanceOf(SendLogcatRequest.class);
 
             SendLogcatRequest request = (SendLogcatRequest) expected;
 
-            if (!actual.bundleId.equals(request.bundleId) || actual.lines.size() != request.lines.size()) {
-                failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to %s", toString(request), toString(actual))));
+            if (actual.cid.equals(request.cid)) {
                 return;
             }
 
-            for (int i = 0; i < request.lines.size(); i++) {
-                if (!request.lines.get(i).equals(actual.lines.get(i))) {
-                    failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to %s", toString(request), toString(actual))));
-                    return;
-                }
-            }
+            failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to have %s", toString(request), actual.cid)));
         }
 
         private static String toString(SendLogcatRequest request) {
             StringBuilder builder = new StringBuilder();
             builder.append("{ ");
-            builder.append("tid=");
-            builder.append(request.bundleId);
+            builder.append("cid=");
+            builder.append(request.cid);
+            builder.append(", bsk=");
+            builder.append(request.gid);
+            builder.append(", pos=");
+            builder.append(request.position.name());
             builder.append(", lines=[");
             builder.append(String.join(", ", request.lines));
             builder.append("]");

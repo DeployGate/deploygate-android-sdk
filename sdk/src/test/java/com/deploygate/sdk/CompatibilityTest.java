@@ -36,5 +36,6 @@ public class CompatibilityTest {
         Truth.assertThat(Compatibility.UPDATE_MESSAGE_OF_BUILD.bitMask).isEqualTo(1);
         Truth.assertThat(Compatibility.SERIALIZED_EXCEPTION.bitMask).isEqualTo(2);
         Truth.assertThat(Compatibility.LOGCAT_BUNDLE.bitMask).isEqualTo(4);
+        Truth.assertThat(Compatibility.STREAMED_LOGCAT.bitMask).isEqualTo(8);
     }
 }

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.deploygate.sdk.mockito.BundleMatcher.eq;
+import static com.deploygate.sdk.mockito.BundleMatcher.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -101,7 +102,7 @@ public class LogcatInstructionSerializerTest {
     public void sendSingleChunk_always_returns_retriable_status_if_service_is_none() throws RemoteException {
         instructionSerializer = new LogcatInstructionSerializer(PACKAGE_NAME);
 
-        instructionSerializer.requestSendingLogcat(true);
+        instructionSerializer.requestOneshotLogcat();
 
         SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
         SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
@@ -127,11 +128,16 @@ public class LogcatInstructionSerializerTest {
         SendLogcatRequest successAfterRetries = new SendLogcatRequest("successAfterRetries", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
         SendLogcatRequest retryExceeded = new SendLogcatRequest("retryExceeded", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
         SendLogcatRequest chunkRequest = new SendLogcatRequest("chunkRequest", new ArrayList<>(Arrays.asList("line10", "line11", "line12")));
+        SendLogcatRequest beginningRequest = SendLogcatRequest.createBeginning("beginningRequest");
+        SendLogcatRequest terminationRequest = SendLogcatRequest.createTermination("terminationRequest");
 
-        doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), BundleMatcher.eq(noIssue.toExtras()));
+        doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(noIssue.toExtras()));
         doThrow(RemoteException.class).doNothing().when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(successAfterRetries.toExtras()));
         doThrow(RemoteException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(retryExceeded.toExtras()));
         doThrow(TransactionTooLargeException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(chunkRequest.toExtras()));
+
+        doThrow(TransactionTooLargeException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(beginningRequest.toExtras()));
+        doThrow(TransactionTooLargeException.class).when(service).sendEvent(eq(PACKAGE_NAME), eq(DeployGateEvent.ACTION_SEND_LOGCAT), eq(terminationRequest.toExtras()));
 
         Truth.assertThat(instructionSerializer.sendSingleChunk(noIssue)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_SUCCESS);
         Truth.assertThat(instructionSerializer.sendSingleChunk(successAfterRetries)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
@@ -146,10 +152,24 @@ public class LogcatInstructionSerializerTest {
                 public void apply() throws Throwable {
                     DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE);
                 }
-            }).thenReturn(false, true);
+            }).thenReturn(false);
 
+            Truth.assertThat(instructionSerializer.sendSingleChunk(beginningRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_SUCCESS);
             Truth.assertThat(instructionSerializer.sendSingleChunk(chunkRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+            Truth.assertThat(instructionSerializer.sendSingleChunk(terminationRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_SUCCESS);
+        }
+
+        try (MockedStatic<DeployGate> mocked = Mockito.mockStatic(DeployGate.class)) {
+            mocked.when(new MockedStatic.Verification() {
+                @Override
+                public void apply() throws Throwable {
+                    DeployGate.isFeatureSupported(Compatibility.LOGCAT_BUNDLE);
+                }
+            }).thenReturn(true);
+
+            Truth.assertThat(instructionSerializer.sendSingleChunk(beginningRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
             Truth.assertThat(instructionSerializer.sendSingleChunk(chunkRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_REQUEST_CHUNK_CHALLENGE);
+            Truth.assertThat(instructionSerializer.sendSingleChunk(terminationRequest)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
         }
     }
 
@@ -160,7 +180,15 @@ public class LogcatInstructionSerializerTest {
         // Don't connect a service
 
         for (int i = 0; i < 10; i++) {
-            instructionSerializer.requestSendingLogcat(true);
+            instructionSerializer.requestStreamedLogcat("bsk");
+        }
+
+        Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
+
+        // don't fail
+
+        for (int i = 0; i < 10; i++) {
+            instructionSerializer.requestOneshotLogcat();
         }
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
@@ -175,14 +203,22 @@ public class LogcatInstructionSerializerTest {
         instructionSerializer.setEnabled(false);
 
         for (int i = 0; i < 30; i++) {
-            Truth.assertThat(instructionSerializer.requestSendingLogcat(i % 2 == 0)).isFalse();
+            if (i % 2 == 0) {
+                Truth.assertThat(instructionSerializer.requestOneshotLogcat()).isFalse();
+            } else {
+                Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+            }
         }
 
         // Even if a service connection is established, this does nothing.
         instructionSerializer.connect(service);
 
         for (int i = 0; i < 30; i++) {
-            Truth.assertThat(instructionSerializer.requestSendingLogcat(i % 2 == 0)).isFalse();
+            if (i % 2 == 0) {
+                Truth.assertThat(instructionSerializer.requestOneshotLogcat()).isFalse();
+            } else {
+                Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+            }
         }
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();

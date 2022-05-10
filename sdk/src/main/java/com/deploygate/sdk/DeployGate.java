@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
@@ -79,6 +80,10 @@ public class DeployGate {
                 String action,
                 Bundle extras
         ) throws RemoteException {
+            if (TextUtils.isEmpty(action)) {
+                return;
+            }
+
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
                 onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false), extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false), extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME), extras.getString(DeployGateEvent.EXTRA_DISTRIBUTION_USER_NAME), extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false), extras.getString(DeployGateEvent.EXTRA_AUTHOR), extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_ID), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_TITLE));
             } else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
@@ -86,9 +91,24 @@ public class DeployGate {
             } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
                 onOneshotLogcat();
             } else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
-                onEnableStreamedLogcat(true);
+                if (mDeployGateClient.isSupported(Compatibility.STREAMED_LOGCAT)) {
+                    String sessionKey = extras.getString(DeployGateEvent.EXTRA_LOGCAT_STREAM_SESSION_KEY);
+
+                    if (TextUtils.isEmpty(sessionKey)) {
+                        Logger.w("%s is missing in the extra", DeployGateEvent.EXTRA_LOGCAT_STREAM_SESSION_KEY);
+                        return;
+                    }
+
+                    onEnableStreamedLogcat(sessionKey);
+                } else {
+                    Logger.w("streamed logcat is not supported");
+                }
             } else if (DeployGateEvent.ACTION_DISABLE_LOGCAT.equals(action)) {
-                onEnableStreamedLogcat(false);
+                if (mDeployGateClient.isSupported(Compatibility.STREAMED_LOGCAT)) {
+                    onDisableStreamedLogcat();
+                } else {
+                    Logger.w("streamed logcat is not supported");
+                }
             }
         }
 
@@ -157,16 +177,25 @@ public class DeployGate {
         }
     };
 
-    private void onOneshotLogcat() {
-        mLogcatInstructionSerializer.requestSendingLogcat(true);
+    private void requestOneshotLogcat() {
+        onOneshotLogcat();
     }
 
-    private void onEnableStreamedLogcat(boolean isEnabled) {
-        if (isEnabled) {
-            mLogcatInstructionSerializer.requestSendingLogcat(false);
-        } else {
-            mLogcatInstructionSerializer.cancel();
+    private void onOneshotLogcat() {
+        mLogcatInstructionSerializer.requestOneshotLogcat();
+    }
+
+    private void onEnableStreamedLogcat(String streamSessionKey) {
+        if (TextUtils.isEmpty(streamSessionKey)) {
+            Logger.w("sdk-origin streamed logcat requests are forbidden");
+            return;
         }
+
+        mLogcatInstructionSerializer.requestStreamedLogcat(streamSessionKey);
+    }
+
+    private void onDisableStreamedLogcat() {
+        mLogcatInstructionSerializer.stopStream();
     }
 
     void callbackDeployGateUnavailable() {
@@ -279,6 +308,20 @@ public class DeployGate {
             mRemoteService.init(mRemoteCallback, mHostApp.packageName, args);
         } catch (RemoteException e) {
             Log.w(TAG, "DeployGate service failed to be initialized.");
+        }
+    }
+
+    private void invokeAction(
+            String action,
+            Bundle extras
+    ) {
+        if (mRemoteService == null) {
+            return;
+        }
+        try {
+            mRemoteService.sendEvent(mHostApp.packageName, action, extras);
+        } catch (RemoteException e) {
+            Log.w(TAG, "failed to invoke " + action + " action: " + e.getMessage());
         }
     }
 
@@ -933,7 +976,7 @@ public class DeployGate {
      */
     public static void requestLogCat() {
         if (sInstance != null) {
-            sInstance.onOneshotLogcat();
+            sInstance.requestOneshotLogcat();
         }
     }
 
@@ -1189,20 +1232,6 @@ public class DeployGate {
         Bundle extras = new Bundle();
         extras.putString(DeployGateEvent.EXTRA_COMMENT, defaultComment);
         sInstance.invokeAction(DeployGateEvent.ACTION_COMPOSE_COMMENT, extras);
-    }
-
-    private void invokeAction(
-            String action,
-            Bundle extras
-    ) {
-        if (mRemoteService == null) {
-            return;
-        }
-        try {
-            mRemoteService.sendEvent(mHostApp.packageName, action, extras);
-        } catch (RemoteException e) {
-            Log.w(TAG, "failed to invoke " + action + " action: " + e.getMessage());
-        }
     }
 
     /**

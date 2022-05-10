@@ -10,19 +10,61 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-class SendLogcatRequest {
-    public final String bundleId;
-    public final String uid;
+class SendLogcatRequest extends Instruction {
+    enum Position {
+        Beginning,
+        Content,
+        Termination;
+
+        private String label() {
+            switch (this) {
+                case Beginning:
+                    return "beginning";
+                case Content:
+                    return "content";
+                case Termination:
+                    return "termination";
+                default:
+                    throw new IllegalStateException(String.format(Locale.US, "%s is not mapped", name()));
+            }
+        }
+    }
+
+    public static SendLogcatRequest createTermination(String processId) {
+        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Termination);
+    }
+
+    public static SendLogcatRequest createBeginning(String processId) {
+        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Beginning);
+    }
+
     public final ArrayList<String> lines;
+    public final Position position;
     private int retryCount;
 
     SendLogcatRequest(
-            String bundleId,
+            String pid,
             List<String> lines
     ) {
-        this.bundleId = bundleId;
-        this.uid = UniqueId.generate();
+        this(pid, lines, Position.Content);
+    }
+
+    /**
+     * @param pid
+     *         a process id. non-null
+     * @param lines
+     *         logcat contents if available. Zero value is an empty list.
+     * @param position
+     *         a position of this request. non-null
+     */
+    private SendLogcatRequest(
+            String pid,
+            List<String> lines,
+            Position position
+    ) {
+        super(pid);
         this.lines = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
+        this.position = position;
     }
 
     /**
@@ -37,7 +79,7 @@ class SendLogcatRequest {
             throw new IllegalArgumentException(String.format(Locale.US, "split count must be greater than 1 but %d", count));
         }
 
-        if (count == 1) {
+        if (count == 1 || position != Position.Content) {
             return Collections.singletonList(this);
         }
 
@@ -53,19 +95,15 @@ class SendLogcatRequest {
         for (int i = 0, offset = 0, step = size / count; i < count; i++, offset += step) {
             final int endIndex = (i == count - 1) ? size : offset + step;
 
-            splits.add(new SendLogcatRequest(bundleId, lines.subList(offset, endIndex)));
+            splits.add(new SendLogcatRequest(gid, lines.subList(offset, endIndex), Position.Content));
         }
 
         return splits;
     }
 
-    Bundle toExtras() {
-        Bundle extras = new Bundle();
-
-        extras.putString(DeployGateEvent.EXTRA_BUNDLE_ID, bundleId);
-        extras.putString(DeployGateEvent.EXTRA_UID, uid);
+    @Override
+    void applyValues(Bundle extras) {
         extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
-
-        return extras;
+        extras.putString(DeployGateEvent.EXTRA_BUNDLE_POSITION, position.label());
     }
 }
