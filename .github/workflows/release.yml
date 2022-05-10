@@ -13,15 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: echo "${GITHUB_REF#refs/tags/}" > VERSION
-      - run: echo "::set-output name=result::$(cat VERSION)"
-        id: version
       - uses: actions/setup-java@v3
         with:
           java-version: '8.x'
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
+      - run: RELEASE_VERSION="${GITHUB_REF#refs/tags/}" ./gradlew verifyReleaseVersion
       - name: Set up gradle.properties for sigining and nexus
         # Add timeout setting due to https://github.com/DeployGate/gradle-deploygate-plugin/runs/2523846388
         run: |
@@ -42,11 +40,3 @@ jobs:
           SLACK_TITLE: 'Android SDK Release'
           SLACK_MESSAGE: "${{ github.ref }} has been published to Sonatype. ref: https://oss.sonatype.org/"
           SLACK_WEBHOOK: ${{ secrets.SHARED_FOR_RELEASE_ARTIFACT_SLACK_INCOMING_WEBHOOK_URL }}
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4.0.2
-        with:
-          title: "Update VERSION information to ${{ steps.version.outputs.result }}"
-          commit-message: "bump :rocket: ${{ steps.version.outputs.result }}"
-          branch: "bumped/${{ steps.version.outputs.result }}"
-          delete-branch: true
-          add-paths: VERSION

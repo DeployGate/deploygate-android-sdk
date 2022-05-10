@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 ext {
-    releaseVersion = '4.3.0'
+    releaseVersion = '4.4.0'
 }
 
 buildscript {
@@ -23,4 +23,12 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+task verifyReleaseVersion() {
+    doLast {
+        if (project.ext.releaseVersion != System.getenv("RELEASE_VERSION")) {
+            throw new GradleException("${project.ext.releaseVersion} does not equal to ${System.getenv("RELEASE_VERSION")}")
+        }
+    }
 }
