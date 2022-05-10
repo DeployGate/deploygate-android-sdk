@@ -4,6 +4,7 @@ import android.os.Build;
 import android.util.Pair;
 
 import com.deploygate.sdk.internal.Logger;
+import com.deploygate.sdk.internal.annotations.Experimental;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,7 +58,7 @@ class LogcatProcess {
      * @return a pair of watcher ids (non-nulls). first is the previous watcher id, second is the new watcher id.
      */
     Pair<String, String> execute(
-            String streamSessionKey
+            @Experimental String streamSessionKey
     ) {
         Pair<String, String> ids;
 
@@ -125,7 +126,7 @@ class LogcatProcess {
         private final AtomicInteger state;
 
         LogcatWatcher(
-                String streamSessionKey,
+                @Experimental String streamSessionKey,
                 Callback callback
         ) {
             this.processId = streamSessionKey != null ? streamSessionKey : ClientId.generate();
