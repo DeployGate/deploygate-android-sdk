@@ -68,9 +68,7 @@ public interface DeployGateEvent {
     public static final String EXTRA_BUFFERED_AT_IN_MILLI_SECONDS = "e.bufferedAt";
 
     /**
-     * this key shouldn't be used
-     *
-     * @see com.deploygate.sdk.DeployGate#SERIALIZED_EXCEPTION_SUPPORT_CLIENT_VERSION
+     * this key shouldn't be used. ref: com.deploygate.sdk.Compatibility#SERIALIZED_EXCEPTION
      */
     @Deprecated
     public static final String EXTRA_EXCEPTION = "exception";
