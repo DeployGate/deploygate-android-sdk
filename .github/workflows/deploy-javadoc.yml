@@ -61,7 +61,7 @@ jobs:
               -o javadoc.jar
             unzip javadoc.jar -d "$dist/"
 
-            if [[ ! -d "$dist/index.html" ]]; then
+            if [[ ! -f "$dist/index.html" ]]; then
               rm -fr "$dist"
             fi
 
