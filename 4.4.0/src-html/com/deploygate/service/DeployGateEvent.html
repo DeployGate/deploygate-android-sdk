@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package com.deploygate.service;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>public interface DeployGateEvent {<a name="line.3"></a>
+<span class="sourceLineNo">004</span>    // old format is too ambiguous so we are going to make it clear and safer.<a name="line.4"></a>
+<span class="sourceLineNo">005</span>    //<a name="line.5"></a>
+<span class="sourceLineNo">006</span>    // all values should be &lt;namespace&gt;.&lt;content&gt; since writing this comment :)<a name="line.6"></a>
+<span class="sourceLineNo">007</span>    //<a name="line.7"></a>
+<span class="sourceLineNo">008</span>    // namespace:<a name="line.8"></a>
+<span class="sourceLineNo">009</span>    //   ACTION =&gt; a<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    //   EXTRA =&gt; e<a name="line.10"></a>
+<span class="sourceLineNo">011</span>    //<a name="line.11"></a>
+<span class="sourceLineNo">012</span>    // content:<a name="line.12"></a>
+<span class="sourceLineNo">013</span>    //   should be hyphen-separated string and be lower cases<a name="line.13"></a>
+<span class="sourceLineNo">014</span><a name="line.14"></a>
+<span class="sourceLineNo">015</span>    public static final String ACTION_INIT = "init";<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    public static final String ACTION_UPDATE_AVAILABLE = "update";<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    public static final String ACTION_ENABLE_LOGCAT = "enableLogcat";<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    public static final String ACTION_DISABLE_LOGCAT = "disableLogcat";<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    public static final String ACTION_ONESHOT_LOGCAT = "oneshotLogcat";<a name="line.19"></a>
+<span class="sourceLineNo">020</span><a name="line.20"></a>
+<span class="sourceLineNo">021</span>    public static final String ACTION_SEND_LOGCAT = "sendLogcat";<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    public static final String ACTION_SEND_CRASH_REPORT = "reportCrash";<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public static final String ACTION_SEND_CUSTOM_LOG = "customLog";<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public static final String ACTION_INSTALL_UPDATE = "installUpdate";<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    public static final String ACTION_OPEN_APP_DETAIL = "openAppDetail";<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    public static final String ACTION_OPEN_COMMENTS = "openComments";<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    public static final String ACTION_COMPOSE_COMMENT = "composeComment";<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>    public static final String EXTRA_AUTHOR = "author";<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    public static final String EXTRA_SDK_VERSION = "sdkVersion";<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    public static final String EXTRA_IS_MANAGED = "isManaged";<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    public static final String EXTRA_IS_AUTHORIZED = "isAuthorized";<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    public static final String EXTRA_LOGIN_USERNAME = "loginUsername";<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    public static final String EXTRA_IS_STOP_REQUESTED = "isStopRequested";<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    public static final String EXTRA_SERIAL = "serial";<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    public static final String EXTRA_VERSION_NAME = "versionName";<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    public static final String EXTRA_VERSION_CODE = "versionCode";<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    public static final String EXTRA_SERIAL_MESSAGE = "serialMessage";<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    public static final String EXTRA_CAN_LOGCAT = "canLogCat";<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    public static final String EXTRA_IS_BOOT = "isBoot";<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    public static final String EXTRA_LOG = "log";<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    public static final String EXTRA_LOG_TYPE = "logType";<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>    /**<a name="line.45"></a>
+<span class="sourceLineNo">046</span>     * the unique id generated on the client side to identify data<a name="line.46"></a>
+<span class="sourceLineNo">047</span>     */<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    public static final String EXTRA_CID = "e.cid";<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>    /**<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * a group id that collects instructions<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     */<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    public static final String EXTRA_INSTRUCTION_GROUP_ID = "e.gid";<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>    /**<a name="line.55"></a>
+<span class="sourceLineNo">056</span>     * session key of a logcat-stream<a name="line.56"></a>
+<span class="sourceLineNo">057</span>     */<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    public static final String EXTRA_LOGCAT_STREAM_SESSION_KEY = "e.logcat-stream-session-key";<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>    /**<a name="line.60"></a>
+<span class="sourceLineNo">061</span>     * a marker of the bundle positioning<a name="line.61"></a>
+<span class="sourceLineNo">062</span>     */<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    public static final String EXTRA_BUNDLE_POSITION = "e.bundle-position";<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>    /**<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     * buffered-at in sdk-side, depends on device-clock.<a name="line.66"></a>
+<span class="sourceLineNo">067</span>     */<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    public static final String EXTRA_BUFFERED_AT_IN_MILLI_SECONDS = "e.bufferedAt";<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>    /**<a name="line.70"></a>
+<span class="sourceLineNo">071</span>     * this key shouldn't be used. ref: com.deploygate.sdk.Compatibility#SERIALIZED_EXCEPTION<a name="line.71"></a>
+<span class="sourceLineNo">072</span>     */<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    @Deprecated<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    public static final String EXTRA_EXCEPTION = "exception";<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    public static final String EXTRA_EXCEPTION_ROOT_CAUSE_CLASSNAME = "exceptionRootCauseClassName";<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    public static final String EXTRA_EXCEPTION_ROOT_CAUSE_MESSAGE = "exceptionRootCauseMessage";<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    public static final String EXTRA_EXCEPTION_STACKTRACES = "exceptionStackTraces";<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    public static final String EXTRA_CURRENT_REVISION = "currentRevision";<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    public static final String EXTRA_CURRENT_DISTRIBUTION_ID = "currentDistributionId";<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    public static final String EXTRA_CURRENT_DISTRIBUTION_TITLE = "currentDistributionTitle";<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    /**<a name="line.81"></a>
+<span class="sourceLineNo">082</span>     * this key shouldn't be used<a name="line.82"></a>
+<span class="sourceLineNo">083</span>     */<a name="line.83"></a>
+<span class="sourceLineNo">084</span>    @Deprecated<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    public static final String EXTRA_DEPLOYGATE_VERSION_CODE = "deploygateVersionCode";<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    public static final String EXTRA_COMMENT = "comment";<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    public static final String EXTRA_DISTRIBUTION_USER_NAME = "distributionUserName";<a name="line.87"></a>
+<span class="sourceLineNo">088</span>}<a name="line.88"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
