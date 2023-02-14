@@ -30,9 +30,9 @@ jobs:
       - id: has-new-release
         run: |
           if [[ -d "${{ steps.latest-version.outputs.result }}" ]]; then
-            echo '::set-output name=result::false'
+            echo 'result=false' >> $GITHUB_OUTPUT
           else
-            echo '::set-output name=result::true'
+            echo 'result=true' >> $GITHUB_OUTPUT
           fi
     outputs:
       has-new-release: ${{ steps.has-new-release.outputs.result }}
