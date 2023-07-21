@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 class SendLogcatRequest extends Instruction {
     enum Position {
@@ -43,7 +42,7 @@ class SendLogcatRequest extends Instruction {
 
     public final ArrayList<String> lines;
     public final Position position;
-    @Nullable public final UUID captureId;
+    @Nullable public final String captureId;
     private int retryCount;
 
     SendLogcatRequest(
@@ -56,7 +55,7 @@ class SendLogcatRequest extends Instruction {
     SendLogcatRequest(
             String pid,
             List<String> lines,
-            UUID captureId
+            String captureId
     ) {
         this(pid, lines, Position.Content, captureId);
     }
@@ -87,7 +86,7 @@ class SendLogcatRequest extends Instruction {
             String pid,
             List<String> lines,
             Position position,
-            @Nullable UUID captureId
+            @Nullable String captureId
     ) {
         super(pid);
         this.lines = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
@@ -133,7 +132,6 @@ class SendLogcatRequest extends Instruction {
     void applyValues(Bundle extras) {
         extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
         extras.putString(DeployGateEvent.EXTRA_BUNDLE_POSITION, position.label());
-        // FIXME: use putString instead of putSerializable
-        extras.putSerializable(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
+        extras.putString(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
     }
 }

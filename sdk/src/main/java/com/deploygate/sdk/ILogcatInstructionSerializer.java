@@ -3,8 +3,6 @@ package com.deploygate.sdk;
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.IDeployGateSdkService;
 
-import java.util.UUID;
-
 interface ILogcatInstructionSerializer {
 
     /**
@@ -28,7 +26,7 @@ interface ILogcatInstructionSerializer {
     /**
      * Create and enqueue a request to start sending oneshot logcat with a capture id
      */
-    boolean requestOneshotLogcat(UUID captureId);
+    boolean requestOneshotLogcat(String captureId);
 
     /**
      * Create and enqueue a request to start sending streamed logcat
@@ -69,7 +67,7 @@ interface ILogcatInstructionSerializer {
         }
 
         @Override
-        public boolean requestOneshotLogcat(UUID captureId) {
+        public boolean requestOneshotLogcat(String captureId) {
             Logger.d("Logcat (no-op): requestOneshotLogcat");
             return false;
         }

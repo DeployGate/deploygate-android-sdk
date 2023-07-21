@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.UUID;
 
 class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     static final int MAX_RETRY_COUNT = 2;
@@ -77,7 +76,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             public void emit(
                     String processId,
                     ArrayList<String> logcatLines,
-                    @Nullable UUID captureId
+                    @Nullable String captureId
             ) {
                 ensureHandlerPrepared();
 
@@ -117,7 +116,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     }
 
     @Override
-    public final synchronized boolean requestOneshotLogcat(UUID captureId) {
+    public final synchronized boolean requestOneshotLogcat(String captureId) {
         return requestLogcat(null, captureId);
     }
 
@@ -235,7 +234,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
      * @param captureId nullable.
      * @return true if new process has lauched
      */
-    private boolean requestLogcat(String streamSessionKey, @Nullable UUID captureId) {
+    private boolean requestLogcat(String streamSessionKey, @Nullable String captureId) {
         ensureHandlerPrepared();
 
         if (!isEnabled) {

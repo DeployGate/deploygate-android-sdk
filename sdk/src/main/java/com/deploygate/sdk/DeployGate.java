@@ -28,7 +28,6 @@ import com.deploygate.service.IDeployGateSdkServiceCallback;
 
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -122,8 +121,7 @@ public class DeployGate {
                 if(isCaptureEnabled) {
                     Log.d("DeployGate", "isCaptureEnabled is true");
                     String uri = extras.getString(DeployGateEvent.EXTRA_SCREENSHOT_URI);
-                    // FIXME: use getString instead of getSerializable
-                    UUID captureId = (UUID) extras.getSerializable(DeployGateEvent.EXTRA_CAPTURE_ID);
+                    String captureId = extras.getString(DeployGateEvent.EXTRA_CAPTURE_ID);
                     requestCreateCapture(uri, captureId);
                 } else {
                     Log.d("DeployGate", "isCaptureEnabled is false");
@@ -200,7 +198,7 @@ public class DeployGate {
         onOneshotLogcat();
     }
 
-    private void requestCreateCapture(String uri, UUID captureId) {
+    private void requestCreateCapture(String uri, String captureId) {
         if(sInstance == null) {
             return;
         }
@@ -210,8 +208,7 @@ public class DeployGate {
 
         Bundle extras = new Bundle();
         extras.putString(DeployGateEvent.EXTRA_SCREENSHOT_URI, uri);
-        // FIXME: use putString instead of putSerializable
-        extras.putSerializable(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
+        extras.putString(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
         extras.putLong(DeployGateEvent.EXTRA_CAPTURE_EVENT_AT, eventAtMillis);
         sInstance.invokeAction(DeployGateEvent.ACTION_OPEN_CAPTURE, extras);
 

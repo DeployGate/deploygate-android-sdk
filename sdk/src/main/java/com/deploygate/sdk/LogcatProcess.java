@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -29,9 +28,9 @@ class LogcatProcess {
         void onStarted(String processId);
 
         void emit(
-                String processId,
-                ArrayList<String> logcatLines,
-                @Nullable UUID captureId
+            String processId,
+            ArrayList<String> logcatLines,
+            @Nullable String captureId
         );
 
         void onFinished(String processId);
@@ -63,7 +62,7 @@ class LogcatProcess {
      */
     Pair<String, String> execute(
         @Experimental String streamSessionKey,
-        @Nullable UUID captureId
+        @Nullable String captureId
     ) {
         Pair<String, String> ids;
 
@@ -126,15 +125,15 @@ class LogcatProcess {
 
         private final String processId;
         private final boolean isOneShot;
-        @Nullable private final UUID captureId;
+        @Nullable private final String captureId;
         private final WeakReference<Callback> callback;
         private final AtomicReference<Process> processRef;
         private final AtomicInteger state;
 
         LogcatWatcher(
-                @Experimental String streamSessionKey,
-                @Nullable UUID captureId,
-                Callback callback
+            @Experimental String streamSessionKey,
+            @Nullable String captureId,
+            Callback callback
         ) {
             this.processId = streamSessionKey != null ? streamSessionKey : ClientId.generate();
             this.isOneShot = streamSessionKey == null;
