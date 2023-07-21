@@ -89,5 +89,10 @@ public interface DeployGateEvent {
     public static final String EXTRA_DISTRIBUTION_USER_NAME = "distributionUserName";
     public static final String EXTRA_SCREENSHOT_URI = "e.screenshot-uri";
     public static final String EXTRA_CAPTURE_ID = "e.capture-id";
+
+    /**
+     * the timestamp of the capture.
+     * this value must be compatible EpochMillis.
+     */
     public static final String EXTRA_CAPTURE_EVENT_AT = "e.capture-event-at";
 }

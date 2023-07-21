@@ -26,7 +26,6 @@ import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.UUID;
@@ -206,15 +205,14 @@ public class DeployGate {
             return;
         }
 
-        Date date = new Date();
-        date.getTime();
+        // capture timestamp
+        long eventAtMillis = System.currentTimeMillis();
 
         Bundle extras = new Bundle();
         extras.putString(DeployGateEvent.EXTRA_SCREENSHOT_URI, uri);
         // FIXME: use putString instead of putSerializable
         extras.putSerializable(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
-        // FIXME: use putString instead of putSerializable
-        extras.putSerializable(DeployGateEvent.EXTRA_CAPTURE_EVENT_AT, date);
+        extras.putLong(DeployGateEvent.EXTRA_CAPTURE_EVENT_AT, eventAtMillis);
         sInstance.invokeAction(DeployGateEvent.ACTION_OPEN_CAPTURE, extras);
 
         // send logcat for capture
