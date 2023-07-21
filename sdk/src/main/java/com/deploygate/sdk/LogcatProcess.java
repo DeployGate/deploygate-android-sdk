@@ -3,6 +3,8 @@ package com.deploygate.sdk;
 import android.os.Build;
 import android.util.Pair;
 
+import androidx.annotation.Nullable;
+
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.sdk.internal.annotations.Experimental;
 
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -27,7 +30,8 @@ class LogcatProcess {
 
         void emit(
                 String processId,
-                ArrayList<String> logcatLines
+                ArrayList<String> logcatLines,
+                @Nullable UUID captureId
         );
 
         void onFinished(String processId);
@@ -58,7 +62,8 @@ class LogcatProcess {
      * @return a pair of watcher ids (non-nulls). first is the previous watcher id, second is the new watcher id.
      */
     Pair<String, String> execute(
-            @Experimental String streamSessionKey
+        @Experimental String streamSessionKey,
+        @Nullable UUID captureId
     ) {
         Pair<String, String> ids;
 
@@ -77,7 +82,7 @@ class LogcatProcess {
                 return Pair.create(currentPid, currentPid);
             }
 
-            final LogcatWatcher newWatcher = new LogcatWatcher(streamSessionKey, callback);
+            final LogcatWatcher newWatcher = new LogcatWatcher(streamSessionKey, captureId, callback);
 
             try {
                 this.latestLogcatWatcher = newWatcher;
@@ -121,16 +126,19 @@ class LogcatProcess {
 
         private final String processId;
         private final boolean isOneShot;
+        @Nullable private final UUID captureId;
         private final WeakReference<Callback> callback;
         private final AtomicReference<Process> processRef;
         private final AtomicInteger state;
 
         LogcatWatcher(
                 @Experimental String streamSessionKey,
+                @Nullable UUID captureId,
                 Callback callback
         ) {
             this.processId = streamSessionKey != null ? streamSessionKey : ClientId.generate();
             this.isOneShot = streamSessionKey == null;
+            this.captureId = captureId;
             this.callback = new WeakReference<>(callback);
             this.processRef = new AtomicReference<>();
             this.state = new AtomicInteger(STATE_READY);
@@ -228,10 +236,10 @@ class LogcatProcess {
                     if (isOneShot) {
                         continue;
                     } else if (logcatBuf.size() >= MAX_LINES) {
-                        callback.emit(processId, toArrayList(logcatBuf));
+                        callback.emit(processId, toArrayList(logcatBuf), captureId);
                         logcatBuf = createBuffer(MAX_LINES); // Don't reuse to make sure releasing the reference
                     } else if (!bufferedReader.ready()) {
-                        callback.emit(processId, toArrayList(logcatBuf));
+                        callback.emit(processId, toArrayList(logcatBuf), captureId);
                         logcatBuf = createBuffer(MAX_LINES); // Don't reuse to make sure releasing the reference
                     } else {
                         continue;
@@ -248,7 +256,7 @@ class LogcatProcess {
                     Callback callback = this.callback.get();
 
                     if (callback != null) {
-                        callback.emit(processId, toArrayList(logcatBuf));
+                        callback.emit(processId, toArrayList(logcatBuf), captureId);
                     }
                 }
 

@@ -11,6 +11,8 @@ import android.os.TransactionTooLargeException;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import androidx.annotation.Nullable;
+
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.UUID;
 
 class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     static final int MAX_RETRY_COUNT = 2;
@@ -73,11 +76,13 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             @Override
             public void emit(
                     String processId,
-                    ArrayList<String> logcatLines
+                    ArrayList<String> logcatLines,
+                    @Nullable UUID captureId
             ) {
                 ensureHandlerPrepared();
 
-                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(processId, logcatLines));
+
+                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(processId, logcatLines, captureId));
             }
 
             @Override
@@ -109,6 +114,11 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     @Override
     public final synchronized boolean requestOneshotLogcat() {
         return requestLogcat(null);
+    }
+
+    @Override
+    public final synchronized boolean requestOneshotLogcat(UUID captureId) {
+        return requestLogcat(null, captureId);
     }
 
     @Override
@@ -183,6 +193,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         Bundle extras = request.toExtras();
 
         try {
+
             service.sendEvent(packageName, DeployGateEvent.ACTION_SEND_LOGCAT, extras);
             return SEND_LOGCAT_RESULT_SUCCESS;
         } catch (RemoteException e) {
@@ -216,13 +227,22 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
      * @return true if new process has lauched
      */
     private boolean requestLogcat(String streamSessionKey) {
+        return requestLogcat(streamSessionKey, null);
+    }
+
+    /**
+     * @param streamSessionKey nullable. sdk can not generate this key.
+     * @param captureId nullable.
+     * @return true if new process has lauched
+     */
+    private boolean requestLogcat(String streamSessionKey, @Nullable UUID captureId) {
         ensureHandlerPrepared();
 
         if (!isEnabled) {
             return false;
         }
 
-        Pair<String, String> ids = logcatProcess.execute(streamSessionKey);
+        Pair<String, String> ids = logcatProcess.execute(streamSessionKey, captureId);
 
         String retiredId = ids.first;
         String newId = ids.second;

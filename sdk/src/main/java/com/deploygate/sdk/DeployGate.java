@@ -15,13 +15,21 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
+
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -74,6 +82,7 @@ public class DeployGate {
     private String mAppUpdateMessage;
 
     private IDeployGateSdkService mRemoteService;
+    private boolean isCaptureEnabled = false;
 
     private final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
 
@@ -109,6 +118,16 @@ public class DeployGate {
                     onDisableStreamedLogcat();
                 } else {
                     Logger.w("streamed logcat is not supported");
+                }
+            } else if (DeployGateEvent.ACTION_DETECT_SCREENSHOT.equals(action)) {
+                if(isCaptureEnabled) {
+                    Log.d("DeployGate", "isCaptureEnabled is true");
+                    String uri = extras.getString(DeployGateEvent.EXTRA_SCREENSHOT_URI);
+                    // FIXME: use getString instead of getSerializable
+                    UUID captureId = (UUID) extras.getSerializable(DeployGateEvent.EXTRA_CAPTURE_ID);
+                    requestCreateCapture(uri, captureId);
+                } else {
+                    Log.d("DeployGate", "isCaptureEnabled is false");
                 }
             }
         }
@@ -182,6 +201,26 @@ public class DeployGate {
         onOneshotLogcat();
     }
 
+    private void requestCreateCapture(String uri, UUID captureId) {
+        if(sInstance == null) {
+            return;
+        }
+
+        Date date = new Date();
+        date.getTime();
+
+        Bundle extras = new Bundle();
+        extras.putString(DeployGateEvent.EXTRA_SCREENSHOT_URI, uri);
+        // FIXME: use putString instead of putSerializable
+        extras.putSerializable(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
+        // FIXME: use putString instead of putSerializable
+        extras.putSerializable(DeployGateEvent.EXTRA_CAPTURE_EVENT_AT, date);
+        sInstance.invokeAction(DeployGateEvent.ACTION_OPEN_CAPTURE, extras);
+
+        // send logcat for capture
+        mLogcatInstructionSerializer.requestOneshotLogcat(captureId);
+    }
+
     private void onOneshotLogcat() {
         mLogcatInstructionSerializer.requestOneshotLogcat();
     }
@@ -223,6 +262,17 @@ public class DeployGate {
             CustomLogConfiguration customLogConfiguration,
             HostApp hostApp
     ) {
+        // Response of screenshot detection according to host application lifecycle
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(new LifecycleEventObserver() {
+            @Override
+            public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
+                if (event == Lifecycle.Event.ON_START) {
+                    isCaptureEnabled = true;
+                } else if (event == Lifecycle.Event.ON_STOP) {
+                    isCaptureEnabled = false;
+                }
+            }
+        });
         mApplicationContext = applicationContext;
         mDeployGateClient = new DeployGateClient(applicationContext, DEPLOYGATE_PACKAGE);
         mHostApp = hostApp;

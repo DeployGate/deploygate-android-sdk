@@ -25,6 +25,8 @@ public interface DeployGateEvent {
     public static final String ACTION_OPEN_APP_DETAIL = "openAppDetail";
     public static final String ACTION_OPEN_COMMENTS = "openComments";
     public static final String ACTION_COMPOSE_COMMENT = "composeComment";
+    public static final String ACTION_DETECT_SCREENSHOT = "a.detect-screenshot";
+    public static final String ACTION_OPEN_CAPTURE = "a.open-capture";
 
     public static final String EXTRA_AUTHOR = "author";
     public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";
@@ -85,4 +87,7 @@ public interface DeployGateEvent {
     public static final String EXTRA_DEPLOYGATE_VERSION_CODE = "deploygateVersionCode";
     public static final String EXTRA_COMMENT = "comment";
     public static final String EXTRA_DISTRIBUTION_USER_NAME = "distributionUserName";
+    public static final String EXTRA_SCREENSHOT_URI = "e.screenshot-uri";
+    public static final String EXTRA_CAPTURE_ID = "e.capture-id";
+    public static final String EXTRA_CAPTURE_EVENT_AT = "e.capture-event-at";
 }

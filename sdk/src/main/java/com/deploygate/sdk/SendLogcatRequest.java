@@ -2,6 +2,8 @@ package com.deploygate.sdk;
 
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
 
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 class SendLogcatRequest extends Instruction {
     enum Position {
@@ -40,6 +43,7 @@ class SendLogcatRequest extends Instruction {
 
     public final ArrayList<String> lines;
     public final Position position;
+    @Nullable public final UUID captureId;
     private int retryCount;
 
     SendLogcatRequest(
@@ -47,6 +51,14 @@ class SendLogcatRequest extends Instruction {
             List<String> lines
     ) {
         this(pid, lines, Position.Content);
+    }
+
+    SendLogcatRequest(
+            String pid,
+            List<String> lines,
+            UUID captureId
+    ) {
+        this(pid, lines, Position.Content, captureId);
     }
 
     /**
@@ -62,9 +74,25 @@ class SendLogcatRequest extends Instruction {
             List<String> lines,
             Position position
     ) {
+        this(pid, lines, position, null);
+    }
+
+    /**
+     * @param pid a process id. non-null
+     * @param lines logcat contents if available. Zero value is an empty list.
+     * @param position a position of this request. non-null
+     * @param captureId the id of the capture. nullable
+     */
+    private SendLogcatRequest(
+            String pid,
+            List<String> lines,
+            Position position,
+            @Nullable UUID captureId
+    ) {
         super(pid);
         this.lines = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
         this.position = position;
+        this.captureId = captureId;
     }
 
     /**
@@ -105,5 +133,7 @@ class SendLogcatRequest extends Instruction {
     void applyValues(Bundle extras) {
         extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
         extras.putString(DeployGateEvent.EXTRA_BUNDLE_POSITION, position.label());
+        // FIXME: use putString instead of putSerializable
+        extras.putSerializable(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
     }
 }
