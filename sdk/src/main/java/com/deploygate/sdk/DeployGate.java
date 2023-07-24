@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -259,7 +260,7 @@ public class DeployGate {
 
     private void prepareBroadcastReceiver() {
         IntentFilter filter = new IntentFilter(ACTION_DEPLOYGATE_STARTED);
-        mApplicationContext.registerReceiver(new BroadcastReceiver() {
+        BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(
                     Context context,
@@ -272,7 +273,13 @@ public class DeployGate {
                     bindToService(false);
                 }
             }
-        }, filter);
+        };
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            mApplicationContext.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            mApplicationContext.registerReceiver(receiver, filter);
+        }
     }
 
     private void bindToService(final boolean isBoot) {
