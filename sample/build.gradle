@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.akaita.android.easylauncher'
+apply plugin: 'com.starter.easylauncher'
 
 android {
-    compileSdkVersion = 32
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.deploygate.sample"
         minSdkVersion 14
-        targetSdkVersion 32
+        targetSdkVersion 33
     }
 
     buildTypes {
@@ -56,7 +56,7 @@ android {
 }
 
 easylauncher {
-    defaultFlavorNaming = true
+    defaultFlavorNaming true
 
     productFlavors {
         devreal {
