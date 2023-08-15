@@ -24,8 +24,11 @@ import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +50,7 @@ public class DeployGate {
 
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
+    private static final Object sPendingEventLock = new Object();
 
     private static DeployGate sInstance;
 
@@ -57,6 +61,7 @@ public class DeployGate {
     private final ILogcatInstructionSerializer mLogcatInstructionSerializer;
     private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
+    private final HashMap<String, Bundle> mPendingEvents;
     private final String mExpectedAuthor;
     private String mAuthor;
 
@@ -164,6 +169,9 @@ public class DeployGate {
             mLogcatInstructionSerializer.connect(mRemoteService);
 
             mInitializedLatch.countDown();
+
+            // to release a lock as soon as possible.
+            flushPendingEvents();
         }
 
         private void onUpdateArrived(
@@ -192,6 +200,7 @@ public class DeployGate {
     @SuppressWarnings("FieldCanBeLocal")
     @NonNull
     private final VisibilityLifecycleCallbacks.OnVisibilityChangeListener mOnVisibilityChangeListener = new VisibilityLifecycleCallbacks.OnVisibilityChangeListener() {
+
         @Override
         public void onForeground(
                 long elapsedRealtime,
@@ -200,7 +209,7 @@ public class DeployGate {
             Bundle extras = new Bundle();
             extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
             extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_TYPE, DeployGateEvent.VisibilityType.FOREGROUND);
-            invokeAction(DeployGateEvent.ACTION_VISIBILITY_EVENT, extras);
+            invokeAction(DeployGateEvent.ACTION_VISIBILITY_EVENT, extras, true);
         }
 
         @Override
@@ -211,7 +220,7 @@ public class DeployGate {
             Bundle extras = new Bundle();
             extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
             extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_TYPE, DeployGateEvent.VisibilityType.BACKGROUND);
-            invokeAction(DeployGateEvent.ACTION_VISIBILITY_EVENT, extras);
+            invokeAction(DeployGateEvent.ACTION_VISIBILITY_EVENT, extras, true);
         }
     };
 
@@ -261,13 +270,13 @@ public class DeployGate {
             HostApp hostApp
     ) {
         mApplicationContext = applicationContext;
-        VisibilityLifecycleCallbacks mVisibilityLifecycleCallbacks = new VisibilityLifecycleCallbacks(mOnVisibilityChangeListener);
         mDeployGateClient = new DeployGateClient(applicationContext, DEPLOYGATE_PACKAGE);
         mHostApp = hostApp;
         mHandler = new Handler();
         mLogcatInstructionSerializer = mHostApp.canUseLogcat ? new LogcatInstructionSerializer(mHostApp.packageName) : ILogcatInstructionSerializer.NULL_INSTANCE;
         mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, customLogConfiguration);
-        mCallbacks = new HashSet<DeployGateCallback>();
+        mCallbacks = new HashSet<>();
+        mPendingEvents = new HashMap<>();
         mExpectedAuthor = author;
 
         prepareBroadcastReceiver();
@@ -277,7 +286,7 @@ public class DeployGate {
         }
 
         mInitializedLatch = new CountDownLatch(1);
-        ((Application) applicationContext).registerActivityLifecycleCallbacks(mVisibilityLifecycleCallbacks);
+        ((Application) applicationContext).registerActivityLifecycleCallbacks(new VisibilityLifecycleCallbacks(mOnVisibilityChangeListener));
         initService(true);
     }
 
@@ -357,17 +366,46 @@ public class DeployGate {
         }
     }
 
+    /**
+     * Send an event to the client application
+     *
+     * @param action to be sent
+     * @param extras to be sent
+     * @param allowPending Allow queueing events to send them after a service connection is established (since 4.6.0)
+     */
     private void invokeAction(
             @NonNull String action,
-            @Nullable Bundle extras
+            @Nullable Bundle extras,
+            boolean allowPending
     ) {
+        extras = extras != null ? extras : new Bundle();
+
         if (mRemoteService == null) {
+            if (allowPending) {
+                synchronized (sPendingEventLock) {
+                    mPendingEvents.put(action, extras);
+                }
+            }
+
             return;
         }
         try {
             mRemoteService.sendEvent(mHostApp.packageName, action, extras);
         } catch (RemoteException e) {
             Log.w(TAG, "failed to invoke " + action + " action: " + e.getMessage());
+        }
+    }
+
+    private void flushPendingEvents() {
+        // cannot re-enqueue events for now
+        synchronized (sPendingEventLock) {
+            Iterator<Map.Entry<String, Bundle>> iterator = mPendingEvents.entrySet().iterator();
+
+            while (iterator.hasNext()) {
+                Map.Entry<String, Bundle> entry = iterator.next();
+                invokeAction(entry.getKey(), entry.getValue(), false);
+                iterator.remove();
+            }
         }
     }
 
@@ -1230,7 +1268,7 @@ public class DeployGate {
             return;
         }
 
-        sInstance.invokeAction(DeployGateEvent.ACTION_INSTALL_UPDATE, null);
+        sInstance.invokeAction(DeployGateEvent.ACTION_INSTALL_UPDATE, null, false);
     }
 
     /**
@@ -1246,7 +1284,7 @@ public class DeployGate {
             return;
         }
 
-        sInstance.invokeAction(DeployGateEvent.ACTION_OPEN_COMMENTS, null);
+        sInstance.invokeAction(DeployGateEvent.ACTION_OPEN_COMMENTS, null, false);
     }
 
     /**
@@ -1279,7 +1317,7 @@ public class DeployGate {
 
         Bundle extras = new Bundle();
         extras.putString(DeployGateEvent.EXTRA_COMMENT, defaultComment);
-        sInstance.invokeAction(DeployGateEvent.ACTION_COMPOSE_COMMENT, extras);
+        sInstance.invokeAction(DeployGateEvent.ACTION_COMPOSE_COMMENT, extras, false);
     }
 
     /**
