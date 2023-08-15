@@ -26,9 +26,9 @@ class LogcatProcess {
         void onStarted(String processId);
 
         void emit(
-            String processId,
-            ArrayList<String> logcatLines,
-            String captureId
+                String processId,
+                ArrayList<String> logcatLines,
+                String captureId
         );
 
         void onFinished(String processId);
@@ -59,8 +59,8 @@ class LogcatProcess {
      * @return a pair of watcher ids (non-nulls). first is the previous watcher id, second is the new watcher id.
      */
     Pair<String, String> execute(
-        @Experimental String streamSessionKey,
-        String captureId
+            @Experimental String streamSessionKey,
+            String captureId
     ) {
         Pair<String, String> ids;
 
@@ -129,9 +129,9 @@ class LogcatProcess {
         private final AtomicInteger state;
 
         LogcatWatcher(
-            @Experimental String streamSessionKey,
-            String captureId,
-            Callback callback
+                @Experimental String streamSessionKey,
+                String captureId,
+                Callback callback
         ) {
             if (streamSessionKey != null && captureId != null) {
                 throw new IllegalArgumentException("streaming and capture cannot be specified at once");

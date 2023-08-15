@@ -1,5 +1,8 @@
 package com.deploygate.sdk;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.mockStatic;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -23,9 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.mockStatic;
 
 @RunWith(AndroidJUnit4.class)
 public class LogcatProcessTest {

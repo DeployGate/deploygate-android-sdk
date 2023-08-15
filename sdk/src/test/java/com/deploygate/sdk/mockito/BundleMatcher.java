@@ -1,12 +1,12 @@
 package com.deploygate.sdk.mockito;
 
+import static org.mockito.internal.progress.ThreadSafeMockingProgress.mockingProgress;
+
 import android.os.Bundle;
 
 import com.deploygate.sdk.helper.Bundles;
 
 import org.mockito.ArgumentMatcher;
-
-import static org.mockito.internal.progress.ThreadSafeMockingProgress.mockingProgress;
 
 public class BundleMatcher {
     public static Bundle eq(Bundle expected) {

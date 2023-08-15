@@ -15,8 +15,8 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.deploygate.sdk.internal.VisibilityLifecycleCallbacks;
 import com.deploygate.sdk.internal.Logger;
+import com.deploygate.sdk.internal.VisibilityLifecycleCallbacks;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
@@ -201,7 +201,7 @@ public class DeployGate {
         public void onForeground(
                 long elapsedRealtime,
                 TimeUnit timeUnit
-            ) {
+        ) {
             Bundle extras = new Bundle();
             extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
             extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_TYPE, DeployGateEvent.VisibilityType.FOREGROUND);
@@ -365,9 +365,12 @@ public class DeployGate {
     /**
      * Send an event to the client application
      *
-     * @param action to be sent
-     * @param extras to be sent
-     * @param allowPending Allow queueing events to send them after a service connection is established (since 4.6.0)
+     * @param action
+     *         to be sent
+     * @param extras
+     *         to be sent
+     * @param allowPending
+     *         Allow queueing events to send them after a service connection is established (since 4.6.0)
      */
     private void invokeAction(
             String action,

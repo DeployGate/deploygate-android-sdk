@@ -75,7 +75,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             public void emit(
                     String processId,
                     ArrayList<String> logcatLines,
-                     String captureId
+                    String captureId
             ) {
                 ensureHandlerPrepared();
 
@@ -229,11 +229,17 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     }
 
     /**
-     * @param streamSessionKey nullable. sdk can not generate this key.
-     * @param captureId nullable.
+     * @param streamSessionKey
+     *         nullable. sdk can not generate this key.
+     * @param captureId
+     *         nullable.
+     *
      * @return true if new process has lauched
      */
-    private boolean requestLogcat(String streamSessionKey, String captureId) {
+    private boolean requestLogcat(
+            String streamSessionKey,
+            String captureId
+    ) {
         ensureHandlerPrepared();
 
         if (!isEnabled || logcatProcess == null) {

@@ -1,5 +1,15 @@
 package com.deploygate.sdk;
 
+import static com.deploygate.sdk.mockito.BundleMatcher.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
+import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
+
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -7,7 +17,6 @@ import android.os.TransactionTooLargeException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.deploygate.sdk.helper.FakeLogcat;
-import com.deploygate.sdk.mockito.BundleMatcher;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.FakeDeployGateClientService;
 import com.google.common.truth.Truth;
@@ -28,17 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
-import static com.deploygate.sdk.mockito.BundleMatcher.eq;
-import static com.deploygate.sdk.mockito.BundleMatcher.eq;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mockStatic;
-import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
 
 @RunWith(AndroidJUnit4.class)
 @LooperMode(PAUSED)
@@ -87,7 +85,7 @@ public class LogcatInstructionSerializerTest {
             instructionSerializer.halt();
         }
 
-        for (Process process: processes) {
+        for (Process process : processes) {
             if (process.isAlive()) {
                 process.destroy();
             }

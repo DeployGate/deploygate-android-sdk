@@ -52,10 +52,14 @@ class SendLogcatRequest extends Instruction {
     }
 
     /**
-     * @param pid a process id. non-null
-     * @param lines logcat contents if available. Zero value is an empty list.
-     * @param position a position of this request. non-null
-     * @param captureId the id of the capture. nullable
+     * @param pid
+     *         a process id. non-null
+     * @param lines
+     *         logcat contents if available. Zero value is an empty list.
+     * @param position
+     *         a position of this request. non-null
+     * @param captureId
+     *         the id of the capture. nullable
      */
     private SendLogcatRequest(
             String pid,

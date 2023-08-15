@@ -1,5 +1,7 @@
 package com.deploygate.sdk;
 
+import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
+
 import android.app.Application;
 
 import androidx.annotation.NonNull;
@@ -10,8 +12,6 @@ import com.google.common.truth.Truth;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
 
 /**

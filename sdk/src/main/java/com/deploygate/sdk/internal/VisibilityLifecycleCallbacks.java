@@ -10,8 +10,15 @@ import java.util.concurrent.TimeUnit;
 
 public final class VisibilityLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
     public interface OnVisibilityChangeListener {
-        void onForeground(long elapsedRealtime, TimeUnit timeUnit);
-        void onBackground(long elapsedRealtime, TimeUnit timeUnit);
+        void onForeground(
+                long elapsedRealtime,
+                TimeUnit timeUnit
+        );
+
+        void onBackground(
+                long elapsedRealtime,
+                TimeUnit timeUnit
+        );
     }
 
     private int onResumeCount = 0; // this is manipulated from the single thread

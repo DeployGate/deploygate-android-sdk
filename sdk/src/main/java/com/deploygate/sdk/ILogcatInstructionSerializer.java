@@ -21,7 +21,8 @@ interface ILogcatInstructionSerializer {
     /**
      * Create and enqueue a request to start sending oneshot logcat
      *
-     * @param captureId this is nullable. Set to non-null if this logcat is for a capture.
+     * @param captureId
+     *         this is nullable. Set to non-null if this logcat is for a capture.
      */
     boolean requestOneshotLogcat(String captureId);
 

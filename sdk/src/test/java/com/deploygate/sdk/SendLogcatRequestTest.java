@@ -1,5 +1,7 @@
 package com.deploygate.sdk;
 
+import static com.google.common.truth.Truth.assertAbout;
+
 import android.os.Bundle;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -20,8 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import static com.google.common.truth.Truth.assertAbout;
 
 @RunWith(AndroidJUnit4.class)
 public class SendLogcatRequestTest {
@@ -155,7 +155,10 @@ public class SendLogcatRequestTest {
         return bundle;
     }
 
-    private static ArrayList<String> arrayListOf(int startInclusive, int count) {
+    private static ArrayList<String> arrayListOf(
+            int startInclusive,
+            int count
+    ) {
         ArrayList<String> list = new ArrayList<>();
 
         for (int i = startInclusive, max = startInclusive + count; i < max; i++) {
@@ -192,7 +195,12 @@ public class SendLogcatRequestTest {
             this.actual = actual;
         }
 
-        public void isSameInBundle(String expectedKey, SendLogcatRequest.Position expectedPosition, List<String> expectedLines, String captureId) {
+        public void isSameInBundle(
+                String expectedKey,
+                SendLogcatRequest.Position expectedPosition,
+                List<String> expectedLines,
+                String captureId
+        ) {
             if (!actual.gid.equals(expectedKey)) {
                 failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected of %s", expectedKey, toString(actual))));
                 return;
@@ -216,7 +224,7 @@ public class SendLogcatRequestTest {
             }
 
             if (!Objects.equals(actual.captureId, captureId)) {
-                failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to be exactly included in %s",actual.captureId, captureId)));
+                failWithActual(Fact.simpleFact(String.format(Locale.US, "%s is expected to be exactly included in %s", actual.captureId, captureId)));
             }
         }
 
