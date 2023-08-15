@@ -40,6 +40,8 @@ android {
 }
 
 dependencies {
+    implementation "androidx.annotation:annotation:1.6.0"
+
     testImplementation 'androidx.test:runner:1.5.2'
     testImplementation 'androidx.test.ext:junit:1.1.5'
     testImplementation 'org.robolectric:robolectric:4.10.3'

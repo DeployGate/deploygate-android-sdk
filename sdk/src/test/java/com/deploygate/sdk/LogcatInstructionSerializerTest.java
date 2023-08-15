@@ -102,7 +102,26 @@ public class LogcatInstructionSerializerTest {
     public void sendSingleChunk_always_returns_retriable_status_if_service_is_none() throws RemoteException {
         instructionSerializer = new LogcatInstructionSerializer(PACKAGE_NAME);
 
-        instructionSerializer.requestOneshotLogcat();
+        instructionSerializer.requestOneshotLogcat(null);
+
+        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
+        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
+        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
+
+        doNothing().when(service).sendEvent(anyString(), anyString(), any(Bundle.class));
+
+        Truth.assertThat(instructionSerializer.sendSingleChunk(chunk1)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(instructionSerializer.sendSingleChunk(chunk2)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(instructionSerializer.sendSingleChunk(chunk3)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test(timeout = 3000L)
+    public void sendSingleChunk_always_returns_retriable_status_if_service_is_none_and_is_in_capture_mode() throws RemoteException {
+        instructionSerializer = new LogcatInstructionSerializer(PACKAGE_NAME);
+
+        instructionSerializer.requestOneshotLogcat("brabra");
 
         SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
         SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
@@ -188,7 +207,15 @@ public class LogcatInstructionSerializerTest {
         // don't fail
 
         for (int i = 0; i < 10; i++) {
-            instructionSerializer.requestOneshotLogcat();
+            instructionSerializer.requestOneshotLogcat(null);
+        }
+
+        Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
+
+        // don't fail
+
+        for (int i = 0; i < 10; i++) {
+            instructionSerializer.requestOneshotLogcat("brabra");
         }
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
@@ -203,10 +230,19 @@ public class LogcatInstructionSerializerTest {
         instructionSerializer.setEnabled(false);
 
         for (int i = 0; i < 30; i++) {
-            if (i % 2 == 0) {
-                Truth.assertThat(instructionSerializer.requestOneshotLogcat()).isFalse();
-            } else {
-                Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+            switch (i % 3) {
+                case 0: {
+                    Truth.assertThat(instructionSerializer.requestOneshotLogcat(null)).isFalse();
+                    break;
+                }
+                case 1: {
+                    Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+                    break;
+                }
+                case 2: {
+                    Truth.assertThat(instructionSerializer.requestOneshotLogcat("brabra")).isFalse();
+                    break;
+                }
             }
         }
 
@@ -214,10 +250,19 @@ public class LogcatInstructionSerializerTest {
         instructionSerializer.connect(service);
 
         for (int i = 0; i < 30; i++) {
-            if (i % 2 == 0) {
-                Truth.assertThat(instructionSerializer.requestOneshotLogcat()).isFalse();
-            } else {
-                Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+            switch (i % 3) {
+                case 0: {
+                    Truth.assertThat(instructionSerializer.requestOneshotLogcat(null)).isFalse();
+                    break;
+                }
+                case 1: {
+                    Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+                    break;
+                }
+                case 2: {
+                    Truth.assertThat(instructionSerializer.requestOneshotLogcat("brabra")).isFalse();
+                    break;
+                }
             }
         }
 

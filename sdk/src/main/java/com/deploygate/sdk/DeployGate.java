@@ -16,11 +16,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleEventObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.annotation.Nullable;
 
+import com.deploygate.sdk.internal.VisibilityLifecycleCallbacks;
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
@@ -29,6 +27,7 @@ import com.deploygate.service.IDeployGateSdkServiceCallback;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is DeployGate SDK library. Import this library to the application
@@ -80,13 +79,12 @@ public class DeployGate {
     private String mAppUpdateMessage;
 
     private IDeployGateSdkService mRemoteService;
-    private boolean isCaptureEnabled = false;
 
     private final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
 
         public void onEvent(
-                String action,
-                Bundle extras
+                @NonNull String action,
+                @NonNull Bundle extras
         ) throws RemoteException {
             if (TextUtils.isEmpty(action)) {
                 return;
@@ -97,7 +95,8 @@ public class DeployGate {
             } else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
                 onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL), extras.getString(DeployGateEvent.EXTRA_VERSION_NAME), extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE), extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE));
             } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
-                onOneshotLogcat();
+                String captureId = extras.getString(DeployGateEvent.EXTRA_CAPTURE_ID);
+                onOneshotLogcat(captureId);
             } else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
                 if (mDeployGateClient.isSupported(Compatibility.STREAMED_LOGCAT)) {
                     String sessionKey = extras.getString(DeployGateEvent.EXTRA_LOGCAT_STREAM_SESSION_KEY);
@@ -117,15 +116,8 @@ public class DeployGate {
                 } else {
                     Logger.w("streamed logcat is not supported");
                 }
-            } else if (DeployGateEvent.ACTION_DETECT_SCREENSHOT.equals(action)) {
-                if(isCaptureEnabled) {
-                    Log.d("DeployGate", "isCaptureEnabled is true");
-                    String uri = extras.getString(DeployGateEvent.EXTRA_SCREENSHOT_URI);
-                    String captureId = extras.getString(DeployGateEvent.EXTRA_CAPTURE_ID);
-                    requestCreateCapture(uri, captureId);
-                } else {
-                    Log.d("DeployGate", "isCaptureEnabled is false");
-                }
+            } else {
+                Logger.w("%s is not supported by this sdk version", action);
             }
         }
 
@@ -194,30 +186,26 @@ public class DeployGate {
         }
     };
 
-    private void requestOneshotLogcat() {
-        onOneshotLogcat();
-    }
-
-    private void requestCreateCapture(String uri, String captureId) {
-        if(sInstance == null) {
-            return;
+    @SuppressWarnings("FieldCanBeLocal")
+    @NonNull
+    private final VisibilityLifecycleCallbacks.OnVisibilityChangeListener mOnVisibilityChangeListener = new VisibilityLifecycleCallbacks.OnVisibilityChangeListener() {
+        @Override
+        public void onForeground(
+                long elapsedRealtime,
+                @NonNull TimeUnit timeUnit
+            ) {
+            Bundle extras = new Bundle();
+            extras.putLong(DeployGateEvent.EXTRA_FOREGROUND_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
+            invokeAction(DeployGateEvent.ACTION_GO_TO_FOREGROUND, extras);
         }
+    };
 
-        // capture timestamp
-        long eventAtMillis = System.currentTimeMillis();
-
-        Bundle extras = new Bundle();
-        extras.putString(DeployGateEvent.EXTRA_SCREENSHOT_URI, uri);
-        extras.putString(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
-        extras.putLong(DeployGateEvent.EXTRA_CAPTURE_EVENT_AT, eventAtMillis);
-        sInstance.invokeAction(DeployGateEvent.ACTION_OPEN_CAPTURE, extras);
-
-        // send logcat for capture
-        mLogcatInstructionSerializer.requestOneshotLogcat(captureId);
+    private void requestOneshotLogcat() {
+        onOneshotLogcat(null);
     }
 
-    private void onOneshotLogcat() {
-        mLogcatInstructionSerializer.requestOneshotLogcat();
+    private void onOneshotLogcat(@Nullable String captureId) {
+        mLogcatInstructionSerializer.requestOneshotLogcat(captureId);
     }
 
     private void onEnableStreamedLogcat(String streamSessionKey) {
@@ -257,18 +245,8 @@ public class DeployGate {
             CustomLogConfiguration customLogConfiguration,
             HostApp hostApp
     ) {
-        // Response of screenshot detection according to host application lifecycle
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(new LifecycleEventObserver() {
-            @Override
-            public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
-                if (event == Lifecycle.Event.ON_START) {
-                    isCaptureEnabled = true;
-                } else if (event == Lifecycle.Event.ON_STOP) {
-                    isCaptureEnabled = false;
-                }
-            }
-        });
         mApplicationContext = applicationContext;
+        VisibilityLifecycleCallbacks mVisibilityLifecycleCallbacks = new VisibilityLifecycleCallbacks(mOnVisibilityChangeListener);
         mDeployGateClient = new DeployGateClient(applicationContext, DEPLOYGATE_PACKAGE);
         mHostApp = hostApp;
         mHandler = new Handler();
@@ -284,6 +262,7 @@ public class DeployGate {
         }
 
         mInitializedLatch = new CountDownLatch(1);
+        ((Application) applicationContext).registerActivityLifecycleCallbacks(mVisibilityLifecycleCallbacks);
         initService(true);
     }
 
@@ -364,8 +343,8 @@ public class DeployGate {
     }
 
     private void invokeAction(
-            String action,
-            Bundle extras
+            @NonNull String action,
+            @Nullable Bundle extras
     ) {
         if (mRemoteService == null) {
             return;
