@@ -11,9 +11,6 @@ import android.os.TransactionTooLargeException;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
@@ -34,37 +31,31 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     static final int WHAT_SEND_LOGCAT = 0x20;
     static final int WHAT_ADD_LOGCAT_CHUNK = 0x30;
 
-    @NonNull
     private static final Object LOCK = new Object();
 
-    @NonNull
     private final String packageName;
 
     /**
      * nullable if logcat is not supported on this device
      */
-    @Nullable
     private final LogcatProcess logcatProcess;
 
     /**
      * nullable if logcat is not supported on this device
      */
     @SuppressWarnings("FieldCanBeLocal")
-    @NonNull
     private final HandlerThread thread;
 
     /**
      * NonNull if prepared once, however this is always null Logcat is not supported
      */
-    @Nullable
     private LogcatHandler handler;
     private boolean isEnabled;
 
-    @Nullable
     private volatile IDeployGateSdkService service;
 
     LogcatInstructionSerializer(
-            @NonNull String packageName
+            String packageName
     ) {
         if (TextUtils.isEmpty(packageName)) {
             throw new IllegalArgumentException("packageName must be present");
@@ -75,16 +66,16 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         this.logcatProcess = new LogcatProcess(new LogcatProcess.Callback() {
             @Override
-            public void onStarted(@NonNull String processId) {
+            public void onStarted(String processId) {
                 //noinspection ConstantConditions
                 handler.enqueueSendLogcatMessageInstruction(SendLogcatRequest.createBeginning(processId));
             }
 
             @Override
             public void emit(
-                    @NonNull String processId,
-                    @NonNull ArrayList<String> logcatLines,
-                    @Nullable  String captureId
+                    String processId,
+                    ArrayList<String> logcatLines,
+                     String captureId
             ) {
                 ensureHandlerPrepared();
 
@@ -93,7 +84,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
             }
 
             @Override
-            public void onFinished(@NonNull String processId) {
+            public void onFinished(String processId) {
                 //noinspection ConstantConditions
                 handler.enqueueSendLogcatMessageInstruction(SendLogcatRequest.createTermination(processId));
             }
@@ -103,7 +94,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     }
 
     @Override
-    public final synchronized void connect(@NonNull IDeployGateSdkService service) {
+    public final synchronized void connect(IDeployGateSdkService service) {
         //noinspection ConstantConditions
         if (service == null) {
             throw new IllegalArgumentException("service must not be null");
@@ -121,12 +112,12 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     }
 
     @Override
-    public final synchronized boolean requestOneshotLogcat(@Nullable String captureId) {
+    public final synchronized boolean requestOneshotLogcat(String captureId) {
         return requestLogcat(null, captureId);
     }
 
     @Override
-    public boolean requestStreamedLogcat(@Nullable String sessionKey) {
+    public boolean requestStreamedLogcat(String sessionKey) {
         if (TextUtils.isEmpty(sessionKey)) {
             Logger.w("non-blank stream key is required");
             return false;
@@ -182,7 +173,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
      * otherwise {@link LogcatInstructionSerializer#SEND_LOGCAT_RESULT_FAILURE_RETRY_EXCEEDED}
      */
     int sendSingleChunk(
-            @NonNull SendLogcatRequest request
+            SendLogcatRequest request
     ) {
         IDeployGateSdkService service = this.service;
 
@@ -233,7 +224,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
      *
      * @return true if new process has lauched
      */
-    private boolean requestLogcat(@Nullable String streamSessionKey) {
+    private boolean requestLogcat(String streamSessionKey) {
         return requestLogcat(streamSessionKey, null);
     }
 
@@ -242,7 +233,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
      * @param captureId nullable.
      * @return true if new process has lauched
      */
-    private boolean requestLogcat(@Nullable String streamSessionKey, @Nullable String captureId) {
+    private boolean requestLogcat(String streamSessionKey, String captureId) {
         ensureHandlerPrepared();
 
         if (!isEnabled || logcatProcess == null) {
@@ -289,7 +280,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
      */
     private int sendChunkedLogcats(
             int splitTimes,
-            @NonNull LinkedList<SendLogcatRequest> pendingRequests
+            LinkedList<SendLogcatRequest> pendingRequests
     ) {
         SendLogcatRequest request = pendingRequests.removeFirst();
 
@@ -317,7 +308,6 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     /**
      * @return the handler instance
      */
-    @NonNull
     Handler getHandler() {
         ensureHandlerPrepared();
         //noinspection ConstantConditions

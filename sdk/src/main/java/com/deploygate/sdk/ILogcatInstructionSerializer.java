@@ -1,8 +1,5 @@
 package com.deploygate.sdk;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.IDeployGateSdkService;
 
@@ -14,7 +11,7 @@ interface ILogcatInstructionSerializer {
      * @param service
      *         the latest service connection
      */
-    void connect(@NonNull IDeployGateSdkService service);
+    void connect(IDeployGateSdkService service);
 
     /**
      * Release a service connection and cancel all pending instructions and on-going instruction.
@@ -26,13 +23,13 @@ interface ILogcatInstructionSerializer {
      *
      * @param captureId this is nullable. Set to non-null if this logcat is for a capture.
      */
-    boolean requestOneshotLogcat(@Nullable String captureId);
+    boolean requestOneshotLogcat(String captureId);
 
     /**
      * Create and enqueue a request to start sending streamed logcat
      */
     boolean requestStreamedLogcat(
-            @Nullable String sessionKey
+            String sessionKey
     );
 
     /**
@@ -51,7 +48,7 @@ interface ILogcatInstructionSerializer {
     ILogcatInstructionSerializer NULL_INSTANCE = new ILogcatInstructionSerializer() {
 
         @Override
-        public void connect(@NonNull IDeployGateSdkService service) {
+        public void connect(IDeployGateSdkService service) {
             Logger.d("Logcat (no-op): connect");
         }
 
@@ -67,7 +64,7 @@ interface ILogcatInstructionSerializer {
         }
 
         @Override
-        public boolean requestStreamedLogcat(@Nullable String sessionKey) {
+        public boolean requestStreamedLogcat(String sessionKey) {
             Logger.d("Logcat (no-op): requestStreamedLogcat(%s)", sessionKey);
             return false;
         }

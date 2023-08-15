@@ -2,8 +2,6 @@ package com.deploygate.sdk;
 
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
-
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
 
@@ -33,24 +31,17 @@ class SendLogcatRequest extends Instruction {
     }
 
     public static SendLogcatRequest createTermination(String processId) {
-        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Termination);
+        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Termination, null);
     }
 
     public static SendLogcatRequest createBeginning(String processId) {
-        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Beginning);
+        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Beginning, null);
     }
 
     public final ArrayList<String> lines;
     public final Position position;
-    @Nullable public final String captureId;
+    public final String captureId;
     private int retryCount;
-
-    SendLogcatRequest(
-            String pid,
-            List<String> lines
-    ) {
-        this(pid, lines, Position.Content);
-    }
 
     SendLogcatRequest(
             String pid,
@@ -58,22 +49,6 @@ class SendLogcatRequest extends Instruction {
             String captureId
     ) {
         this(pid, lines, Position.Content, captureId);
-    }
-
-    /**
-     * @param pid
-     *         a process id. non-null
-     * @param lines
-     *         logcat contents if available. Zero value is an empty list.
-     * @param position
-     *         a position of this request. non-null
-     */
-    private SendLogcatRequest(
-            String pid,
-            List<String> lines,
-            Position position
-    ) {
-        this(pid, lines, position, null);
     }
 
     /**
@@ -86,7 +61,7 @@ class SendLogcatRequest extends Instruction {
             String pid,
             List<String> lines,
             Position position,
-            @Nullable String captureId
+            String captureId
     ) {
         super(pid);
         this.lines = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
@@ -122,7 +97,7 @@ class SendLogcatRequest extends Instruction {
         for (int i = 0, offset = 0, step = size / count; i < count; i++, offset += step) {
             final int endIndex = (i == count - 1) ? size : offset + step;
 
-            splits.add(new SendLogcatRequest(gid, lines.subList(offset, endIndex), Position.Content));
+            splits.add(new SendLogcatRequest(gid, lines.subList(offset, endIndex), Position.Content, captureId));
         }
 
         return splits;

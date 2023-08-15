@@ -15,9 +15,6 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.deploygate.sdk.internal.VisibilityLifecycleCallbacks;
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.service.DeployGateEvent;
@@ -88,8 +85,8 @@ public class DeployGate {
     private final IDeployGateSdkServiceCallback mRemoteCallback = new IDeployGateSdkServiceCallback.Stub() {
 
         public void onEvent(
-                @NonNull String action,
-                @Nullable Bundle extras
+                String action,
+                Bundle extras
         ) throws RemoteException {
             if (TextUtils.isEmpty(action)) {
                 return;
@@ -198,13 +195,12 @@ public class DeployGate {
     };
 
     @SuppressWarnings("FieldCanBeLocal")
-    @NonNull
     private final VisibilityLifecycleCallbacks.OnVisibilityChangeListener mOnVisibilityChangeListener = new VisibilityLifecycleCallbacks.OnVisibilityChangeListener() {
 
         @Override
         public void onForeground(
                 long elapsedRealtime,
-                @NonNull TimeUnit timeUnit
+                TimeUnit timeUnit
             ) {
             Bundle extras = new Bundle();
             extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
@@ -215,7 +211,7 @@ public class DeployGate {
         @Override
         public void onBackground(
                 long elapsedRealtime,
-                @NonNull TimeUnit timeUnit
+                TimeUnit timeUnit
         ) {
             Bundle extras = new Bundle();
             extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
@@ -228,7 +224,7 @@ public class DeployGate {
         onOneshotLogcat(null);
     }
 
-    private void onOneshotLogcat(@Nullable String captureId) {
+    private void onOneshotLogcat(String captureId) {
         mLogcatInstructionSerializer.requestOneshotLogcat(captureId);
     }
 
@@ -374,8 +370,8 @@ public class DeployGate {
      * @param allowPending Allow queueing events to send them after a service connection is established (since 4.6.0)
      */
     private void invokeAction(
-            @NonNull String action,
-            @Nullable Bundle extras,
+            String action,
+            Bundle extras,
             boolean allowPending
     ) {
         extras = extras != null ? extras : new Bundle();

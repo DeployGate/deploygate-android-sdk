@@ -104,9 +104,9 @@ public class LogcatInstructionSerializerTest {
 
         instructionSerializer.requestOneshotLogcat(null);
 
-        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
-        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
-        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
+        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")), null);
+        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")), null);
+        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")), null);
 
         doNothing().when(service).sendEvent(anyString(), anyString(), any(Bundle.class));
 
@@ -123,9 +123,9 @@ public class LogcatInstructionSerializerTest {
 
         instructionSerializer.requestOneshotLogcat("brabra");
 
-        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
-        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
-        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
+        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")), "brabra");
+        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")), "brabra");
+        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")), "brabra");
 
         doNothing().when(service).sendEvent(anyString(), anyString(), any(Bundle.class));
 
@@ -143,10 +143,10 @@ public class LogcatInstructionSerializerTest {
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).pause();
 
-        SendLogcatRequest noIssue = new SendLogcatRequest("noIssue", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
-        SendLogcatRequest successAfterRetries = new SendLogcatRequest("successAfterRetries", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
-        SendLogcatRequest retryExceeded = new SendLogcatRequest("retryExceeded", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
-        SendLogcatRequest chunkRequest = new SendLogcatRequest("chunkRequest", new ArrayList<>(Arrays.asList("line10", "line11", "line12")));
+        SendLogcatRequest noIssue = new SendLogcatRequest("noIssue", new ArrayList<>(Arrays.asList("line1", "line2", "line3")), null);
+        SendLogcatRequest successAfterRetries = new SendLogcatRequest("successAfterRetries", new ArrayList<>(Arrays.asList("line4", "line5", "line6")), null);
+        SendLogcatRequest retryExceeded = new SendLogcatRequest("retryExceeded", new ArrayList<>(Arrays.asList("line7", "line8", "line9")), null);
+        SendLogcatRequest chunkRequest = new SendLogcatRequest("chunkRequest", new ArrayList<>(Arrays.asList("line10", "line11", "line12")), null);
         SendLogcatRequest beginningRequest = SendLogcatRequest.createBeginning("beginningRequest");
         SendLogcatRequest terminationRequest = SendLogcatRequest.createTermination("terminationRequest");
 

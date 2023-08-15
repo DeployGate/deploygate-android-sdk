@@ -3,9 +3,6 @@ package com.deploygate.sdk;
 import android.os.Build;
 import android.util.Pair;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.sdk.internal.annotations.Experimental;
 
@@ -31,7 +28,7 @@ class LogcatProcess {
         void emit(
             String processId,
             ArrayList<String> logcatLines,
-            @Nullable String captureId
+            String captureId
         );
 
         void onFinished(String processId);
@@ -63,7 +60,7 @@ class LogcatProcess {
      */
     Pair<String, String> execute(
         @Experimental String streamSessionKey,
-        @Nullable String captureId
+        String captureId
     ) {
         Pair<String, String> ids;
 
@@ -124,20 +121,20 @@ class LogcatProcess {
         private static final int STATE_INTERRUPTED = 2;
         private static final int STATE_FINISHED = 3;
 
-        @NonNull private final String processId;
+        private final String processId;
         private final boolean isOneShot;
-        @Nullable private final String captureId;
-        @NonNull private final WeakReference<Callback> callback;
-        @NonNull private final AtomicReference<Process> processRef;
-        @NonNull private final AtomicInteger state;
+        private final String captureId;
+        private final WeakReference<Callback> callback;
+        private final AtomicReference<Process> processRef;
+        private final AtomicInteger state;
 
         LogcatWatcher(
-            @Experimental @Nullable String streamSessionKey,
-            @Nullable String captureId,
-            @NonNull Callback callback
+            @Experimental String streamSessionKey,
+            String captureId,
+            Callback callback
         ) {
             if (streamSessionKey != null && captureId != null) {
-                throw new IllegalArgumentException("either of stream session key and capture id can be present");
+                throw new IllegalArgumentException("streaming and capture cannot be specified at once");
             }
 
             this.processId = streamSessionKey != null ? streamSessionKey : ClientId.generate();
