@@ -25,7 +25,7 @@ public interface DeployGateEvent {
     public static final String ACTION_OPEN_APP_DETAIL = "openAppDetail";
     public static final String ACTION_OPEN_COMMENTS = "openComments";
     public static final String ACTION_COMPOSE_COMMENT = "composeComment";
-    public static final String ACTION_GO_TO_FOREGROUND = "a.go-to-foreground";
+    public static final String ACTION_VISIBILITY_EVENT = "a.visibility-event";
 
     public static final String EXTRA_AUTHOR = "author";
     public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";
@@ -93,8 +93,18 @@ public interface DeployGateEvent {
     public static final String EXTRA_CAPTURE_ID = "e.capture-id";
 
     /**
-     * The elapsed real time since boot at the time when the app goes to foreground.
+     * A event name for the app goes to foreground/background.
+     */
+    public static final String EXTRA_VISIBILITY_EVENT_NAME = "e.visibility-event-name";
+
+    /**
+     * The elapsed real time since boot at the time when the app goes to foreground/background.
      * this value must be nano times.
      */
-    public static final String EXTRA_FOREGROUND_EVENT_ELAPSED_REAL_TIME_IN_NANOS = "e.foreground-event-elapsed-real-time";
+    public static final String EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS = "e.visibility-event-elapsed-real-time";
+
+    interface Visibility {
+        int BACKGROUND = 0;
+        int FOREGROUND = 1;
+    }
 }

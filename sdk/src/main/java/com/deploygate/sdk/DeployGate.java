@@ -84,11 +84,14 @@ public class DeployGate {
 
         public void onEvent(
                 @NonNull String action,
-                @NonNull Bundle extras
+                @Nullable Bundle extras
         ) throws RemoteException {
             if (TextUtils.isEmpty(action)) {
                 return;
             }
+
+            // ensure non-null
+            extras = extras != null ? extras : new Bundle();
 
             if (DeployGateEvent.ACTION_INIT.equals(action)) {
                 onInitialized(extras.getBoolean(DeployGateEvent.EXTRA_IS_MANAGED, false), extras.getBoolean(DeployGateEvent.EXTRA_IS_AUTHORIZED, false), extras.getString(DeployGateEvent.EXTRA_LOGIN_USERNAME), extras.getString(DeployGateEvent.EXTRA_DISTRIBUTION_USER_NAME), extras.getBoolean(DeployGateEvent.EXTRA_IS_STOP_REQUESTED, false), extras.getString(DeployGateEvent.EXTRA_AUTHOR), extras.getInt(DeployGateEvent.EXTRA_CURRENT_REVISION, 0), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_ID), extras.getString(DeployGateEvent.EXTRA_CURRENT_DISTRIBUTION_TITLE));
@@ -195,8 +198,20 @@ public class DeployGate {
                 @NonNull TimeUnit timeUnit
             ) {
             Bundle extras = new Bundle();
-            extras.putLong(DeployGateEvent.EXTRA_FOREGROUND_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
-            invokeAction(DeployGateEvent.ACTION_GO_TO_FOREGROUND, extras);
+            extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
+            extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_NAME, DeployGateEvent.Visibility.FOREGROUND);
+            invokeAction(DeployGateEvent.ACTION_VISIBILITY_EVENT, extras);
+        }
+
+        @Override
+        public void onBackground(
+                long elapsedRealtime,
+                @NonNull TimeUnit timeUnit
+        ) {
+            Bundle extras = new Bundle();
+            extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
+            extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_NAME, DeployGateEvent.Visibility.BACKGROUND);
+            invokeAction(DeployGateEvent.ACTION_VISIBILITY_EVENT, extras);
         }
     };
 
