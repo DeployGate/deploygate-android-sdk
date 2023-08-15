@@ -3,6 +3,7 @@ package com.deploygate.sdk;
 import android.os.Build;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.deploygate.sdk.internal.Logger;
@@ -123,18 +124,22 @@ class LogcatProcess {
         private static final int STATE_INTERRUPTED = 2;
         private static final int STATE_FINISHED = 3;
 
-        private final String processId;
+        @NonNull private final String processId;
         private final boolean isOneShot;
         @Nullable private final String captureId;
-        private final WeakReference<Callback> callback;
-        private final AtomicReference<Process> processRef;
-        private final AtomicInteger state;
+        @NonNull private final WeakReference<Callback> callback;
+        @NonNull private final AtomicReference<Process> processRef;
+        @NonNull private final AtomicInteger state;
 
         LogcatWatcher(
-            @Experimental String streamSessionKey,
+            @Experimental @Nullable String streamSessionKey,
             @Nullable String captureId,
-            Callback callback
+            @NonNull Callback callback
         ) {
+            if (streamSessionKey != null && captureId != null) {
+                throw new IllegalArgumentException("either of stream session key and capture id can be present");
+            }
+
             this.processId = streamSessionKey != null ? streamSessionKey : ClientId.generate();
             this.isOneShot = streamSessionKey == null;
             this.captureId = captureId;
