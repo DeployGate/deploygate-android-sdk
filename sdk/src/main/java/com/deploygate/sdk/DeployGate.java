@@ -199,7 +199,7 @@ public class DeployGate {
             ) {
             Bundle extras = new Bundle();
             extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
-            extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_NAME, DeployGateEvent.Visibility.FOREGROUND);
+            extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_TYPE, DeployGateEvent.VisibilityType.FOREGROUND);
             invokeAction(DeployGateEvent.ACTION_VISIBILITY_EVENT, extras);
         }
 
@@ -210,7 +210,7 @@ public class DeployGate {
         ) {
             Bundle extras = new Bundle();
             extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
-            extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_NAME, DeployGateEvent.Visibility.BACKGROUND);
+            extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_TYPE, DeployGateEvent.VisibilityType.BACKGROUND);
             invokeAction(DeployGateEvent.ACTION_VISIBILITY_EVENT, extras);
         }
     };

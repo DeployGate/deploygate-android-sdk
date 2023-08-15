@@ -93,9 +93,9 @@ public interface DeployGateEvent {
     public static final String EXTRA_CAPTURE_ID = "e.capture-id";
 
     /**
-     * A event name for the app goes to foreground/background.
+     * A event type for the app goes to foreground/background.
      */
-    public static final String EXTRA_VISIBILITY_EVENT_NAME = "e.visibility-event-name";
+    public static final String EXTRA_VISIBILITY_EVENT_TYPE = "e.visibility-event-type";
 
     /**
      * The elapsed real time since boot at the time when the app goes to foreground/background.
@@ -103,7 +103,7 @@ public interface DeployGateEvent {
      */
     public static final String EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS = "e.visibility-event-elapsed-real-time";
 
-    interface Visibility {
+    interface VisibilityType {
         int BACKGROUND = 0;
         int FOREGROUND = 1;
     }
