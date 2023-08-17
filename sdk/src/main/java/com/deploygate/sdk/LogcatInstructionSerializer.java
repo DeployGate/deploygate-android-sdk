@@ -191,7 +191,6 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         Bundle extras = request.toExtras();
 
         try {
-
             service.sendEvent(packageName, DeployGateEvent.ACTION_SEND_LOGCAT, extras);
             return SEND_LOGCAT_RESULT_SUCCESS;
         } catch (RemoteException e) {
