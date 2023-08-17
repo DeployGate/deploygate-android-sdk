@@ -100,7 +100,13 @@ public class DeployGate {
             } else if (DeployGateEvent.ACTION_UPDATE_AVAILABLE.equals(action)) {
                 onUpdateArrived(extras.getInt(DeployGateEvent.EXTRA_SERIAL), extras.getString(DeployGateEvent.EXTRA_VERSION_NAME), extras.getInt(DeployGateEvent.EXTRA_VERSION_CODE), extras.getString(DeployGateEvent.EXTRA_SERIAL_MESSAGE));
             } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
-                String captureId = extras.getString(DeployGateEvent.EXTRA_CAPTURE_ID);
+                String captureId = null;
+
+                if (mDeployGateClient.isSupported(Compatibility.DEVICE_CAPTURE)) {
+                    // still nullable
+                    captureId = extras.getString(DeployGateEvent.EXTRA_CAPTURE_ID);
+                }
+
                 onOneshotLogcat(captureId);
             } else if (DeployGateEvent.ACTION_ENABLE_LOGCAT.equals(action)) {
                 if (mDeployGateClient.isSupported(Compatibility.STREAMED_LOGCAT)) {

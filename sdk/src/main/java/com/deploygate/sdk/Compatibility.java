@@ -4,7 +4,9 @@ enum Compatibility {
     UPDATE_MESSAGE_OF_BUILD(1),
     SERIALIZED_EXCEPTION(1 << 1),
     LOGCAT_BUNDLE(1 << 2),
-    STREAMED_LOGCAT(1 << 3);
+    STREAMED_LOGCAT(1 << 3),
+
+    DEVICE_CAPTURE(1 << 4);
 
     final int bitMask;
 
