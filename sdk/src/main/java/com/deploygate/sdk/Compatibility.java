@@ -1,12 +1,17 @@
 package com.deploygate.sdk;
 
+/**
+ * A metadata content to represent feature compatibilities of the client app.
+ *
+ * NOTE: Do not remove any enum entry even if it's completely removed from the client app.
+ */
 enum Compatibility {
-    UPDATE_MESSAGE_OF_BUILD(1),
-    SERIALIZED_EXCEPTION(1 << 1),
-    LOGCAT_BUNDLE(1 << 2),
-    STREAMED_LOGCAT(1 << 3),
+    UPDATE_MESSAGE_OF_BUILD(BuildConfig.UPDATE_MESSAGE_OF_BUILD),
+    SERIALIZED_EXCEPTION(BuildConfig.SERIALIZED_EXCEPTION),
+    LOGCAT_BUNDLE(BuildConfig.LOGCAT_BUNDLE),
+    STREAMED_LOGCAT(BuildConfig.STREAMED_LOGCAT),
 
-    DEVICE_CAPTURE(1 << 4);
+    DEVICE_CAPTURE(BuildConfig.DEVICE_CAPTURE);
 
     final int bitMask;
 

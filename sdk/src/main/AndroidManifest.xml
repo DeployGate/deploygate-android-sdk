@@ -13,6 +13,11 @@
             android:name="com.deploygate.sdk.version"
             android:value="${sdkVersion}"
             />
+
+        <meta-data
+            android:name="com.deploygate.sdk.feature_flags"
+            android:value="${featureFlags}"
+            />
     </application>
     <queries>
         <package android:name="com.deploygate" />

@@ -11,7 +11,34 @@ android {
         targetSdkVersion 33
         versionCode 1
         versionName project.version
-        manifestPlaceholders = [sdkVersion:"4"]
+
+        // A map of name to isSupporting
+        def features = [
+                UPDATE_MESSAGE_OF_BUILD: true,
+                SERIALIZED_EXCEPTION: true,
+                LOGCAT_BUNDLE: true,
+                STREAMED_LOGCAT: true,
+                DEVICE_CAPTURE: true,
+        ]
+
+        if (!(features instanceof LinkedHashMap)) {
+            throw new IllegalAccessException("The key order may not be kept")
+        }
+
+        int flags = 0
+
+        features.keySet().eachWithIndex { String key, int i ->
+            buildConfigField("int", key, "1 << $i")
+
+            if (features[key]) {
+                flags |= 1 << i
+            }
+        }
+
+        manifestPlaceholders += [
+                featureFlags: flags,
+                sdkVersion: "4"
+        ]
     }
 
     buildTypes {
@@ -36,6 +63,10 @@ android {
         unitTests.all {
             jvmArgs "-Xmx1g"
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 
