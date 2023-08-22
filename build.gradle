@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 ext {
-    releaseVersion = '4.6.0-alpha02'
+    releaseVersion = '4.6.0-alpha03'
 }
 
 buildscript {
