@@ -151,7 +151,9 @@ public class SendLogcatRequestTest {
         bundle.putString("e.cid", cid);
         bundle.putStringArrayList("log", lines);
         bundle.putString("e.bundle-position", positionLabel);
-        bundle.putString("e.capture-id", captureId);
+        if (captureId != null) {
+            bundle.putString("e.capture-id", captureId);
+        }
         return bundle;
     }
 

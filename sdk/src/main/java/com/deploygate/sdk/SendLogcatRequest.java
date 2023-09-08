@@ -111,6 +111,8 @@ class SendLogcatRequest extends Instruction {
     void applyValues(Bundle extras) {
         extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
         extras.putString(DeployGateEvent.EXTRA_BUNDLE_POSITION, position.label());
-        extras.putString(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
+        if (captureId != null) {
+            extras.putString(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
+        }
     }
 }
