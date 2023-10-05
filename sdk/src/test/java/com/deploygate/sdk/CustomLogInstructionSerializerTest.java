@@ -1,5 +1,15 @@
 package com.deploygate.sdk;
 
+import static com.deploygate.sdk.mockito.BundleMatcher.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
+
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.RemoteException;
@@ -25,16 +35,6 @@ import org.robolectric.annotation.LooperMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static com.deploygate.sdk.mockito.BundleMatcher.eq;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
 
 @RunWith(AndroidJUnit4.class)
 @LooperMode(PAUSED)

@@ -20,8 +20,11 @@ interface ILogcatInstructionSerializer {
 
     /**
      * Create and enqueue a request to start sending oneshot logcat
+     *
+     * @param captureId
+     *         this is nullable. Set to non-null if this logcat is for a capture.
      */
-    boolean requestOneshotLogcat();
+    boolean requestOneshotLogcat(String captureId);
 
     /**
      * Create and enqueue a request to start sending streamed logcat
@@ -56,8 +59,8 @@ interface ILogcatInstructionSerializer {
         }
 
         @Override
-        public boolean requestOneshotLogcat() {
-            Logger.d("Logcat (no-op): requestOneshotLogcat");
+        public boolean requestOneshotLogcat(String captureId) {
+            Logger.d("Logcat (no-op): requestOneshotLogcat(%s)", captureId != null ? captureId : "null");
             return false;
         }
 

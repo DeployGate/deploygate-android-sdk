@@ -67,21 +67,25 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
         this.logcatProcess = new LogcatProcess(new LogcatProcess.Callback() {
             @Override
             public void onStarted(String processId) {
+                //noinspection ConstantConditions
                 handler.enqueueSendLogcatMessageInstruction(SendLogcatRequest.createBeginning(processId));
             }
 
             @Override
             public void emit(
                     String processId,
-                    ArrayList<String> logcatLines
+                    ArrayList<String> logcatLines,
+                    String captureId
             ) {
                 ensureHandlerPrepared();
 
-                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(processId, logcatLines));
+                //noinspection ConstantConditions
+                handler.enqueueSendLogcatMessageInstruction(new SendLogcatRequest(processId, logcatLines, captureId));
             }
 
             @Override
             public void onFinished(String processId) {
+                //noinspection ConstantConditions
                 handler.enqueueSendLogcatMessageInstruction(SendLogcatRequest.createTermination(processId));
             }
         });
@@ -91,6 +95,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
     @Override
     public final synchronized void connect(IDeployGateSdkService service) {
+        //noinspection ConstantConditions
         if (service == null) {
             throw new IllegalArgumentException("service must not be null");
         }
@@ -107,8 +112,8 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     }
 
     @Override
-    public final synchronized boolean requestOneshotLogcat() {
-        return requestLogcat(null);
+    public final synchronized boolean requestOneshotLogcat(String captureId) {
+        return requestLogcat(null, captureId);
     }
 
     @Override
@@ -136,7 +141,10 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
     public final void stopStream() {
         ensureHandlerPrepared();
 
-        logcatProcess.stop();
+        if (logcatProcess != null) {
+            logcatProcess.stop();
+        }
+        //noinspection ConstantConditions
         handler.cancelPendingSendLogcatInstruction();
     }
 
@@ -216,13 +224,28 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
      * @return true if new process has lauched
      */
     private boolean requestLogcat(String streamSessionKey) {
+        return requestLogcat(streamSessionKey, null);
+    }
+
+    /**
+     * @param streamSessionKey
+     *         nullable. sdk can not generate this key.
+     * @param captureId
+     *         nullable.
+     *
+     * @return true if new process has lauched
+     */
+    private boolean requestLogcat(
+            String streamSessionKey,
+            String captureId
+    ) {
         ensureHandlerPrepared();
 
-        if (!isEnabled) {
+        if (!isEnabled || logcatProcess == null) {
             return false;
         }
 
-        Pair<String, String> ids = logcatProcess.execute(streamSessionKey);
+        Pair<String, String> ids = logcatProcess.execute(streamSessionKey, captureId);
 
         String retiredId = ids.first;
         String newId = ids.second;
@@ -234,6 +257,7 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         if (!LogcatProcess.UNKNOWN_PROCESS_ID.equals(retiredId)) {
             // the previous on-going execution has been retied
+            //noinspection ConstantConditions
             handler.cancelPendingSendLogcatInstruction(retiredId);
         }
 
@@ -287,10 +311,11 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
      */
 
     /**
-     * @return the handler instance or null if not prepared.
+     * @return the handler instance
      */
     Handler getHandler() {
         ensureHandlerPrepared();
+        //noinspection ConstantConditions
         return handler;
     }
 
@@ -327,8 +352,6 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         /**
          * Cancel the send-logcat instruction of all watchers in the handler message queue.
-         *
-         * @return true if canceled, otherwise false.
          */
         void cancelPendingSendLogcatInstruction() {
             synchronized (requestMap) {
@@ -341,8 +364,6 @@ class LogcatInstructionSerializer implements ILogcatInstructionSerializer {
 
         /**
          * Cancel the send-logcat instruction of the specific watcher in the handler message queue.
-         *
-         * @return true if canceled, otherwise false.
          */
         void cancelPendingSendLogcatInstruction(String bundleId) {
             acquireRequests(bundleId);

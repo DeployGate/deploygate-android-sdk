@@ -27,7 +27,8 @@ class LogcatProcess {
 
         void emit(
                 String processId,
-                ArrayList<String> logcatLines
+                ArrayList<String> logcatLines,
+                String captureId
         );
 
         void onFinished(String processId);
@@ -58,7 +59,8 @@ class LogcatProcess {
      * @return a pair of watcher ids (non-nulls). first is the previous watcher id, second is the new watcher id.
      */
     Pair<String, String> execute(
-            @Experimental String streamSessionKey
+            @Experimental String streamSessionKey,
+            String captureId
     ) {
         Pair<String, String> ids;
 
@@ -77,7 +79,7 @@ class LogcatProcess {
                 return Pair.create(currentPid, currentPid);
             }
 
-            final LogcatWatcher newWatcher = new LogcatWatcher(streamSessionKey, callback);
+            final LogcatWatcher newWatcher = new LogcatWatcher(streamSessionKey, captureId, callback);
 
             try {
                 this.latestLogcatWatcher = newWatcher;
@@ -121,16 +123,23 @@ class LogcatProcess {
 
         private final String processId;
         private final boolean isOneShot;
+        private final String captureId;
         private final WeakReference<Callback> callback;
         private final AtomicReference<Process> processRef;
         private final AtomicInteger state;
 
         LogcatWatcher(
                 @Experimental String streamSessionKey,
+                String captureId,
                 Callback callback
         ) {
+            if (streamSessionKey != null && captureId != null) {
+                throw new IllegalArgumentException("streaming and capture cannot be specified at once");
+            }
+
             this.processId = streamSessionKey != null ? streamSessionKey : ClientId.generate();
             this.isOneShot = streamSessionKey == null;
+            this.captureId = captureId;
             this.callback = new WeakReference<>(callback);
             this.processRef = new AtomicReference<>();
             this.state = new AtomicInteger(STATE_READY);
@@ -228,10 +237,10 @@ class LogcatProcess {
                     if (isOneShot) {
                         continue;
                     } else if (logcatBuf.size() >= MAX_LINES) {
-                        callback.emit(processId, toArrayList(logcatBuf));
+                        callback.emit(processId, toArrayList(logcatBuf), captureId);
                         logcatBuf = createBuffer(MAX_LINES); // Don't reuse to make sure releasing the reference
                     } else if (!bufferedReader.ready()) {
-                        callback.emit(processId, toArrayList(logcatBuf));
+                        callback.emit(processId, toArrayList(logcatBuf), captureId);
                         logcatBuf = createBuffer(MAX_LINES); // Don't reuse to make sure releasing the reference
                     } else {
                         continue;
@@ -248,7 +257,7 @@ class LogcatProcess {
                     Callback callback = this.callback.get();
 
                     if (callback != null) {
-                        callback.emit(processId, toArrayList(logcatBuf));
+                        callback.emit(processId, toArrayList(logcatBuf), captureId);
                     }
                 }
 

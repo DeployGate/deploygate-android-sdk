@@ -31,22 +31,24 @@ class SendLogcatRequest extends Instruction {
     }
 
     public static SendLogcatRequest createTermination(String processId) {
-        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Termination);
+        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Termination, null);
     }
 
     public static SendLogcatRequest createBeginning(String processId) {
-        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Beginning);
+        return new SendLogcatRequest(processId, new ArrayList<String>(), Position.Beginning, null);
     }
 
     public final ArrayList<String> lines;
     public final Position position;
+    public final String captureId;
     private int retryCount;
 
     SendLogcatRequest(
             String pid,
-            List<String> lines
+            List<String> lines,
+            String captureId
     ) {
-        this(pid, lines, Position.Content);
+        this(pid, lines, Position.Content, captureId);
     }
 
     /**
@@ -56,15 +58,19 @@ class SendLogcatRequest extends Instruction {
      *         logcat contents if available. Zero value is an empty list.
      * @param position
      *         a position of this request. non-null
+     * @param captureId
+     *         the id of the capture. nullable
      */
     private SendLogcatRequest(
             String pid,
             List<String> lines,
-            Position position
+            Position position,
+            String captureId
     ) {
         super(pid);
         this.lines = lines instanceof ArrayList ? (ArrayList<String>) lines : new ArrayList<>(lines);
         this.position = position;
+        this.captureId = captureId;
     }
 
     /**
@@ -95,7 +101,7 @@ class SendLogcatRequest extends Instruction {
         for (int i = 0, offset = 0, step = size / count; i < count; i++, offset += step) {
             final int endIndex = (i == count - 1) ? size : offset + step;
 
-            splits.add(new SendLogcatRequest(gid, lines.subList(offset, endIndex), Position.Content));
+            splits.add(new SendLogcatRequest(gid, lines.subList(offset, endIndex), Position.Content, captureId));
         }
 
         return splits;
@@ -105,5 +111,8 @@ class SendLogcatRequest extends Instruction {
     void applyValues(Bundle extras) {
         extras.putStringArrayList(DeployGateEvent.EXTRA_LOG, lines);
         extras.putString(DeployGateEvent.EXTRA_BUNDLE_POSITION, position.label());
+        if (captureId != null) {
+            extras.putString(DeployGateEvent.EXTRA_CAPTURE_ID, captureId);
+        }
     }
 }

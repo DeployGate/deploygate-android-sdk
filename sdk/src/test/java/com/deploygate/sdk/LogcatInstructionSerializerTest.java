@@ -1,5 +1,15 @@
 package com.deploygate.sdk;
 
+import static com.deploygate.sdk.mockito.BundleMatcher.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
+import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
+
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -7,7 +17,6 @@ import android.os.TransactionTooLargeException;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.deploygate.sdk.helper.FakeLogcat;
-import com.deploygate.sdk.mockito.BundleMatcher;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.FakeDeployGateClientService;
 import com.google.common.truth.Truth;
@@ -28,17 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-
-import static com.deploygate.sdk.mockito.BundleMatcher.eq;
-import static com.deploygate.sdk.mockito.BundleMatcher.eq;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mockStatic;
-import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
 
 @RunWith(AndroidJUnit4.class)
 @LooperMode(PAUSED)
@@ -87,7 +85,7 @@ public class LogcatInstructionSerializerTest {
             instructionSerializer.halt();
         }
 
-        for (Process process: processes) {
+        for (Process process : processes) {
             if (process.isAlive()) {
                 process.destroy();
             }
@@ -102,11 +100,30 @@ public class LogcatInstructionSerializerTest {
     public void sendSingleChunk_always_returns_retriable_status_if_service_is_none() throws RemoteException {
         instructionSerializer = new LogcatInstructionSerializer(PACKAGE_NAME);
 
-        instructionSerializer.requestOneshotLogcat();
+        instructionSerializer.requestOneshotLogcat(null);
 
-        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
-        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
-        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
+        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")), null);
+        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")), null);
+        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")), null);
+
+        doNothing().when(service).sendEvent(anyString(), anyString(), any(Bundle.class));
+
+        Truth.assertThat(instructionSerializer.sendSingleChunk(chunk1)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(instructionSerializer.sendSingleChunk(chunk2)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+        Truth.assertThat(instructionSerializer.sendSingleChunk(chunk3)).isEqualTo(LogcatInstructionSerializer.SEND_LOGCAT_RESULT_FAILURE_RETRIABLE);
+
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test(timeout = 3000L)
+    public void sendSingleChunk_always_returns_retriable_status_if_service_is_none_and_is_in_capture_mode() throws RemoteException {
+        instructionSerializer = new LogcatInstructionSerializer(PACKAGE_NAME);
+
+        instructionSerializer.requestOneshotLogcat("brabra");
+
+        SendLogcatRequest chunk1 = new SendLogcatRequest("tid1", new ArrayList<>(Arrays.asList("line1", "line2", "line3")), "brabra");
+        SendLogcatRequest chunk2 = new SendLogcatRequest("tid2", new ArrayList<>(Arrays.asList("line4", "line5", "line6")), "brabra");
+        SendLogcatRequest chunk3 = new SendLogcatRequest("tid3", new ArrayList<>(Arrays.asList("line7", "line8", "line9")), "brabra");
 
         doNothing().when(service).sendEvent(anyString(), anyString(), any(Bundle.class));
 
@@ -124,10 +141,10 @@ public class LogcatInstructionSerializerTest {
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).pause();
 
-        SendLogcatRequest noIssue = new SendLogcatRequest("noIssue", new ArrayList<>(Arrays.asList("line1", "line2", "line3")));
-        SendLogcatRequest successAfterRetries = new SendLogcatRequest("successAfterRetries", new ArrayList<>(Arrays.asList("line4", "line5", "line6")));
-        SendLogcatRequest retryExceeded = new SendLogcatRequest("retryExceeded", new ArrayList<>(Arrays.asList("line7", "line8", "line9")));
-        SendLogcatRequest chunkRequest = new SendLogcatRequest("chunkRequest", new ArrayList<>(Arrays.asList("line10", "line11", "line12")));
+        SendLogcatRequest noIssue = new SendLogcatRequest("noIssue", new ArrayList<>(Arrays.asList("line1", "line2", "line3")), null);
+        SendLogcatRequest successAfterRetries = new SendLogcatRequest("successAfterRetries", new ArrayList<>(Arrays.asList("line4", "line5", "line6")), null);
+        SendLogcatRequest retryExceeded = new SendLogcatRequest("retryExceeded", new ArrayList<>(Arrays.asList("line7", "line8", "line9")), null);
+        SendLogcatRequest chunkRequest = new SendLogcatRequest("chunkRequest", new ArrayList<>(Arrays.asList("line10", "line11", "line12")), null);
         SendLogcatRequest beginningRequest = SendLogcatRequest.createBeginning("beginningRequest");
         SendLogcatRequest terminationRequest = SendLogcatRequest.createTermination("terminationRequest");
 
@@ -188,7 +205,15 @@ public class LogcatInstructionSerializerTest {
         // don't fail
 
         for (int i = 0; i < 10; i++) {
-            instructionSerializer.requestOneshotLogcat();
+            instructionSerializer.requestOneshotLogcat(null);
+        }
+
+        Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
+
+        // don't fail
+
+        for (int i = 0; i < 10; i++) {
+            instructionSerializer.requestOneshotLogcat("brabra");
         }
 
         Shadows.shadowOf(instructionSerializer.getHandler().getLooper()).idle();
@@ -203,10 +228,19 @@ public class LogcatInstructionSerializerTest {
         instructionSerializer.setEnabled(false);
 
         for (int i = 0; i < 30; i++) {
-            if (i % 2 == 0) {
-                Truth.assertThat(instructionSerializer.requestOneshotLogcat()).isFalse();
-            } else {
-                Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+            switch (i % 3) {
+                case 0: {
+                    Truth.assertThat(instructionSerializer.requestOneshotLogcat(null)).isFalse();
+                    break;
+                }
+                case 1: {
+                    Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+                    break;
+                }
+                case 2: {
+                    Truth.assertThat(instructionSerializer.requestOneshotLogcat("brabra")).isFalse();
+                    break;
+                }
             }
         }
 
@@ -214,10 +248,19 @@ public class LogcatInstructionSerializerTest {
         instructionSerializer.connect(service);
 
         for (int i = 0; i < 30; i++) {
-            if (i % 2 == 0) {
-                Truth.assertThat(instructionSerializer.requestOneshotLogcat()).isFalse();
-            } else {
-                Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+            switch (i % 3) {
+                case 0: {
+                    Truth.assertThat(instructionSerializer.requestOneshotLogcat(null)).isFalse();
+                    break;
+                }
+                case 1: {
+                    Truth.assertThat(instructionSerializer.requestStreamedLogcat("bsk")).isFalse();
+                    break;
+                }
+                case 2: {
+                    Truth.assertThat(instructionSerializer.requestOneshotLogcat("brabra")).isFalse();
+                    break;
+                }
             }
         }
 

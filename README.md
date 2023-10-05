@@ -125,6 +125,14 @@ Unless required by applicable law or agreed to in writing, software distributed 
 - Add new tests for your changes
 - Make sure all tests are passed
 
+```bash
+# help: build and install artifacts into your local maven repo
+./gradlew clean \
+    sdk:verifyBytecodeVersionRelease sdkMock:verifyBytecodeVersionRelease \
+    sdk:publishReleasePublicationToMavenLocal sdkMock:publishReleasePublicationToMavenLocal \
+    --stacktrace
+```
+
 ### sdk
 
 - Consider if we should use external libraries carefully

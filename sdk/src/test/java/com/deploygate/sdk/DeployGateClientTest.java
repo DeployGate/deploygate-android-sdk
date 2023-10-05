@@ -1,5 +1,7 @@
 package com.deploygate.sdk;
 
+import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
+
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -20,8 +22,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowPackageManager;
-
-import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
 @RunWith(AndroidJUnit4.class)
 public class DeployGateClientTest {

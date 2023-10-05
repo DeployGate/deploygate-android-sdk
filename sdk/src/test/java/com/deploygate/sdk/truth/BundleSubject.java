@@ -1,5 +1,7 @@
 package com.deploygate.sdk.truth;
 
+import static com.google.common.truth.Truth.assertAbout;
+
 import android.os.Bundle;
 
 import com.deploygate.sdk.helper.Bundles;
@@ -8,8 +10,6 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 
 import java.util.Locale;
-
-import static com.google.common.truth.Truth.assertAbout;
 
 public class BundleSubject extends Subject {
     public static Factory<BundleSubject, Bundle> bundles() {

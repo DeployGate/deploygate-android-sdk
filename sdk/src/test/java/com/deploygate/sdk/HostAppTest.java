@@ -1,5 +1,7 @@
 package com.deploygate.sdk;
 
+import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
+
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -11,8 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
-
-import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
 @RunWith(AndroidJUnit4.class)
 public class HostAppTest {
