@@ -18,7 +18,12 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.deploygate:sdk:<latest version>'
+    // use full implementation for debug builds
+    debugImplementation 'com.deploygate:sdk:<latest version>'
+    
+    // use mocked implementation for release builds
+    // see also "Mock" section below for more details
+    releaseImplementation 'com.deploygate:sdk-mock:<latest version>'
 }
 ```
 
@@ -38,6 +43,17 @@ DeployGate SDK uses `ContentProvider` to initialize itself so you need to remove
         tools:node="remove"
         />
 </application>
+```
+
+And you also need to add `DeployGate.install()` to your implementation.
+For example, add to your custom application class, content provider, or else.
+
+```java
+DeployGate.install(context, /** forceApplyOnReleaseBuild */ false);
+```
+
+```kotlin
+DeployGate.install(app = context, forceApplyOnReleaseBuild = false)
 ```
 
 ## Usage
@@ -75,6 +91,9 @@ See [SDK Sample](./sample) for more examples.
 
 You may want to remove DeployGate SDK and related code in production build
 to reduce your app's footprint.
+
+In addition, you may want to disable all features provided by DeployGate SDK
+on artifacts for production release.
 
 For your convenience, we provide "Mock" SDK that replaces every function call
 to empty implementation so you don't have to modify your code to switch the builds.
