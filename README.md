@@ -18,10 +18,10 @@ repositories {
 }
 
 dependencies {
-    // use full implementation for debug builds
+    // Use SDK dependency for variants like debug.
     debugImplementation 'com.deploygate:sdk:<latest version>'
     
-    // use mocked implementation for release builds
+    // Use no-op implementation for variants you would like to disable DeployGate SDK.
     // see also "Mock" section below for more details
     releaseImplementation 'com.deploygate:sdk-mock:<latest version>'
 }
@@ -45,16 +45,13 @@ DeployGate SDK uses `ContentProvider` to initialize itself so you need to remove
 </application>
 ```
 
-And you also need to add `DeployGate.install()` to your implementation.
+And also, you need to call `DeployGate#install` in your Application class, ContentProvider or AndroidX Startup Initializer.
 For example, add to your custom application class, content provider, or else.
 
 ```java
 DeployGate.install(context, /** forceApplyOnReleaseBuild */ false);
 ```
 
-```kotlin
-DeployGate.install(app = context, forceApplyOnReleaseBuild = false)
-```
 
 ## Usage
 
@@ -89,14 +86,7 @@ See [SDK Sample](./sample) for more examples.
 
 ## Mock
 
-You may want to remove DeployGate SDK and related code in production build
-to reduce your app's footprint.
-
-In addition, you may want to disable all features provided by DeployGate SDK
-on artifacts for production release.
-
-For your convenience, we provide "Mock" SDK that replaces every function call
-to empty implementation so you don't have to modify your code to switch the builds.
+Do you want to disable DeployGate SDK on production builds? If so, please use `sdk-mock` dependency for production builds instead of `sdk`. `sdk-mock` dependency has public interfaces that are same as of `sdk` but their implementations are empty, so you don't have to modify your app code for specific build variants.
 
 To use it, simply replace the dependency from `sdk` to `sdk-mock`.
 You can use it with a conjunction of `productFlavors` and `buildConfig` of Gradle
