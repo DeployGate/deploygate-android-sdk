@@ -5,7 +5,7 @@ import android.util.Log;
 import java.util.Locale;
 
 public class Logger {
-    private static final String TAG = "DeployGateSDK";
+    public static final String TAG = "DeployGateSDK";
 
     public static void d(
             String format,

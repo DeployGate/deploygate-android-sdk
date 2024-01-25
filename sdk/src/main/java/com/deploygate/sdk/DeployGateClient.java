@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Build;
+import android.util.Log;
 
 import com.deploygate.sdk.internal.Logger;
 
@@ -56,7 +57,16 @@ class DeployGateClient {
                 this.versionCode = info.versionCode;
             }
 
-            this.featuresFlag = info.applicationInfo.metaData.getInt("com.deploygate.features", 0);
+            if (info.applicationInfo.metaData == null) {
+                // LG_G3 (OS 5.0, the build number is unknown)
+
+                this.featuresFlag = 0;
+
+                Log.w(Logger.TAG, "New features of DeployGate SDK may not be available on this device.");
+                Log.w(Logger.TAG, "This may happen on a few device when you use ContentProvider to initialize DeployGate SDK, then please initialize DeployGateSDK manually instead.");
+            } else {
+                this.featuresFlag = info.applicationInfo.metaData.getInt("com.deploygate.features", 0);
+            }
         } else {
             this.isInstalled = false;
             this.versionCode = 0;
