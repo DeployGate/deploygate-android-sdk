@@ -26,22 +26,65 @@ public class HostAppTest {
 
     @Test
     public void default_properties() {
-        HostApp app = new HostApp(context);
+        HostApp app = new HostApp(
+                context,
+                new DeployGateSdkConfiguration.Builder().build()
+        );
 
         Truth.assertThat(app.debuggable).isTrue();
         Truth.assertThat(app.canUseLogcat).isTrue();
         Truth.assertThat(app.packageName).isEqualTo("com.deploygate.sdk.test");
         Truth.assertThat(app.sdkVersion).isEqualTo(4);
         Truth.assertThat(app.sdkArtifactVersion).isEqualTo("4.6.1");
+        Truth.assertThat(app.activeFeatureFlags).isEqualTo(31);
+        Truth.assertThat(app.canUseDeviceCapture()).isTrue();
     }
 
     @Test
     @Config(sdk = 16)
     public void canUseLogcat_is_true_if_sdk_is_equal_to_jb() {
-        HostApp app = new HostApp(context);
+        HostApp app = new HostApp(
+                context,
+                new DeployGateSdkConfiguration.Builder().build()
+        );
 
         Truth.assertThat(app.canUseLogcat).isTrue();
     }
 
     // sdk 15 or lower is not available for robolectric...
+
+    @Test
+    public void disabled_DeployGateSdkConfiguration_initialize_host_app_as_disabled() {
+        HostApp app = new HostApp(
+                context,
+                new DeployGateSdkConfiguration.Builder().setDisabled(true).build()
+        );
+
+        Truth.assertThat(app.debuggable).isFalse();
+        Truth.assertThat(app.canUseLogcat).isFalse();
+        Truth.assertThat(app.packageName).isEqualTo("com.deploygate.sdk.test");
+        Truth.assertThat(app.sdkVersion).isEqualTo(0);
+        Truth.assertThat(app.sdkArtifactVersion).isNull();
+        Truth.assertThat(app.activeFeatureFlags).isEqualTo(0);
+        Truth.assertThat(app.canUseDeviceCapture()).isFalse();
+    }
+
+    @Test
+    public void can_read_DeployGateSdkConfiguration_setCaptureEnabled() {
+        HostApp app1 = new HostApp(
+                context,
+                new DeployGateSdkConfiguration.Builder().setCaptureEnabled(true).build()
+        );
+
+        Truth.assertThat(app1.canUseDeviceCapture()).isTrue();
+        Truth.assertThat(app1.activeFeatureFlags).isEqualTo(31);
+
+        HostApp app2 = new HostApp(
+                context,
+                new DeployGateSdkConfiguration.Builder().setCaptureEnabled(false).build()
+        );
+
+        Truth.assertThat(app2.canUseDeviceCapture()).isFalse();
+        Truth.assertThat(app2.activeFeatureFlags).isEqualTo(15);
+    }
 }

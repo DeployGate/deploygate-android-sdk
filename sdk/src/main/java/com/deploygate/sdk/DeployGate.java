@@ -102,7 +102,7 @@ public class DeployGate {
             } else if (DeployGateEvent.ACTION_ONESHOT_LOGCAT.equals(action)) {
                 String captureId = null;
 
-                if (mDeployGateClient.isSupported(Compatibility.DEVICE_CAPTURE)) {
+                if (mHostApp.canUseDeviceCapture() && mDeployGateClient.isSupported(Compatibility.DEVICE_CAPTURE)) {
                     // still nullable
                     captureId = extras.getString(DeployGateEvent.EXTRA_CAPTURE_ID);
                 }
@@ -266,25 +266,25 @@ public class DeployGate {
      */
     private DeployGate(
             Context applicationContext,
-            String author,
-            DeployGateCallback callback,
-            CustomLogConfiguration customLogConfiguration,
-            HostApp hostApp
+            HostApp hostApp,
+            DeployGateSdkConfiguration sdkConfiguration
     ) {
+        // Don't hold sdkConfiguration to avoid memory leak
+
         mApplicationContext = applicationContext;
         mDeployGateClient = new DeployGateClient(applicationContext, DEPLOYGATE_PACKAGE);
         mHostApp = hostApp;
         mHandler = new Handler();
         mLogcatInstructionSerializer = mHostApp.canUseLogcat ? new LogcatInstructionSerializer(mHostApp.packageName) : ILogcatInstructionSerializer.NULL_INSTANCE;
-        mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, customLogConfiguration);
+        mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, sdkConfiguration.customLogConfiguration);
         mCallbacks = new HashSet<>();
         mPendingEvents = new HashMap<>();
-        mExpectedAuthor = author;
+        mExpectedAuthor = sdkConfiguration.appOwnerName;
 
         prepareBroadcastReceiver();
 
-        if (callback != null) {
-            mCallbacks.add(callback);
+        if (sdkConfiguration.callback != null) {
+            mCallbacks.add(sdkConfiguration.callback);
         }
 
         mInitializedLatch = new CountDownLatch(1);
@@ -362,6 +362,7 @@ public class DeployGate {
         args.putString(DeployGateEvent.EXTRA_EXPECTED_AUTHOR, mExpectedAuthor);
         args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, mHostApp.sdkVersion);
         args.putString(DeployGateEvent.EXTRA_SDK_ARTIFACT_VERSION, mHostApp.sdkArtifactVersion);
+        args.putInt(DeployGateEvent.EXTRA_ACTIVE_FEATURE_FLAGS, mHostApp.activeFeatureFlags);
         try {
             mRemoteService.init(mRemoteCallback, mHostApp.packageName, args);
         } catch (RemoteException e) {
@@ -424,6 +425,49 @@ public class DeployGate {
         sInstance = null;
     }
 
+
+    /**
+     * Install DeployGate on your application instance. Call this method inside
+     * of your {@link Application#onCreate()}, in ContentProvider or AndroidX Startup Initializer only once.
+     *
+     * @param context Your application's Context. SDK will use {@code context.getApplicationContext} and don't hold this object reference.
+     * @param sdkConfiguration sdk configuration {@link DeployGateSdkConfiguration}
+     *
+     * @throws IllegalStateException
+     *         if this called twice
+     * @since 4.7.0
+     */
+
+    public static void install(Context context, DeployGateSdkConfiguration sdkConfiguration) {
+        if (sInstance != null) {
+            Log.w(TAG, "DeployGate.install was already called. Ignoring.");
+            return;
+        }
+
+        Context application = context.getApplicationContext();
+
+        HostApp hostApp = new HostApp(
+                application,
+                sdkConfiguration
+        );
+
+        if (!hostApp.isSdkEnabled) {
+            return;
+        }
+
+        if (sdkConfiguration.isCrashReportingEnabled) {
+            Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread.getDefaultUncaughtExceptionHandler()));
+        } else {
+            Logger.d("DeployGateSDK crash reporting hasn't started");
+        }
+
+        sInstance = new DeployGate(
+                application,
+                hostApp,
+                sdkConfiguration
+        );
+    }
+
     /**
      * Install DeployGate on your application instance. Call this method inside
      * of your {@link Application#onCreate()} once.
@@ -447,6 +491,7 @@ public class DeployGate {
      * @throws IllegalStateException
      *         if this called twice
      * @since r1
+     * @deprecated since 4.7.0. Use {@link DeployGate#install(Context, DeployGateSdkConfiguration)} instead.
      */
     public static void install(Application app) {
         install(app, (String) null);
@@ -471,6 +516,7 @@ public class DeployGate {
      * @throws IllegalStateException
      *         if this called twice
      * @since r2
+     * @deprecated since 4.7.0. Use {@link DeployGate#install(Context, DeployGateSdkConfiguration)} instead.
      */
     public static void install(
             Application app,
@@ -505,6 +551,7 @@ public class DeployGate {
      * @throws IllegalStateException
      *         if this called twice
      * @since r1
+     * @deprecated since 4.7.0. Use {@link DeployGate#install(Context, DeployGateSdkConfiguration)} instead.
      */
     public static void install(
             Application app,
@@ -533,6 +580,7 @@ public class DeployGate {
      * @throws IllegalStateException
      *         if this called twice
      * @since r4.2
+     * @deprecated since 4.7.0. Use {@link DeployGate#install(Context, DeployGateSdkConfiguration)} instead.
      */
     public static void install(
             Application app,
@@ -563,6 +611,7 @@ public class DeployGate {
      * @throws IllegalStateException
      *         if this called twice
      * @since r2
+     * @deprecated since 4.7.0. Use {@link DeployGate#install(Context, DeployGateSdkConfiguration)} instead.
      */
     public static void install(
             Application app,
@@ -594,6 +643,7 @@ public class DeployGate {
      * @throws IllegalStateException
      *         if this called twice
      * @since r1
+     * @deprecated since 4.7.0. Use {@link DeployGate#install(Context, DeployGateSdkConfiguration)} instead.
      */
     public static void install(
             Application app,
@@ -619,6 +669,7 @@ public class DeployGate {
      *         the release build, set this true.
      *
      * @since r2
+     * @deprecated since 4.7.0. Use {@link DeployGate#install(Context, DeployGateSdkConfiguration)} instead.
      */
     public static void install(
             Application app,
@@ -647,6 +698,7 @@ public class DeployGate {
      *         set a configuration for custom logging
      *
      * @since 4.4.0
+     * @deprecated since 4.7.0. Use {@link DeployGate#install(Context, DeployGateSdkConfiguration)} instead.
      */
     public static void install(
             Application app,
@@ -655,19 +707,19 @@ public class DeployGate {
             boolean forceApplyOnReleaseBuild,
             CustomLogConfiguration customLogConfiguration
     ) {
-        if (sInstance != null) {
-            Log.w(TAG, "DeployGate.install was already called. Ignoring.");
-            return;
+        DeployGateSdkConfiguration.Builder builder = new DeployGateSdkConfiguration.Builder()
+                .setAppOwnerName(author)
+                .setCustomLogConfiguration(customLogConfiguration)
+                .setCallback(callback);
+
+        if (forceApplyOnReleaseBuild) {
+            builder.setEnabledOnNonDebuggableBuild(false);
         }
 
-        HostApp hostApp = new HostApp(app.getApplicationContext());
-
-        if (!forceApplyOnReleaseBuild && !hostApp.debuggable) {
-            return;
-        }
-
-        Thread.setDefaultUncaughtExceptionHandler(new DeployGateUncaughtExceptionHandler(Thread.getDefaultUncaughtExceptionHandler()));
-        sInstance = new DeployGate(app.getApplicationContext(), author, callback, customLogConfiguration, hostApp);
+        install(
+                app,
+                builder.build()
+        );
     }
 
     /**

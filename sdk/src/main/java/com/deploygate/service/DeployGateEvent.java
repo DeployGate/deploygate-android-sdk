@@ -41,6 +41,13 @@ public interface DeployGateEvent {
      * @since 4.7.0
      */
     public static final String EXTRA_SDK_ARTIFACT_VERSION = "e.sdk-artifact-version";
+
+    /**
+     * Only active feature flags on this host app.
+     *
+     * @since 4.7.0
+     */
+    public static final String EXTRA_ACTIVE_FEATURE_FLAGS = "e.active-feature-flags";
     public static final String EXTRA_IS_MANAGED = "isManaged";
     public static final String EXTRA_IS_AUTHORIZED = "isAuthorized";
     public static final String EXTRA_LOGIN_USERNAME = "loginUsername";
