@@ -37,7 +37,8 @@ android {
 
         manifestPlaceholders += [
                 featureFlags: flags,
-                sdkVersion: "4"
+                sdkVersion: "4",
+                sdkArtifactVersion: project.version,
         ]
     }
 

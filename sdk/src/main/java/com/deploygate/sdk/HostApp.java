@@ -13,6 +13,7 @@ class HostApp {
     public final boolean canUseLogcat;
     public final boolean debuggable;
     public final int sdkVersion;
+    public final String sdkArtifactVersion;
 
     HostApp(
             Context context
@@ -32,6 +33,7 @@ class HostApp {
             this.debuggable = false;
             this.canUseLogcat = false;
             this.sdkVersion = 0;
+            this.sdkArtifactVersion = null;
             return;
         }
 
@@ -44,5 +46,6 @@ class HostApp {
         }
 
         this.sdkVersion = info.metaData.getInt("com.deploygate.sdk.version", 0);
+        this.sdkArtifactVersion = info.metaData.getString("com.deploygate.sdk.artifact_version");
     }
 }

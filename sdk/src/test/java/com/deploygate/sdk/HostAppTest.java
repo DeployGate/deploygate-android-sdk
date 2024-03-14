@@ -32,6 +32,7 @@ public class HostAppTest {
         Truth.assertThat(app.canUseLogcat).isTrue();
         Truth.assertThat(app.packageName).isEqualTo("com.deploygate.sdk.test");
         Truth.assertThat(app.sdkVersion).isEqualTo(4);
+        Truth.assertThat(app.sdkArtifactVersion).isEqualTo("4.6.1");
     }
 
     @Test
