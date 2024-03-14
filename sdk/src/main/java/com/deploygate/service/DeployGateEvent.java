@@ -29,7 +29,18 @@ public interface DeployGateEvent {
 
     public static final String EXTRA_AUTHOR = "author";
     public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";
+
+    /**
+     * A SDK's model version queried by this key from INIT event.
+     */
     public static final String EXTRA_SDK_VERSION = "sdkVersion";
+
+    /**
+     * A SDK's artifact version queried by this key from INIT event.
+     *
+     * @since 4.7.0
+     */
+    public static final String EXTRA_SDK_ARTIFACT_VERSION = "e.sdk-artifact-version";
     public static final String EXTRA_IS_MANAGED = "isManaged";
     public static final String EXTRA_IS_AUTHORIZED = "isAuthorized";
     public static final String EXTRA_LOGIN_USERNAME = "loginUsername";

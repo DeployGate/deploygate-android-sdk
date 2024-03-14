@@ -15,6 +15,11 @@
             />
 
         <meta-data
+            android:name="com.deploygate.sdk.artifact_version"
+            android:value="${sdkArtifactVersion}"
+            />
+
+        <meta-data
             android:name="com.deploygate.sdk.feature_flags"
             android:value="${featureFlags}"
             />

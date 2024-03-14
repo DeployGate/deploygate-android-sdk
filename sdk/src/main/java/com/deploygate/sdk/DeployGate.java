@@ -361,6 +361,7 @@ public class DeployGate {
         args.putBoolean(DeployGateEvent.EXTRA_CAN_LOGCAT, mHostApp.canUseLogcat);
         args.putString(DeployGateEvent.EXTRA_EXPECTED_AUTHOR, mExpectedAuthor);
         args.putInt(DeployGateEvent.EXTRA_SDK_VERSION, mHostApp.sdkVersion);
+        args.putString(DeployGateEvent.EXTRA_SDK_ARTIFACT_VERSION, mHostApp.sdkArtifactVersion);
         try {
             mRemoteService.init(mRemoteCallback, mHostApp.packageName, args);
         } catch (RemoteException e) {
