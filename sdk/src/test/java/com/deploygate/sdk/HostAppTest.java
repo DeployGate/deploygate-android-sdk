@@ -31,7 +31,6 @@ public class HostAppTest {
                 new DeployGateSdkConfiguration.Builder().build()
         );
 
-        Truth.assertThat(app.debuggable).isTrue();
         Truth.assertThat(app.canUseLogcat).isTrue();
         Truth.assertThat(app.packageName).isEqualTo("com.deploygate.sdk.test");
         Truth.assertThat(app.sdkVersion).isEqualTo(4);
@@ -60,7 +59,6 @@ public class HostAppTest {
                 new DeployGateSdkConfiguration.Builder().setDisabled(true).build()
         );
 
-        Truth.assertThat(app.debuggable).isFalse();
         Truth.assertThat(app.canUseLogcat).isFalse();
         Truth.assertThat(app.packageName).isEqualTo("com.deploygate.sdk.test");
         Truth.assertThat(app.sdkVersion).isEqualTo(0);

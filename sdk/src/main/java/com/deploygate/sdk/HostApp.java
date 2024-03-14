@@ -25,11 +25,6 @@ class HostApp {
     public final boolean canUseLogcat;
 
     /**
-     * true if this app is absolutely debuggable.
-     */
-    public final boolean debuggable;
-
-    /**
      * SDK's model version
      */
     public final int sdkVersion;
@@ -59,9 +54,14 @@ class HostApp {
             Logger.w(e, "unexpected code");
         }
 
-        if (info == null || sdkConfiguration.isDisabled) {
+        boolean shouldDisable =
+                info == null || info.metaData == null || sdkConfiguration.isDisabled ||
+                        !sdkConfiguration.isEnabledOnNonDebuggableBuild && (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != ApplicationInfo.FLAG_DEBUGGABLE;
+
+        if (shouldDisable) {
+            Logger.d("DeployGate SDK is unavailable on this app");
+
             this.isSdkEnabled = false;
-            this.debuggable = false;
             this.canUseLogcat = false;
             this.sdkVersion = 0;
             this.sdkArtifactVersion = null;
@@ -69,7 +69,7 @@ class HostApp {
             return;
         }
 
-        this.debuggable = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        this.isSdkEnabled = true;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             this.canUseLogcat = true;
@@ -79,7 +79,6 @@ class HostApp {
 
         this.sdkVersion = info.metaData.getInt("com.deploygate.sdk.version", 0);
         this.sdkArtifactVersion = info.metaData.getString("com.deploygate.sdk.artifact_version");
-        this.isSdkEnabled = debuggable || sdkConfiguration.isEnabledOnNonDebuggableBuild;
 
         int supportedFeatureFlags = info.metaData.getInt("com.deploygate.sdk.feature_flags", 0);
 
