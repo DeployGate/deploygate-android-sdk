@@ -8,15 +8,40 @@ import android.os.Build;
 
 import com.deploygate.sdk.internal.Logger;
 
+/**
+ * Shadow of an application that embeds this SDK.
+ */
 class HostApp {
     public final String packageName;
+
+    /**
+     * true if SDK is enabled. Nothing should work if this value is false.
+     */
+    public final boolean isSdkEnabled;
+
+    /**
+     * true if this app can read LogCat.
+     */
     public final boolean canUseLogcat;
-    public final boolean debuggable;
+
+    /**
+     * SDK's model version
+     */
     public final int sdkVersion;
+
+    /**
+     * SDK's artifact version
+     */
     public final String sdkArtifactVersion;
 
+    /**
+     * Bit flag representation of active features
+     */
+    public final int activeFeatureFlags;
+
     HostApp(
-            Context context
+            Context context,
+            DeployGateSdkConfiguration sdkConfiguration
     ) {
         this.packageName = context.getPackageName();
         PackageManager pm = context.getPackageManager();
@@ -29,15 +54,22 @@ class HostApp {
             Logger.w(e, "unexpected code");
         }
 
-        if (info == null) {
-            this.debuggable = false;
+        boolean shouldDisable =
+                info == null || info.metaData == null || sdkConfiguration.isDisabled ||
+                        !sdkConfiguration.isEnabledOnNonDebuggableBuild && (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != ApplicationInfo.FLAG_DEBUGGABLE;
+
+        if (shouldDisable) {
+            Logger.d("DeployGate SDK is unavailable on this app");
+
+            this.isSdkEnabled = false;
             this.canUseLogcat = false;
             this.sdkVersion = 0;
             this.sdkArtifactVersion = null;
+            this.activeFeatureFlags = 0;
             return;
         }
 
-        this.debuggable = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        this.isSdkEnabled = true;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             this.canUseLogcat = true;
@@ -47,5 +79,17 @@ class HostApp {
 
         this.sdkVersion = info.metaData.getInt("com.deploygate.sdk.version", 0);
         this.sdkArtifactVersion = info.metaData.getString("com.deploygate.sdk.artifact_version");
+
+        int supportedFeatureFlags = info.metaData.getInt("com.deploygate.sdk.feature_flags", 0);
+
+        if (!sdkConfiguration.isCaptureEnabled) {
+            supportedFeatureFlags ^= Compatibility.DEVICE_CAPTURE.bitMask;
+        }
+
+        this.activeFeatureFlags = supportedFeatureFlags;
+    }
+
+    final boolean canUseDeviceCapture() {
+        return (activeFeatureFlags & Compatibility.DEVICE_CAPTURE.bitMask) == BuildConfig.DEVICE_CAPTURE;
     }
 }
