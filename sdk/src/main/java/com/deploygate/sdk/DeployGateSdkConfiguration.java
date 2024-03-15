@@ -18,19 +18,6 @@ public final class DeployGateSdkConfiguration {
     final boolean isCaptureEnabled;
 
     private DeployGateSdkConfiguration(
-    ) {
-        this(
-                true,
-                new CustomLogConfiguration.Builder().build(),
-                false,
-                null,
-                false,
-                false,
-                null
-        );
-    }
-
-    private DeployGateSdkConfiguration(
             Builder builder
     ) {
         this(
@@ -171,7 +158,8 @@ public final class DeployGateSdkConfiguration {
          */
         public DeployGateSdkConfiguration build() {
             if (isDisabled) {
-                return new DeployGateSdkConfiguration();
+                // Create a new builder instance to release all references just in case.
+                return new DeployGateSdkConfiguration(new Builder().setDisabled(true));
             } else {
                 return new DeployGateSdkConfiguration(this);
             }
