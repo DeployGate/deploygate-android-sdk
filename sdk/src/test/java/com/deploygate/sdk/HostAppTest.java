@@ -16,6 +16,8 @@ import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
 public class HostAppTest {
+    private static final int FULL_BIT = (1 << 5) - 1;
+
     @NonNull
     private Context context;
 
@@ -35,7 +37,7 @@ public class HostAppTest {
         Truth.assertThat(app.packageName).isEqualTo("com.deploygate.sdk.test");
         Truth.assertThat(app.sdkVersion).isEqualTo(4);
         Truth.assertThat(app.sdkArtifactVersion).isEqualTo("4.7.0");
-        Truth.assertThat(app.activeFeatureFlags).isEqualTo(1 << 5 - 1);
+        Truth.assertThat(app.activeFeatureFlags).isEqualTo(FULL_BIT);
         Truth.assertThat(app.canUseDeviceCapture()).isTrue();
     }
 
@@ -75,7 +77,7 @@ public class HostAppTest {
         );
 
         Truth.assertThat(app1.canUseDeviceCapture()).isTrue();
-        Truth.assertThat(app1.activeFeatureFlags).isEqualTo(1 << 5 - 1);
+        Truth.assertThat(app1.activeFeatureFlags).isEqualTo(FULL_BIT);
 
         HostApp app2 = new HostApp(
                 context,
@@ -83,6 +85,6 @@ public class HostAppTest {
         );
 
         Truth.assertThat(app2.canUseDeviceCapture()).isFalse();
-        Truth.assertThat(app2.activeFeatureFlags).isEqualTo((1 << 5 - 1) - BuildConfig.DEVICE_CAPTURE);
+        Truth.assertThat(app2.activeFeatureFlags).isEqualTo(FULL_BIT - BuildConfig.DEVICE_CAPTURE);
     }
 }
