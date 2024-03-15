@@ -707,18 +707,14 @@ public class DeployGate {
             boolean forceApplyOnReleaseBuild,
             CustomLogConfiguration customLogConfiguration
     ) {
-        DeployGateSdkConfiguration.Builder builder = new DeployGateSdkConfiguration.Builder()
-                .setAppOwnerName(author)
-                .setCustomLogConfiguration(customLogConfiguration)
-                .setCallback(callback);
-
-        if (forceApplyOnReleaseBuild) {
-            builder.setEnabledOnNonDebuggableBuild(false);
-        }
-
         install(
                 app,
-                builder.build()
+                new DeployGateSdkConfiguration.Builder()
+                        .setAppOwnerName(author)
+                        .setCustomLogConfiguration(customLogConfiguration)
+                        .setEnabledOnNonDebuggableBuild(forceApplyOnReleaseBuild)
+                        .setCallback(callback)
+                        .build()
         );
     }
 
