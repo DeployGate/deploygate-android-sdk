@@ -34,8 +34,8 @@ public class HostAppTest {
         Truth.assertThat(app.canUseLogcat).isTrue();
         Truth.assertThat(app.packageName).isEqualTo("com.deploygate.sdk.test");
         Truth.assertThat(app.sdkVersion).isEqualTo(4);
-        Truth.assertThat(app.sdkArtifactVersion).isEqualTo("4.6.1");
-        Truth.assertThat(app.activeFeatureFlags).isEqualTo(31);
+        Truth.assertThat(app.sdkArtifactVersion).isEqualTo("4.7.0");
+        Truth.assertThat(app.activeFeatureFlags).isEqualTo(1 << 5 - 1);
         Truth.assertThat(app.canUseDeviceCapture()).isTrue();
     }
 
@@ -75,7 +75,7 @@ public class HostAppTest {
         );
 
         Truth.assertThat(app1.canUseDeviceCapture()).isTrue();
-        Truth.assertThat(app1.activeFeatureFlags).isEqualTo(31);
+        Truth.assertThat(app1.activeFeatureFlags).isEqualTo(1 << 5 - 1);
 
         HostApp app2 = new HostApp(
                 context,
@@ -83,6 +83,6 @@ public class HostAppTest {
         );
 
         Truth.assertThat(app2.canUseDeviceCapture()).isFalse();
-        Truth.assertThat(app2.activeFeatureFlags).isEqualTo(15);
+        Truth.assertThat(app2.activeFeatureFlags).isEqualTo((1 << 5 - 1) - BuildConfig.DEVICE_CAPTURE);
     }
 }

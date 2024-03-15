@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 ext {
     // sdk/java/com/deploygate/sdk/HostAppTest.java needs to be changed for a new release
-    releaseVersion = '4.6.1'
+    releaseVersion = '4.7.0'
 }
 
 buildscript {
