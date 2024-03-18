@@ -1,1 +1,40 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    pluginManagement {
+        resolutionStrategy {
+            eachPlugin {
+                switch(requested.id.id) {
+                    case "com.google.android.gms.oss-licenses-plugin":
+                        useModule("com.google.android.gms:oss-licenses-plugin:${requested.version}")
+                        break
+                    case "deploygate":
+                        useModule("com.deploygate:gradle:${requested.version}")
+                        break
+                }
+            }
+        }
+    }
+
+    includeBuild("build-logic")
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url 'https://deploygate.github.io/maven/artifacts'
+            content { includeGroup "com.deploygate" }
+        }
+    }
+}
+
+includeBuild('plugins')
+
 include ':sdk', ':sdkMock', ':sample'
