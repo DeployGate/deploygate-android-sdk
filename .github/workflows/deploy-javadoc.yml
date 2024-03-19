@@ -16,27 +16,32 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: gh-pages
-      - uses: actions/github-script@v6
-        id: latest-version
+      - uses: actions/github-script@v7
+        id: versions
         with:
-          result-encoding: string
+          result-encoding: json
           script: |
-            const { data: release } = await github.rest.repos.getLatestRelease({
+            const fs = require('fs');
+            
+            const opts = github.rest.repos.listReleases.endpoint.merge({
               owner: context.repo.owner,
-              repo: context.repo.repo,
+              repo: context.repo.repo
+            });
+            const releases = await github.paginate(opts);
+
+            const missings = [];
+
+            releases.forEach((release) => {
+              if (!release.draft && !release.prerelease && release.tag_name) {
+                if (!fs.existsSync(release.tag_name)) {
+                  missings.push(release.tag_name);
+                }
+              }
             });
 
-            return release.tag_name
-      - id: has-new-release
-        run: |
-          if [[ -d "${{ steps.latest-version.outputs.result }}" ]]; then
-            echo 'result=false' >> $GITHUB_OUTPUT
-          else
-            echo 'result=true' >> $GITHUB_OUTPUT
-          fi
+            return missings;
     outputs:
-      has-new-release: ${{ steps.has-new-release.outputs.result }}
-      latest-version: ${{ steps.latest-version.outputs.result }}
+      versions: ${{ steps.versions.outputs.result }}
   deploy-new-javadoc:
     needs:
       - check-new-release
@@ -46,27 +51,31 @@ jobs:
         with:
           ref: gh-pages
       - id: download-javadoc
-        if: ${{ needs.check-new-release.outputs.has-new-release == 'true' }}
+        if: >
+          needs.check-new-release.outputs.versions != '[]'
+        env:
+          MISSING_VERSIONS: ${{ join(fromJSON(needs.check-new-release.outputs.versions), ' ') }}
         run: |
-          readonly version='${{ needs.check-new-release.outputs.latest-version }}'
-          readonly url="https://repo1.maven.org/maven2/com/deploygate/sdk/${version}/sdk-${version}-javadoc.jar"
-          readonly dist="$version"
-
-          mkdir -p "$dist"
-
-          if curl -sSfL -I --url "$url"; then
-            curl -sSfL \
-              -X GET \
-              --url "$url" \
-              -o javadoc.jar
-            unzip javadoc.jar -d "$dist/"
+          for version in $MISSING_VERSIONS; do
+            url="https://repo1.maven.org/maven2/com/deploygate/sdk/${version}/sdk-${version}-javadoc.jar"
+            dist="$version"
+  
+            mkdir -p "$dist"
+  
+            if curl -sSfL -I --url "$url"; then
+              curl -sSfL \
+                -X GET \
+                --url "$url" \
+                -o javadoc.jar
+              unzip javadoc.jar -d "$dist/"
+  
+              rm javadoc.jar
+            fi
 
             if [[ ! -f "$dist/index.html" ]]; then
               rm -fr "$dist"
             fi
-
-            rm javadoc.jar
-          fi
+          done
       - uses: actions/github-script@v6
         with:
           script: |
