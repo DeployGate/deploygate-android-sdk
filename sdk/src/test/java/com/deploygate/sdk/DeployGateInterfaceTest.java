@@ -61,6 +61,42 @@ public class DeployGateInterfaceTest {
     }
 
     @Test
+    public void install__Context_SdkConfiguration() {
+        DeployGate.install(
+                app,
+                new DeployGateSdkConfiguration.Builder()
+                        .setCaptureEnabled(false)
+                        .setDisabled(false)
+                        .setEnabledOnNonDebuggableBuild(false)
+                        .setAppOwnerName("sample")
+                        .setCrashReportingEnabled(false)
+                        .setCustomLogConfiguration(
+                                new CustomLogConfiguration.Builder()
+                                        .setBackpressure(CustomLogConfiguration.Backpressure.DROP_BUFFER_BY_OLDEST)
+                                        .setBufferSize(5)
+                                        .build()
+                        )
+                        .setCallback(new DeployGateCallback() {
+                            @Override
+                            public void onInitialized(boolean isServiceAvailable) {
+
+                            }
+
+                            @Override
+                            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+
+                            }
+
+                            @Override
+                            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+
+                            }
+                        })
+                        .build()
+        );
+    }
+
+    @Test
     public void install__Application() {
         DeployGate.install(app);
     }

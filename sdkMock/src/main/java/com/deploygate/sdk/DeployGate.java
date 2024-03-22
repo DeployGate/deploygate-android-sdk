@@ -1,10 +1,20 @@
 package com.deploygate.sdk;
 
 import android.app.Application;
+import android.content.Context;
 
+/**
+ * @noinspection ALL
+ */
 public class DeployGate {
 
     static void clear() {
+    }
+
+    public static void install(
+            Context context,
+            DeployGateSdkConfiguration sdkConfiguration
+    ) {
     }
 
     public static void install(Application app) {
