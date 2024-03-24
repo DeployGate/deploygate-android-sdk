@@ -1,6 +1,5 @@
 package com.deploygate.plugins
 
-import com.android.build.api.dsl.Lint
 import com.android.build.gradle.AppExtension
 import com.project.starter.easylauncher.filter.ColorRibbonFilter
 import com.project.starter.easylauncher.plugin.EasyLauncherExtension
@@ -8,16 +7,16 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.invoke
 
-class SampleAppPlugin: Plugin<Project> {
+class SampleAppPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.apply(plugin = "com.android.application")
         target.apply(plugin = "com.starter.easylauncher")
 
         target.extensions.findByType(AppExtension::class.java)?.configureAppExtension()
-        target.extensions.findByType(EasyLauncherExtension::class.java)?.configureEasyLauncherExtension()
+        target.extensions.findByType(EasyLauncherExtension::class.java)
+            ?.configureEasyLauncherExtension()
     }
 
     private fun AppExtension.configureAppExtension() {
@@ -30,19 +29,19 @@ class SampleAppPlugin: Plugin<Project> {
         }
 
         buildTypes {
-            getByName("debug") {
+            named("debug") {
                 applicationIdSuffix = ".debug"
             }
-            create("distribute") {
-                debuggable(true)
-                matchingFallbacks += "release"
-            }
-            create("release") {
+            named("release") {
                 minifyEnabled(true)
                 proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-project.txt",
                 )
+            }
+            create("distribute") {
+                debuggable(true)
+                matchingFallbacks += "release"
             }
         }
 

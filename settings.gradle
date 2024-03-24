@@ -32,4 +32,4 @@ dependencyResolutionManagement {
     }
 }
 
-include ':sdk'//, ':sdkMock', ':sample'
+include ':sdk', ':sdkMock', ':sample'

@@ -2,6 +2,7 @@ package com.deploygate.plugins
 
 import com.android.build.api.dsl.LibraryExtension
 import com.deploygate.plugins.dsl.SdkExtension
+import com.deploygate.plugins.ext.libraryExtension
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
@@ -9,9 +10,8 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.getByType
 
-class SdkPlugin: Plugin<Project> {
+class SdkPlugin : Plugin<Project> {
     companion object {
         /**
          * sdk/java/com/deploygate/sdk/HostAppTest.java needs to be changed for a new release
@@ -29,7 +29,7 @@ class SdkPlugin: Plugin<Project> {
         target.apply(plugin = "com.android.library")
         target.apply<MavenPublishPlugin>()
 
-        target.extensions.getByType<LibraryExtension>().configureLibraryExtension(
+        target.libraryExtension.configureLibraryExtension(
             artifactVersion = target.version as String,
         )
 

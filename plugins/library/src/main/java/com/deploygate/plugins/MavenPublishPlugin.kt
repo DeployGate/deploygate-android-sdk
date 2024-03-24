@@ -1,7 +1,9 @@
 package com.deploygate.plugins
 
+import com.deploygate.plugins.ext.internalApiLibraryExtension
+import com.deploygate.plugins.ext.publishingExtension
 import com.deploygate.plugins.ext.sdkExtension
-import com.android.build.gradle.LibraryExtension as InternalApiLibraryExtension
+import com.deploygate.plugins.ext.signingExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.PasswordCredentials
@@ -17,7 +19,7 @@ import org.gradle.kotlin.dsl.register
 import org.gradle.plugins.signing.SigningExtension
 import java.util.Locale
 
-class MavenPublishPlugin: Plugin<Project> {
+class MavenPublishPlugin : Plugin<Project> {
     companion object {
         private val RELEASE_VERSION_REGEX = "^\\d+\\.\\d+\\.\\d+\$".toRegex()
     }
@@ -35,30 +37,31 @@ class MavenPublishPlugin: Plugin<Project> {
 
         val isRelease = artifactVersion.matches(RELEASE_VERSION_REGEX)
 
-        target.extensions.getByType<InternalApiLibraryExtension>().libraryVariants.configureEach {
+        target.internalApiLibraryExtension.libraryVariants.configureEach {
             val variant = this
 
-            target.tasks.register<Exec>("verifyBytecodeVersion${variant.name.capitalize(Locale.ROOT)}").configure {
-                dependsOn(variant.assembleProvider)
+            target.tasks.register<Exec>("verifyBytecodeVersion${variant.name.capitalize(Locale.ROOT)}")
+                .configure {
+                    dependsOn(variant.assembleProvider)
 
-                commandLine(
-                    target.rootProject.file("scripts/verify-bytecode-version"),
-                    "--aar",
-                    variant.packageLibraryProvider.flatMap { it.archiveFile }.get(),
-                    "--java",
-                    SdkPlugin.JAVA_VERSION.toString()
-                )
-            }
+                    commandLine(
+                        target.rootProject.file("scripts/verify-bytecode-version"),
+                        "--aar",
+                        variant.packageLibraryProvider.flatMap { it.archiveFile }.get(),
+                        "--java",
+                        SdkPlugin.JAVA_VERSION.toString()
+                    )
+                }
         }
 
-        target.extensions.getByType<PublishingExtension>().configurePublishingExtension(
+        target.publishingExtension.configurePublishingExtension(
             target = target,
             artifactVersion = artifactVersion,
             isRelease = isRelease,
             repositoryUsername = repositoryUsername,
             repositoryPassword = repositoryPassword,
         )
-        target.extensions.getByType<SigningExtension>().configureSigningExtension(
+        target.signingExtension.configureSigningExtension(
             isSigningRequired = isRelease,
             signingKey = signingKey,
             signingPassword = signingPassword,
@@ -66,13 +69,13 @@ class MavenPublishPlugin: Plugin<Project> {
         )
 
         target.gradle.taskGraph.whenReady {
-            with(target.extensions.getByType<SigningExtension>()) {
+            with(target.signingExtension) {
                 isRequired = isRequired && hasTask("publishReleasePublicationToMavenRepository")
             }
         }
     }
 
-    fun PublishingExtension.configurePublishingExtension(
+    private fun PublishingExtension.configurePublishingExtension(
         target: Project,
         artifactVersion: String,
         isRelease: Boolean,
@@ -143,7 +146,7 @@ class MavenPublishPlugin: Plugin<Project> {
     }
 
 
-    fun SigningExtension.configureSigningExtension(
+    private fun SigningExtension.configureSigningExtension(
         isSigningRequired: Boolean,
         signingKey: String?,
         signingPassword: String?,
