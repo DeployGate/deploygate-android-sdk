@@ -9,9 +9,6 @@ pluginManagement {
         resolutionStrategy {
             eachPlugin {
                 switch(requested.id.id) {
-                    case "com.google.android.gms.oss-licenses-plugin":
-                        useModule("com.google.android.gms:oss-licenses-plugin:${requested.version}")
-                        break
                     case "deploygate":
                         useModule("com.deploygate:gradle:${requested.version}")
                         break
@@ -20,7 +17,7 @@ pluginManagement {
         }
     }
 
-    includeBuild("build-logic")
+    includeBuild("plugins")
 }
 
 dependencyResolutionManagement {
@@ -35,6 +32,4 @@ dependencyResolutionManagement {
     }
 }
 
-includeBuild('plugins')
-
-include ':sdk', ':sdkMock', ':sample'
+include ':sdk'//, ':sdkMock', ':sample'

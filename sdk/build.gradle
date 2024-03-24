@@ -1,4 +1,4 @@
-apply from: rootProject.file('sdk.build.gradle')
+apply plugin: 'com.deploygate.plugins.sdk'
 
 android {
     defaultConfig {
@@ -11,10 +11,8 @@ dependencies {
     testImplementation 'org.mockito:mockito-inline:4.4.0'
 }
 
-ext {
-    displayName = "DeployGate SDK"
-    artifactId = 'sdk'
-    desc = 'DeployGate SDK for Android'
+sdk {
+    displayName.set("DeployGate SDK")
+    artifactId.set('sdk')
+    description.set('DeployGate SDK for Android')
 }
-
-apply from: rootProject.file('publishing.build.gradle')

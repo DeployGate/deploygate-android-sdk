@@ -13,13 +13,7 @@ dependencyResolutionManagement {
     mavenCentral()
     gradlePluginPortal()
   }
-  versionCatalogs {
-    create("libs") {
-      from(files("../gradle/libs.versions.toml"))
-    }
-  }
 }
 
-include(":android")
-include(":common")
-include(":spotless")
+include(":library")
+include(":sample")

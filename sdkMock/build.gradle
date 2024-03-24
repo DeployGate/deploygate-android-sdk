@@ -1,9 +1,7 @@
-apply from: rootProject.file('sdk.build.gradle')
+apply plugin: 'com.deploygate.plugins.sdk'
 
-ext {
-    displayName = "DeployGate SDK Mock"
-    artifactId = 'sdk-mock'
-    desc = 'Mocked dummy DeployGate SDK for Android to reduce footprint of your release version app without code modification'
+sdk {
+    displayName.set("DeployGate SDK Mock")
+    artifactId.set('sdk-mock')
+    description.set('Mocked dummy DeployGate SDK for Android to reduce footprint of your release version app without code modification')
 }
-
-apply from: rootProject.file('publishing.build.gradle')
