@@ -18,7 +18,7 @@ class SdkPlugin : Plugin<Project> {
          */
         private const val ARTIFACT_VERSION = "4.7.1"
 
-        val JAVA_VERSION = JavaVersion.VERSION_1_8
+        val JAVA_VERSION = JavaVersion.VERSION_1_7
     }
 
     override fun apply(target: Project) {
