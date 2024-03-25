@@ -58,6 +58,7 @@ class SdkPlugin : Plugin<Project> {
 
         defaultConfig {
             minSdk = 14
+            targetSdk = 33
 
             // A map of <name => isSupporting>
             val features = linkedMapOf(
@@ -103,11 +104,12 @@ class SdkPlugin : Plugin<Project> {
         testOptions {
             unitTests {
                 isIncludeAndroidResources = true
-            }
-            unitTests.all {
-                it.jvmArgs(
-                    "-Xmx1g",
-                )
+
+                all {
+                    it.jvmArgs(
+                        "-Xmx1g",
+                    )
+                }
             }
         }
 
