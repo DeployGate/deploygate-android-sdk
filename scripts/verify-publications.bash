@@ -11,10 +11,12 @@ readonly tmp_dir="$(mktemp -d)"
 
 readonly module_name="$1"
 
+_GRADLE_ARGS="${_GRADLE_ARGS-} --stacktrace"
+
 ./gradlew \
     "${module_name}:verifyBytecodeVersionRelease" \
     "${module_name}:publishReleasePublicationToMavenLocal" \
-    --stacktrace
+    $_GRADLE_ARGS
 
 cat "${module_name}/build/publications/release/module.json"
 

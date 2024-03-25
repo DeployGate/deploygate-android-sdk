@@ -26,8 +26,12 @@ jobs:
           cache: 'gradle'
       - name: Check sdk publications
         run: ./scripts/verify-publications.bash sdk
+        env:
+          _GRADLE_ARGS: --no-daemon
       - name: Check sdk-mock publications
         run: ./scripts/verify-publications.bash sdkMock
+        env:
+          _GRADLE_ARGS: --no-daemon
 
   build-and-upload:
     runs-on: ubuntu-latest
