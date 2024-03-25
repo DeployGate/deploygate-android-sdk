@@ -1,6 +1,5 @@
 package com.deploygate.sdk;
 
-/** @noinspection ALL*/
 public final class DeployGateSdkConfiguration {
     private DeployGateSdkConfiguration() {
     }

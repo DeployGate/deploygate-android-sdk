@@ -3,9 +3,6 @@ package com.deploygate.sdk;
 import android.app.Application;
 import android.content.Context;
 
-/**
- * @noinspection ALL
- */
 public class DeployGate {
 
     static void clear() {
