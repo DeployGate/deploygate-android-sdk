@@ -1,1 +1,35 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    pluginManagement {
+        resolutionStrategy {
+            eachPlugin {
+                switch(requested.id.id) {
+                    case "deploygate":
+                        useModule("com.deploygate:gradle:${requested.version}")
+                        break
+                }
+            }
+        }
+    }
+
+    includeBuild("plugins")
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url 'https://deploygate.github.io/maven/artifacts'
+            content { includeGroup "com.deploygate" }
+        }
+    }
+}
+
 include ':sdk', ':sdkMock', ':sample'
