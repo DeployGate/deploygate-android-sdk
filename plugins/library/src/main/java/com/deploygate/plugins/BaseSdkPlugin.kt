@@ -16,7 +16,7 @@ abstract class BaseSdkPlugin : Plugin<Project> {
         /**
          * sdk/java/com/deploygate/sdk/HostAppTest.java needs to be changed for a new release
          */
-        private const val ARTIFACT_VERSION = "4.7.1"
+        const val ARTIFACT_VERSION = "4.7.1"
 
         val JAVA_VERSION = JavaVersion.VERSION_1_7
     }
