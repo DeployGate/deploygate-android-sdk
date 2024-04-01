@@ -13,5 +13,9 @@ gradlePlugin {
             id = "com.deploygate.plugins.sdk"
             implementationClass = "com.deploygate.plugins.SdkPlugin"
         }
+        create("sdk-mock") {
+            id = "com.deploygate.plugins.sdk-mock"
+            implementationClass = "com.deploygate.plugins.SdkMockPlugin"
+        }
     }
 }

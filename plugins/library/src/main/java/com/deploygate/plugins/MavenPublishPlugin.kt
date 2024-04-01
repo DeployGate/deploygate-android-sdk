@@ -49,7 +49,7 @@ class MavenPublishPlugin : Plugin<Project> {
                         "--aar",
                         variant.packageLibraryProvider.flatMap { it.archiveFile }.get(),
                         "--java",
-                        SdkPlugin.JAVA_VERSION.toString()
+                        BaseSdkPlugin.JAVA_VERSION.toString()
                     )
                 }
         }
@@ -139,7 +139,7 @@ class MavenPublishPlugin : Plugin<Project> {
                 // Configure some values after AGP has been configured
                 named<MavenPublication>("release") {
                     from(components.getByName("release"))
-                    artifactId = sdkExtension.artifactId.get()
+                    artifactId = sdkExtension.artifactId
                 }
             }
         }
