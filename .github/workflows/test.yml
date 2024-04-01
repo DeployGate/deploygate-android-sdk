@@ -14,8 +14,6 @@ on:
 jobs:
   sdk-build:
     runs-on: ubuntu-latest
-    if: >
-      github.event_name != 'workflow_dispatch'
     env:
       GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=2g -Dkotlin.daemon.jvm.options=-Xmx1536m"
     steps:
@@ -30,6 +28,19 @@ jobs:
         run: ./scripts/verify-publications.bash sdk
       - name: Check sdk-mock publications
         run: ./scripts/verify-publications.bash sdkMock
+      - run: ./gradlew sdk:generateMetaDataJson
+      - run: |
+          ls -R ~/.m2/repositories
+          
+          mkdir -p tmp/artifacts
+          cp -r ~/.m2/repositories/com/deploygate/* tmp/artifacts/
+          cp sdk/build/generated-sdk-metadata/sdk-meta-data-* tmp/artifacts/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: tmp/artifacts
+          retention-days: 3
+          if-no-files-found: error
 
   build-and-upload:
     runs-on: ubuntu-latest
