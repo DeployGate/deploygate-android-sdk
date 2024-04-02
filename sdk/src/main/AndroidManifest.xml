@@ -10,18 +10,18 @@
             />
 
         <meta-data
-            android:name="com.deploygate.sdk.version"
-            android:value="${sdkVersion}"
+            android:name="${deploygate_sdk_version_name}"
+            android:value="${deploygate_sdk_version_value}"
             />
 
         <meta-data
-            android:name="com.deploygate.sdk.artifact_version"
-            android:value="${sdkArtifactVersion}"
+            android:name="${deploygate_sdk_artifact_version_name}"
+            android:value="${deploygate_sdk_artifact_version_value}"
             />
 
         <meta-data
-            android:name="com.deploygate.sdk.feature_flags"
-            android:value="${featureFlags}"
+            android:name="${deploygate_sdk_feature_flags_name}"
+            android:value="${deploygate_sdk_feature_flags_value}"
             />
     </application>
     <queries>
