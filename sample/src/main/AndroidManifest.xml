@@ -15,6 +15,9 @@
     <!-- only for sample app -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- collecting stats data from app&device -->
+    <uses-permission android:name="com.deploygate.permission.COLLECT_STATS_DATA" />
+
     <!--
       If you have multiple processes in your application, or you want to customize SDK initializer,
       you need to add your own Application class here. In this example, the class is
@@ -67,4 +70,8 @@
         <!-- SDK will be initialized through ContentProvider by default -->
         <!-- Please refer to stablereal/AndroidManifest.xml -->
     </application>
+
+    <queries>
+        <provider android:authorities="com.deploygate.external.sdk" />
+    </queries>
 </manifest>

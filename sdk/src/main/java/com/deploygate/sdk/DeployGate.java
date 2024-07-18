@@ -3,10 +3,13 @@ package com.deploygate.sdk;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +17,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.sdk.internal.VisibilityLifecycleCallbacks;
@@ -127,6 +131,17 @@ public class DeployGate {
                 } else {
                     Logger.w("streamed logcat is not supported");
                 }
+            } else if (DeployGateEvent.ACTION_COLLECT_DEVICE_STATS.equals(action)) {
+                Uri targetUri = Uri.parse(extras.getString("e.target-content-uri"));
+                Logger.d("collect-device-status event received: %s", targetUri);
+
+                Logger.d("dump extras: %s", extras.toString());
+
+                ContentResolver cr = mApplicationContext.getContentResolver();
+                ContentValues cv = new ContentValues();
+                cv.put("build_environment", "\"{\"build\":true}\"");
+                cv.put("extras", "\"{\"ext\":1}\"");
+                cr.insert(targetUri, cv);
             } else {
                 Logger.w("%s is not supported by this sdk version", action);
             }

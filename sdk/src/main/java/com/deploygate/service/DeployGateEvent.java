@@ -27,6 +27,11 @@ public interface DeployGateEvent {
     public static final String ACTION_COMPOSE_COMMENT = "composeComment";
     public static final String ACTION_VISIBILITY_EVENT = "a.visibility-event";
 
+    /**
+     * @since 4.8.0
+     */
+    public static final String ACTION_COLLECT_DEVICE_STATS = "a.collect-device-stats";
+
     public static final String EXTRA_AUTHOR = "author";
     public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";
 
