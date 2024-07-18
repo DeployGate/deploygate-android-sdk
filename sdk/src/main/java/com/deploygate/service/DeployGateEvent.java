@@ -30,7 +30,7 @@ public interface DeployGateEvent {
     /**
      * @since 4.8.0
      */
-    public static final String ACTION_COLLECT_DEVICE_STATS = "a.collect-device-stats";
+    public static final String ACTION_COLLECT_DEVICE_STATES = "a.collect-device-states";
 
     public static final String EXTRA_AUTHOR = "author";
     public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";

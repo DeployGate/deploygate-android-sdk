@@ -16,7 +16,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- collecting stats data from app&device -->
-    <uses-permission android:name="com.deploygate.permission.COLLECT_STATS_DATA" />
+    <uses-permission android:name="com.deploygate.permission.COLLECT_DEVICE_STATES" />
 
     <!--
       If you have multiple processes in your application, or you want to customize SDK initializer,

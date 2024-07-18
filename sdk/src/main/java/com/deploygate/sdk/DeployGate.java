@@ -17,7 +17,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 
 import com.deploygate.sdk.internal.Logger;
 import com.deploygate.sdk.internal.VisibilityLifecycleCallbacks;
@@ -131,7 +130,7 @@ public class DeployGate {
                 } else {
                     Logger.w("streamed logcat is not supported");
                 }
-            } else if (DeployGateEvent.ACTION_COLLECT_DEVICE_STATS.equals(action)) {
+            } else if (DeployGateEvent.ACTION_COLLECT_DEVICE_STATES.equals(action)) {
                 Uri targetUri = Uri.parse(extras.getString("e.target-content-uri"));
                 Logger.d("collect-device-status event received: %s", targetUri);
 
