@@ -1,5 +1,5 @@
 apply plugin: 'com.deploygate.plugins.sdk-mock'
 
 android {
-    namespace "com.deploygate.sdk"
+    namespace "com.deploygate.sdk-mock"
 }
