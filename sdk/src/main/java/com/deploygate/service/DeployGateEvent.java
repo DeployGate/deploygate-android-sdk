@@ -36,6 +36,11 @@ public interface DeployGateEvent {
     public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";
 
     /**
+     * @since 4.8.0
+     */
+    public static final String EXTRA_TARGET_URI_FOR_REPORT_DEVICE_STATES = "e.target-uri-for-report-device-states";
+
+    /**
      * A SDK's model version queried by this key from INIT event.
      */
     public static final String EXTRA_SDK_VERSION = "sdkVersion";
