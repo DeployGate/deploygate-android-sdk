@@ -1,5 +1,9 @@
 apply plugin: 'com.deploygate.plugins.sample-app'
 
+android {
+    namespace "com.deploygate.sample"
+}
+
 dependencies {
     devrealImplementation project(':sdk')
     devmockImplementation project(':sdkMock')

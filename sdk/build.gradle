@@ -1,6 +1,8 @@
 apply plugin: 'com.deploygate.plugins.sdk'
 
 android {
+    namespace "com.deploygate.sdk"
+
     defaultConfig {
         consumerProguardFiles 'deploygate-sdk-proguard-rules.txt'
     }
