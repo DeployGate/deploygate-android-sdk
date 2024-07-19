@@ -24,6 +24,8 @@ import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -131,15 +133,31 @@ public class DeployGate {
                     Logger.w("streamed logcat is not supported");
                 }
             } else if (DeployGateEvent.ACTION_COLLECT_DEVICE_STATES.equals(action)) {
-                Uri targetUri = Uri.parse(extras.getString("e.target-content-uri"));
+                Uri targetUri = Uri.parse(extras.getString(DeployGateEvent.EXTRA_TARGET_URI_FOR_REPORT_DEVICE_STATES));
                 Logger.d("collect-device-status event received: %s", targetUri);
 
                 Logger.d("dump extras: %s", extras.toString());
 
                 ContentResolver cr = mApplicationContext.getContentResolver();
                 ContentValues cv = new ContentValues();
-                cv.put("build_environment", "\"{\"build\":true}\"");
-                cv.put("extras", "\"{\"ext\":1}\"");
+                HashMap<String, Object> buildEnv = new HashMap<>();
+                buildEnv.put("bool", true);
+                buildEnv.put("int", 1);
+                buildEnv.put("long", 1L);
+                buildEnv.put("float", 1.1f);
+                buildEnv.put("double", 1.11111111);
+                buildEnv.put("string", "1");
+                HashMap<String, Object> runtimeExtras = new HashMap<>();
+                runtimeExtras.put("bool", false);
+                runtimeExtras.put("int", 2);
+                runtimeExtras.put("long", 2L);
+                runtimeExtras.put("float", 2.2f);
+                runtimeExtras.put("double", 2.22222222);
+                runtimeExtras.put("string", "2");
+                cv.put(DeployGateEvent.KEY_BUILD_ENVIRONMENT, new JSONObject(buildEnv).toString());
+                cv.put(DeployGateEvent.KEY_RUNTIME_EXTRAS, new JSONObject(runtimeExtras).toString());
+                cv.put(DeployGateEvent.KEY_PACKAGE_NAME, mApplicationContext.getPackageName());
+                cv.put(DeployGateEvent.KEY_EVENT_AT, System.currentTimeMillis());
                 cr.insert(targetUri, cv);
             } else {
                 Logger.w("%s is not supported by this sdk version", action);

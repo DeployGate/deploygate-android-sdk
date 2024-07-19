@@ -8,6 +8,7 @@ public interface DeployGateEvent {
     // namespace:
     //   ACTION => a
     //   EXTRA => e
+    //   KEY => k
     //
     // content:
     //   should be hyphen-separated string and be lower cases
@@ -39,6 +40,10 @@ public interface DeployGateEvent {
      * @since 4.8.0
      */
     public static final String EXTRA_TARGET_URI_FOR_REPORT_DEVICE_STATES = "e.target-uri-for-report-device-states";
+    public static final String KEY_BUILD_ENVIRONMENT = "k.build-environment";
+    public static final String KEY_RUNTIME_EXTRAS = "k.runtime-extras";
+    public static final String KEY_PACKAGE_NAME = "k.package-name";
+    public static final String KEY_EVENT_AT = "k.event-at";
 
     /**
      * A SDK's model version queried by this key from INIT event.
