@@ -210,33 +210,33 @@ public class DeployGate {
     public static void removeAllBuildEnvironmentValues() {
     }
 
-    public static boolean putRuntimeExtrasValue(String key, String value) {
+    public static boolean putRuntimeExtraValue(String key, String value) {
         return false;
     }
 
-    public static boolean putRuntimeExtrasValue(String key, int value) {
+    public static boolean putRuntimeExtraValue(String key, int value) {
         return false;
     }
 
-    public static boolean putRuntimeExtrasValue(String key, long value) {
+    public static boolean putRuntimeExtraValue(String key, long value) {
         return false;
     }
 
-    public static boolean putRuntimeExtrasValue(String key, float value) {
+    public static boolean putRuntimeExtraValue(String key, float value) {
         return false;
     }
 
-    public static boolean putRuntimeExtrasValue(String key, double value) {
+    public static boolean putRuntimeExtraValue(String key, double value) {
         return false;
     }
 
-    public static boolean putRuntimeExtrasValue(String key, boolean value) {
+    public static boolean putRuntimeExtraValue(String key, boolean value) {
         return false;
     }
 
-    public static void removeRuntimeExtrasValue(String key) {
+    public static void removeRuntimeExtraValue(String key) {
     }
 
-    public static void removeAllRuntimeExtrasValues() {
+    public static void removeAllRuntimeExtraValues() {
     }
 }
