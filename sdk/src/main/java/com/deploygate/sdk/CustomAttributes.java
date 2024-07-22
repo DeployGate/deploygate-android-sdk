@@ -13,8 +13,6 @@ public final class CustomAttributes {
 
   private static final int MAX_ATTRIBUTES_SIZE = 8;
   private static final Pattern VALID_KEY_PATTERN = Pattern.compile("^[a-z][_a-z0-9]{2,31}$");
-  private static final int MIN_KEY_LENGTH = 3;
-  private static final int MAX_KEY_LENGTH = 32;
   private static final int MAX_VALUE_LENGTH = 64;
 
   private final ConcurrentHashMap<String, Object> attributes;
@@ -91,7 +89,7 @@ public final class CustomAttributes {
       return false;
     }
 
-    if (key.length() < MIN_KEY_LENGTH || key.length() > MAX_KEY_LENGTH || !VALID_KEY_PATTERN.matcher(key).matches()) {
+    if (!VALID_KEY_PATTERN.matcher(key).matches()) {
       Log.w(TAG, "Invalid key: " + key);
       return false;
     }
