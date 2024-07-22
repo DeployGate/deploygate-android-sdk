@@ -3,10 +3,13 @@ package com.deploygate.sdk;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -129,6 +132,18 @@ public class DeployGate {
                 } else {
                     Logger.w("streamed logcat is not supported");
                 }
+            } else if (DeployGateEvent.ACTION_COLLECT_DEVICE_STATES.equals(action)) {
+                Uri targetUri = Uri.parse(extras.getString(DeployGateEvent.EXTRA_TARGET_URI_FOR_REPORT_DEVICE_STATES));
+                Logger.d("collect-device-status event received: %s", targetUri);
+
+                ContentValues cv = new ContentValues();
+                cv.put(DeployGateEvent.KEY_BUILD_ENVIRONMENT, mBuildEnvironment.toJsonString());
+                cv.put(DeployGateEvent.KEY_RUNTIME_EXTRAS, mRuntimeExtra.toJsonString());
+                cv.put(DeployGateEvent.KEY_PACKAGE_NAME, mApplicationContext.getPackageName());
+                cv.put(DeployGateEvent.KEY_EVENT_AT, System.currentTimeMillis());
+
+                ContentResolver cr = mApplicationContext.getContentResolver();
+                cr.insert(targetUri, cv);
             } else {
                 Logger.w("%s is not supported by this sdk version", action);
             }
