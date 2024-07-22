@@ -1,8 +1,8 @@
 package com.deploygate.sdk;
 
-public class CustomAttributes {
+public final class CustomAttributes {
 
-  public CustomAttributes() {
+  CustomAttributes() {
   }
 
   public boolean putString(String key, String value) {
@@ -39,7 +39,11 @@ public class CustomAttributes {
     return 0;
   }
 
-  public String toJsonString() {
+  public boolean isEmpty() {
+    return true;
+  }
+
+  String toJsonString() {
     return null;
   }
 }

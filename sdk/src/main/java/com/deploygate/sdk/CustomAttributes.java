@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-public class CustomAttributes {
+public final class CustomAttributes {
 
   private static final String TAG = "CustomAttributes";
 
@@ -19,7 +19,7 @@ public class CustomAttributes {
 
   private final ConcurrentHashMap<String, Object> attributes;
 
-  public CustomAttributes() {
+  CustomAttributes() {
     attributes = new ConcurrentHashMap<>();
   }
 
@@ -63,7 +63,7 @@ public class CustomAttributes {
     return attributes.isEmpty();
   }
 
-  public String toJsonString() {
+  String toJsonString() {
     return new JSONObject(attributes).toString();
   }
 
