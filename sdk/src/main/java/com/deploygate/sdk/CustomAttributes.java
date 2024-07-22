@@ -1,6 +1,6 @@
 package com.deploygate.sdk;
 
-import android.util.Log;
+import com.deploygate.sdk.internal.Logger;
 
 import org.json.JSONObject;
 
@@ -82,17 +82,17 @@ public final class CustomAttributes {
 
   private boolean isValidKey(String key) {
     if (size() >= MAX_ATTRIBUTES_SIZE && !attributes.containsKey(key)) {
-      Log.w(TAG, "Attributes already reached max size. Ignored: " + key);
+      Logger.w(TAG, "Attributes already reached max size. Ignored: " + key);
       return false;
     }
 
     if (key == null || key.equals("true") || key.equals("false") || key.equals("null")) {
-      Log.w(TAG, "Not allowed key: " + key);
+      Logger.w(TAG, "Not allowed key: " + key);
       return false;
     }
 
     if (!VALID_KEY_PATTERN.matcher(key).matches()) {
-      Log.w(TAG, "Invalid key: " + key);
+      Logger.w(TAG, "Invalid key: " + key);
       return false;
     }
 
@@ -101,18 +101,18 @@ public final class CustomAttributes {
 
   private boolean isValidValue(Object value) {
     if (value == null) {
-      Log.w(TAG, "Value is null");
+      Logger.w(TAG, "Value is null");
       return false;
     }
 
     if (value instanceof String && ((String) value).length() > MAX_VALUE_LENGTH) {
-        Log.w(TAG, "Value too long: " + value);
+        Logger.w(TAG, "Value too long: " + value);
         return false;
     } else if (value instanceof String || value instanceof Number || value instanceof Boolean) {
       return true;
     } else {
       // dead code
-      Log.w(TAG, "Invalid value: " + value);
+      Logger.w(TAG, "Invalid value: " + value);
       return false;
     }
   }
