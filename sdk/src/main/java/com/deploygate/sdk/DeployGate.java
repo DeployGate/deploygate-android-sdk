@@ -1390,4 +1390,140 @@ public class DeployGate {
 
         return sInstance.mDistributionUserName;
     }
+
+    public static boolean putBuildEnvironmentValue(String key, String value) {
+        if (sInstance != null) {
+            return sInstance.putBuildEnvironmentValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, int value) {
+        if (sInstance != null) {
+            return sInstance.putBuildEnvironmentValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, long value) {
+        if (sInstance != null) {
+            return sInstance.putBuildEnvironmentValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, float value) {
+        if (sInstance != null) {
+            return sInstance.putBuildEnvironmentValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, double value) {
+        if (sInstance != null) {
+            return sInstance.putBuildEnvironmentValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, boolean value) {
+        if (sInstance != null) {
+            return sInstance.putBuildEnvironmentValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static void removeBuildEnvironmentValue(String key) {
+        if (sInstance != null) {
+            sInstance.removeBuildEnvironmentValueInternal(key);
+        }
+    }
+
+    public static void removeAllBuildEnvironmentValues() {
+        if (sInstance != null) {
+            sInstance.removeAllBuildEnvironmentValuesInternal();
+        }
+    }
+
+    public static boolean putRuntimeExtraValue(String key, String value) {
+        if (sInstance != null) {
+            return sInstance.putRuntimeExtraValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putRuntimeExtraValue(String key, int value) {
+        if (sInstance != null) {
+            return sInstance.putRuntimeExtraValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putRuntimeExtraValue(String key, long value) {
+        if (sInstance != null) {
+            return sInstance.putRuntimeExtraValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putRuntimeExtraValue(String key, float value) {
+        if (sInstance != null) {
+            return sInstance.putRuntimeExtraValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putRuntimeExtraValue(String key, double value) {
+        if (sInstance != null) {
+            return sInstance.putRuntimeExtraValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static boolean putRuntimeExtraValue(String key, boolean value) {
+        if (sInstance != null) {
+            return sInstance.putRuntimeExtraValueInternal(key, value);
+        }
+        return false;
+    }
+
+    public static void removeRuntimeExtraValue(String key) {
+        if (sInstance != null) {
+            sInstance.removeRuntimeExtraValueInternal(key);
+        }
+    }
+
+    public static void removeAllRuntimeExtraValues() {
+        if (sInstance != null) {
+            sInstance.removeAllRuntimeExtraValuesInternal();
+        }
+    }
+
+    private boolean putBuildEnvironmentValueInternal(String key, Object value) {
+        return true;
+    }
+
+    private void removeBuildEnvironmentValueInternal(String key) {
+    }
+
+    private void removeAllBuildEnvironmentValuesInternal() {
+    }
+
+    private boolean putRuntimeExtraValueInternal(String key, Object value) {
+        return true;
+    }
+
+    private void removeRuntimeExtraValueInternal(String key) {
+    }
+
+    private void removeAllRuntimeExtraValuesInternal() {
+    }
+
+    private boolean isValidKey(String key) {
+        return true;
+    }
+
+    private boolean isValidValue(Object value) {
+        return true;
+    }
 }

@@ -179,4 +179,64 @@ public class DeployGate {
     public static String getDistributionUserName() {
         return null;
     }
+
+    public static boolean putBuildEnvironmentValue(String key, String value) {
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, int value) {
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, long value) {
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, float value) {
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, double value) {
+        return false;
+    }
+
+    public static boolean putBuildEnvironmentValue(String key, boolean value) {
+        return false;
+    }
+
+    public static void removeBuildEnvironmentValue(String key) {
+    }
+
+    public static void removeAllBuildEnvironmentValues() {
+    }
+
+    public static boolean putRuntimeExtrasValue(String key, String value) {
+        return false;
+    }
+
+    public static boolean putRuntimeExtrasValue(String key, int value) {
+        return false;
+    }
+
+    public static boolean putRuntimeExtrasValue(String key, long value) {
+        return false;
+    }
+
+    public static boolean putRuntimeExtrasValue(String key, float value) {
+        return false;
+    }
+
+    public static boolean putRuntimeExtrasValue(String key, double value) {
+        return false;
+    }
+
+    public static boolean putRuntimeExtrasValue(String key, boolean value) {
+        return false;
+    }
+
+    public static void removeRuntimeExtrasValue(String key) {
+    }
+
+    public static void removeAllRuntimeExtrasValues() {
+    }
 }

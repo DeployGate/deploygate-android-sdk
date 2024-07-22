@@ -364,4 +364,74 @@ public class DeployGateInterfaceTest {
     public void getDistributionUserName() {
         Truth.assertThat(DeployGate.getDistributionUserName()).isNull();
     }
+
+    @Test
+    public void putBuildEnvironmentValue__string() {
+        DeployGate.putBuildEnvironmentValue("key", "value");
+    }
+
+    @Test
+    public void putBuildEnvironmentValue__int() {
+        DeployGate.putBuildEnvironmentValue("key", 1);
+    }
+
+    @Test
+    public void putBuildEnvironmentValue__float() {
+        DeployGate.putBuildEnvironmentValue("key", 1.0f);
+    }
+
+    @Test
+    public void putBuildEnvironmentValue__double() {
+        DeployGate.putBuildEnvironmentValue("key", 1.0);
+    }
+
+    @Test
+    public void putBuildEnvironmentValue__long() {
+        DeployGate.putBuildEnvironmentValue("key", 1L);
+    }
+
+    @Test
+    public void removeBuildEnvironmentValue() {
+        DeployGate.removeBuildEnvironmentValue("key");
+    }
+
+    @Test
+    public void removeAllBuildEnvironmentValues() {
+        DeployGate.removeAllBuildEnvironmentValues();
+    }
+
+    @Test
+    public void putRuntimeExtraValue__string() {
+        DeployGate.putRuntimeExtraValue("key", "value");
+    }
+
+    @Test
+    public void putRuntimeExtrasValue__int() {
+        DeployGate.putRuntimeExtraValue("key", 1);
+    }
+
+    @Test
+    public void putRuntimeExtrasValue__float() {
+        DeployGate.putRuntimeExtraValue("key", 1.0f);
+    }
+
+    @Test
+    public void putRuntimeExtrasValue__double() {
+        DeployGate.putRuntimeExtraValue("key", 1.0);
+    }
+
+    @Test
+    public void putRuntimeExtrasValue__long() {
+        DeployGate.putRuntimeExtraValue("key", 1L);
+    }
+
+    @Test
+    public void removeRuntimeExtrasValue() {
+        DeployGate.removeRuntimeExtraValue("key");
+    }
+
+    @Test
+    public void removeAllRuntimeExtraValues() {
+        DeployGate.removeAllRuntimeExtraValues();
+    }
 }
