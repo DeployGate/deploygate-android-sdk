@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.common.truth.Truth;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +22,7 @@ public class CustomAttributesTest {
   }
 
   @Test
-  public void put__key_pattern() {
+  public void put__keyPattern() {
     Truth.assertThat(attributes.putString("valid", "value")).isTrue();
     Truth.assertThat(attributes.putString("valid_underscore", "value")).isTrue();
     Truth.assertThat(attributes.putString("valid_1_number", "value")).isTrue();
@@ -45,7 +46,7 @@ public class CustomAttributesTest {
   }
 
   @Test
-  public void put__value_pattern() {
+  public void put__valuePattern() {
     Truth.assertThat(attributes.putString("valid_string", "value")).isTrue();
     Truth.assertThat(attributes.putInt("valid_int", 1)).isTrue();
     Truth.assertThat(attributes.putLong("valid_long", 1L)).isTrue();
@@ -57,7 +58,7 @@ public class CustomAttributesTest {
   }
 
   @Test
-  public void put__max_size() {
+  public void put_remove_removeAll_maxSize() {
     Truth.assertThat(attributes.putString("key1", "value")).isTrue();
     Truth.assertThat(attributes.putString("key2", "value")).isTrue();
     Truth.assertThat(attributes.putString("key3", "value")).isTrue();
@@ -93,5 +94,27 @@ public class CustomAttributesTest {
     Truth.assertThat(attributes.putString("key7", "value")).isTrue();
     Truth.assertThat(attributes.putString("key8", "value")).isTrue();
     Truth.assertThat(attributes.putString("key9", "value")).isFalse();
+  }
+
+  @Test
+  public void toJsonString() {
+    attributes.putString("valid_string", "value");
+    attributes.putInt("valid_int", 1);
+    attributes.putLong("valid_long", 1L);
+    attributes.putFloat("valid_float", 1.1f);
+    attributes.putDouble("valid_double", 1.1);
+    attributes.putBoolean("valid_boolean", true);
+
+    try {
+      JSONObject actualJson = new JSONObject(attributes.toJsonString());
+      Truth.assertThat(actualJson.getString("valid_string")).isEqualTo("value");
+      Truth.assertThat(actualJson.getInt("valid_int")).isEqualTo(1);
+      Truth.assertThat(actualJson.getLong("valid_long")).isEqualTo(1L);
+      Truth.assertThat((float) actualJson.getDouble("valid_float")).isEqualTo(1.1f);
+      Truth.assertThat(actualJson.getDouble("valid_double")).isEqualTo(1.1);
+      Truth.assertThat(actualJson.getBoolean("valid_boolean")).isTrue();
+    } catch (Exception e) {
+      Truth.assertWithMessage("Failed to parse JSON").fail();
+    }
   }
 }
