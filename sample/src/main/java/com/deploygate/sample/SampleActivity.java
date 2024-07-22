@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.deploygate.sdk.CustomAttributes;
 import com.deploygate.sdk.DeployGate;
 import com.deploygate.sdk.DeployGateCallback;
 
@@ -53,6 +54,19 @@ public class SampleActivity extends Activity implements DeployGateCallback {
         mUpdateButton = (Button) findViewById(R.id.updateButton);
         mLogMessage = (EditText) findViewById(R.id.message);
         mDistributionComments = (LinearLayout) findViewById(R.id.distributionComments);
+
+
+        CustomAttributes attrs = DeployGate.getRuntimeExtra();
+        if (attrs == null) {
+            attrs = new CustomAttributes();
+        }
+        attrs.putString("string", "value");
+        attrs.putInt("int", 123);
+        attrs.putBoolean("boolean", true);
+        attrs.putFloat("float", 1.23f);
+        attrs.putDouble("double", 1.23);
+        attrs.putLong("long", 123L);
+        DeployGate.setRuntimeExtra(attrs);
     }
 
     @Override
