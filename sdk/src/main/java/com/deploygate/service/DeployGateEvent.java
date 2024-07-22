@@ -8,7 +8,7 @@ public interface DeployGateEvent {
     // namespace:
     //   ACTION => a
     //   EXTRA => e
-    //   KEY => k
+    //   ATTRIBUTE_KEY => ak
     //
     // content:
     //   should be hyphen-separated string and be lower cases
@@ -135,22 +135,17 @@ public interface DeployGateEvent {
     /**
      * @since 4.8.0
      */
-    public static final String KEY_BUILD_ENVIRONMENT = "k.build-environment";
+    public static final String ATTRIBUTE_KEY_BUILD_ENVIRONMENT = "ak.build-environment";
 
     /**
      * @since 4.8.0
      */
-    public static final String KEY_RUNTIME_EXTRAS = "k.runtime-extras";
+    public static final String ATTRIBUTE_KEY_RUNTIME_EXTRAS = "ak.runtime-extras";
 
     /**
      * @since 4.8.0
      */
-    public static final String KEY_PACKAGE_NAME = "k.package-name";
-
-    /**
-     * @since 4.8.0
-     */
-    public static final String KEY_EVENT_AT = "k.event-at";
+    public static final String ATTRIBUTE_KEY_EVENT_AT = "ak.event-at";
 
     interface VisibilityType {
         int BACKGROUND = 0;

@@ -140,12 +140,12 @@ public class DeployGate {
 
                 ContentValues cv = new ContentValues();
                 if (sBuildEnvironment != null && !sBuildEnvironment.isEmpty()) {
-                    cv.put(DeployGateEvent.KEY_BUILD_ENVIRONMENT, sBuildEnvironment.toJsonString());
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_BUILD_ENVIRONMENT, sBuildEnvironment.toJsonString());
                 }
                 if (sRuntimeExtra != null && !sRuntimeExtra.isEmpty()) {
-                    cv.put(DeployGateEvent.KEY_RUNTIME_EXTRAS, sRuntimeExtra.toJsonString());
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, sRuntimeExtra.toJsonString());
                 }
-                cv.put(DeployGateEvent.KEY_EVENT_AT, System.currentTimeMillis());
+                cv.put(DeployGateEvent.ATTRIBUTE_KEY_EVENT_AT, System.currentTimeMillis());
 
                 ContentResolver cr = mApplicationContext.getContentResolver();
                 cr.insert(targetUri, cv);
