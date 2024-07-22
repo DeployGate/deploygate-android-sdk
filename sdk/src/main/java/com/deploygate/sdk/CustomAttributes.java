@@ -17,7 +17,6 @@ public class CustomAttributes {
   private static final int MAX_KEY_LENGTH = 32;
   private static final int MAX_VALUE_LENGTH = 64;
 
-
   private final ConcurrentHashMap<String, Object> attributes;
 
   public CustomAttributes() {

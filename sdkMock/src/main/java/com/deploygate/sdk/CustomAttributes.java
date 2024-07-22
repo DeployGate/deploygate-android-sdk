@@ -2,21 +2,41 @@ package com.deploygate.sdk;
 
 public class CustomAttributes {
 
-  public CustomAttributes() {}
+  public CustomAttributes() {
+  }
 
-  public boolean put(String key, String value) {
+  public boolean putString(String key, String value) {
     return false;
   }
 
-  public boolean put(String key, Number value) {
+  public boolean putInt(String key, int value) {
     return false;
   }
 
-  public boolean put(String key, Boolean value) {
+  public boolean putLong(String key, long value) {
+    return false;
+  }
+
+  public boolean putFloat(String key, float value) {
+    return false;
+  }
+
+  public boolean putDouble(String key, double value) {
+    return false;
+  }
+
+  public boolean putBoolean(String key, boolean value) {
     return false;
   }
 
   public void remove(String key) {
+  }
+
+  public void removeAll() {
+  }
+
+  public int size() {
+    return 0;
   }
 
   public String toJsonString() {
