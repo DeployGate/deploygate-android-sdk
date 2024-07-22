@@ -137,8 +137,12 @@ public class DeployGate {
                 Logger.d("collect-device-status event received: %s", targetUri);
 
                 ContentValues cv = new ContentValues();
-                cv.put(DeployGateEvent.KEY_BUILD_ENVIRONMENT, mBuildEnvironment.toJsonString());
-                cv.put(DeployGateEvent.KEY_RUNTIME_EXTRAS, mRuntimeExtra.toJsonString());
+                if (mBuildEnvironment != null) {
+                    cv.put(DeployGateEvent.KEY_BUILD_ENVIRONMENT, mBuildEnvironment.toJsonString());
+                }
+                if (mRuntimeExtra != null) {
+                    cv.put(DeployGateEvent.KEY_RUNTIME_EXTRAS, mRuntimeExtra.toJsonString());
+                }
                 cv.put(DeployGateEvent.KEY_PACKAGE_NAME, mApplicationContext.getPackageName());
                 cv.put(DeployGateEvent.KEY_EVENT_AT, System.currentTimeMillis());
 
