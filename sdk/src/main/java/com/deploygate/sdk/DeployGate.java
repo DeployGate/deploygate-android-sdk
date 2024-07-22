@@ -143,7 +143,6 @@ public class DeployGate {
                 if (mRuntimeExtra != null) {
                     cv.put(DeployGateEvent.KEY_RUNTIME_EXTRAS, mRuntimeExtra.toJsonString());
                 }
-                cv.put(DeployGateEvent.KEY_PACKAGE_NAME, mApplicationContext.getPackageName());
                 cv.put(DeployGateEvent.KEY_EVENT_AT, System.currentTimeMillis());
 
                 ContentResolver cr = mApplicationContext.getContentResolver();
