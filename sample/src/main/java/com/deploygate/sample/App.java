@@ -37,13 +37,9 @@ public class App extends Application {
                     Log.i(TAG, "SDK is available");
                     DeployGate.logInfo("SDK is available");
 
-                    CustomAttributes attrs = new CustomAttributes();
+                    CustomAttributes attrs = DeployGate.getBuildEnvironment();
                     attrs.putString("build_type", BuildConfig.BUILD_TYPE);
                     attrs.putString("flavor", BuildConfig.FLAVOR);
-                    attrs.putString("version_name", BuildConfig.VERSION_NAME);
-                    attrs.putInt("version_code", BuildConfig.VERSION_CODE);
-                    attrs.putString("application_id", BuildConfig.APPLICATION_ID);
-                    DeployGate.setRuntimeExtra(attrs);
                 } else {
                     Log.i(TAG, "SDK is unavailable");
                     DeployGate.logInfo("SDK is unavailable"); // this fails silently
@@ -100,12 +96,8 @@ public class App extends Application {
         super.onConfigurationChanged(newConfig);
 
         CustomAttributes attrs = DeployGate.getRuntimeExtra();
-        if (attrs == null) {
-            attrs = new CustomAttributes();
-        }
         attrs.putString("locale", newConfig.locale.toString());
         attrs.putInt("orientation", newConfig.orientation);
         attrs.putFloat("font_scale", newConfig.fontScale);
-        DeployGate.setRuntimeExtra(attrs);
     }
 }

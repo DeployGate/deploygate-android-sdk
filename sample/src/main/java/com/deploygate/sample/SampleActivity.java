@@ -57,16 +57,12 @@ public class SampleActivity extends Activity implements DeployGateCallback {
 
 
         CustomAttributes attrs = DeployGate.getRuntimeExtra();
-        if (attrs == null) {
-            attrs = new CustomAttributes();
-        }
         attrs.putString("string", "value");
         attrs.putInt("int", 123);
         attrs.putBoolean("boolean", true);
         attrs.putFloat("float", 1.23f);
         attrs.putDouble("double", 1.23);
         attrs.putLong("long", 123L);
-        DeployGate.setRuntimeExtra(attrs);
     }
 
     @Override
