@@ -49,6 +49,13 @@ public class DeployGate {
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
     private static final Object sPendingEventLock = new Object();
 
+    private static final int MAX_BUILD_ENVIRONMENTS_SIZE = 8;
+    private static final int MAX_RUNTIME_EXTRAS_SIZE = 8;
+    private static final Pattern USER_INPUT_KEY_PATTERN = Pattern.compile("^[a-z][_a-z0-9]{2,31}$");
+    private static final int MIN_USER_INPUT_KEY_LENGTH = 3;
+    private static final int MAX_USER_INPUT_KEY_LENGTH = 32;
+    private static final int MAX_USER_INPUT_VALUE_LENGTH = 64;
+
     private static DeployGate sInstance;
 
     private final Context mApplicationContext;
@@ -59,6 +66,8 @@ public class DeployGate {
     private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
     private final HashMap<String, Bundle> mPendingEvents;
+    private final HashMap<String, Object> mBuildEnvironments;
+    private final HashMap<String, Object> mRuntimeExtras;
     private final String mExpectedAuthor;
     private String mAuthor;
 
@@ -279,6 +288,8 @@ public class DeployGate {
         mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, sdkConfiguration.customLogConfiguration);
         mCallbacks = new HashSet<>();
         mPendingEvents = new HashMap<>();
+        mBuildEnvironments = new HashMap<>();
+        mRuntimeExtras = new HashMap<>();
         mExpectedAuthor = sdkConfiguration.appOwnerName;
 
         prepareBroadcastReceiver();
@@ -1500,30 +1511,82 @@ public class DeployGate {
     }
 
     private boolean putBuildEnvironmentValueInternal(String key, Object value) {
+        if (mBuildEnvironments.size() >= MAX_BUILD_ENVIRONMENTS_SIZE && !mBuildEnvironments.containsKey(key)) {
+            Log.w(TAG, "BuildEnvironment already full. Ignored: " + key);
+            return false;
+        }
+
+        if (!isValidKey(key)) {
+            return false;
+        }
+
+        if (!isValidValue(value)) {
+            return false;
+        }
+
+        mBuildEnvironments.put(key, value);
         return true;
     }
 
     private void removeBuildEnvironmentValueInternal(String key) {
+        mBuildEnvironments.remove(key);
     }
 
     private void removeAllBuildEnvironmentValuesInternal() {
+        mBuildEnvironments.clear();
     }
 
     private boolean putRuntimeExtraValueInternal(String key, Object value) {
+        if (mRuntimeExtras.size() >= MAX_RUNTIME_EXTRAS_SIZE && !mRuntimeExtras.containsKey(key)) {
+            Log.w(TAG, "RuntimeExtra already full. Ignored: " + key);
+            return false;
+        }
+
+        if (!isValidKey(key)) {
+            return false;
+        }
+
+        if (!isValidValue(value)) {
+            return false;
+        }
+
+        mRuntimeExtras.put(key, value);
         return true;
     }
 
     private void removeRuntimeExtraValueInternal(String key) {
+        mRuntimeExtras.remove(key);
     }
 
     private void removeAllRuntimeExtraValuesInternal() {
+        mRuntimeExtras.clear();
     }
 
     private boolean isValidKey(String key) {
+        if (key == null || key.equals("true") || key.equals("false") || key.equals("null")) {
+            Log.w(TAG, "Not allowed key: " + key);
+            return false;
+        }
+
+        if (key.length() < MIN_USER_INPUT_KEY_LENGTH || key.length() > MAX_USER_INPUT_KEY_LENGTH || !USER_INPUT_KEY_PATTERN.matcher(key).matches()) {
+            Log.w(TAG, "Invalid key: " + key);
+            return false;
+        }
+
         return true;
     }
 
     private boolean isValidValue(Object value) {
+        if (value == null) {
+            Log.w(TAG, "Value is null");
+            return false;
+        }
+
+        if (value instanceof String && ((String) value).length() > MAX_USER_INPUT_VALUE_LENGTH) {
+            Log.w(TAG, "Value too long: " + value);
+            return false;
+        }
+
         return true;
     }
 }

@@ -434,4 +434,161 @@ public class DeployGateInterfaceTest {
     public void removeAllRuntimeExtraValues() {
         DeployGate.removeAllRuntimeExtraValues();
     }
+
+    @Test
+    public void putCustomValues() {
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid", "value")).isFalse();
+
+        DeployGate.install(app);
+
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid", "value")).isTrue();
+    }
+
+    @Test
+    public void putCustomValues__keyPattern() {
+        DeployGate.install(app);
+
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_underscore", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_1_number", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("min", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("ng", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("true", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("false", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("null", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalid-hyphen", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalid#sharp", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalid$dollar", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalid.dot", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalid!bang", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalid*glob", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalidUpperCase", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("12345", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("1_invalid_begin_number", "value")).isFalse();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_key_with_length_under_32", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalid_key_with_length_over_32_characters", "value")).isFalse();
+
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_underscore", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_1_number", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("min", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("ng", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("true", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("false", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("null", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalid-hyphen", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalid#sharp", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalid$dollar", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalid.dot", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalid!bang", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalid*glob", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalidUpperCase", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("12345", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("1_invalid_begin_number", "value")).isFalse();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_key_with_length_under_32", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalid_key_with_length_over_32_characters", "value")).isFalse();
+    }
+
+    @Test
+    public void putCustomValues__valuePattern() {
+        DeployGate.install(app);
+
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_string", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_int", 1)).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_long", 1L)).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_float", 1.1f)).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_double", 1.1)).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("valid_boolean", true)).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("invalid_too_long_string", "this is too long string value. we cannot accept value if size over 64.")).isFalse();
+
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_string", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_int", 1)).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_long", 1L)).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_float", 1.1f)).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_double", 1.1)).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("valid_boolean", true)).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("invalid_too_long_string", "this is too long string value. we cannot accept value if size over 64.")).isFalse();
+    }
+
+    @Test
+    public void setBuildEnvironment__maxSize() {
+        DeployGate.install(app);
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key1", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key2", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key3", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key4", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key5", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key6", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key7", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key8", "value")).isTrue();
+
+        // allow to overwrite
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key1", "value2")).isTrue();
+        // not allow to put value with new key because of max size
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key9", "value")).isFalse();
+
+        DeployGate.removeBuildEnvironmentValue("key8");
+
+        // allow to put value with new key after remove exists key
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key9", "value")).isTrue();
+        // allow to overwrite
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key1", "value3")).isTrue();
+        // not allow to put value with new key because of max size
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key10", "value")).isFalse();
+
+        DeployGate.removeAllBuildEnvironmentValues();
+
+        // allow to put value less than max size
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key1", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key2", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key3", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key4", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key5", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key6", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key7", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key8", "value")).isTrue();
+        Truth.assertThat(DeployGate.putBuildEnvironmentValue("key9", "value")).isFalse();
+    }
+
+    @Test
+    public void setRuntimeExtra__maxSize() {
+        DeployGate.install(app);
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key1", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key2", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key3", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key4", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key5", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key6", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key7", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key8", "value")).isTrue();
+
+        // allow to overwrite
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key1", "value2")).isTrue();
+        // not allow to put value with new key because of max size
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key9", "value")).isFalse();
+
+        DeployGate.removeRuntimeExtraValue("key8");
+
+        // allow to put value with new key after remove exists key
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key9", "value")).isTrue();
+        // allow to overwrite
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key1", "value3")).isTrue();
+        // not allow to put value with new key because of max size
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key10", "value")).isFalse();
+
+        DeployGate.removeAllRuntimeExtraValues();
+
+        // allow to put value less than max size
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key1", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key2", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key3", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key4", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key5", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key6", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key7", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key8", "value")).isTrue();
+        Truth.assertThat(DeployGate.putRuntimeExtraValue("key9", "value")).isFalse();
+    }
 }
