@@ -180,63 +180,23 @@ public class DeployGate {
         return null;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, String value) {
-        return false;
+    public static CustomAttributes getBuildEnvironment() {
+        return null;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, int value) {
-        return false;
+    public static void setBuildEnvironment(CustomAttributes attrs) {
     }
 
-    public static boolean putBuildEnvironmentValue(String key, long value) {
-        return false;
+    public static void clearBuildEnvironment() {
     }
 
-    public static boolean putBuildEnvironmentValue(String key, float value) {
-        return false;
+    public static CustomAttributes getRuntimeExtra() {
+        return null;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, double value) {
-        return false;
+    public static void setRuntimeExtra(CustomAttributes attrs) {
     }
 
-    public static boolean putBuildEnvironmentValue(String key, boolean value) {
-        return false;
-    }
-
-    public static void removeBuildEnvironmentValue(String key) {
-    }
-
-    public static void removeAllBuildEnvironmentValues() {
-    }
-
-    public static boolean putRuntimeExtraValue(String key, String value) {
-        return false;
-    }
-
-    public static boolean putRuntimeExtraValue(String key, int value) {
-        return false;
-    }
-
-    public static boolean putRuntimeExtraValue(String key, long value) {
-        return false;
-    }
-
-    public static boolean putRuntimeExtraValue(String key, float value) {
-        return false;
-    }
-
-    public static boolean putRuntimeExtraValue(String key, double value) {
-        return false;
-    }
-
-    public static boolean putRuntimeExtraValue(String key, boolean value) {
-        return false;
-    }
-
-    public static void removeRuntimeExtraValue(String key) {
-    }
-
-    public static void removeAllRuntimeExtraValues() {
+    public static void clearRuntimeExtra() {
     }
 }

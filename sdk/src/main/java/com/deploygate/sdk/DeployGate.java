@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 /**
  * This is DeployGate SDK library. Import this library to the application
@@ -50,13 +49,6 @@ public class DeployGate {
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
     private static final Object sPendingEventLock = new Object();
 
-    private static final int MAX_BUILD_ENVIRONMENTS_SIZE = 8;
-    private static final int MAX_RUNTIME_EXTRAS_SIZE = 8;
-    private static final Pattern USER_INPUT_KEY_PATTERN = Pattern.compile("^[a-z][_a-z0-9]{2,31}$");
-    private static final int MIN_USER_INPUT_KEY_LENGTH = 3;
-    private static final int MAX_USER_INPUT_KEY_LENGTH = 32;
-    private static final int MAX_USER_INPUT_VALUE_LENGTH = 64;
-
     private static DeployGate sInstance;
 
     private final Context mApplicationContext;
@@ -67,8 +59,8 @@ public class DeployGate {
     private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
     private final HashMap<String, Bundle> mPendingEvents;
-    private final HashMap<String, Object> mBuildEnvironments;
-    private final HashMap<String, Object> mRuntimeExtras;
+    private CustomAttributes mBuildEnvironment;
+    private CustomAttributes mRuntimeExtra;
     private final String mExpectedAuthor;
     private String mAuthor;
 
@@ -289,8 +281,8 @@ public class DeployGate {
         mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, sdkConfiguration.customLogConfiguration);
         mCallbacks = new HashSet<>();
         mPendingEvents = new HashMap<>();
-        mBuildEnvironments = new HashMap<>();
-        mRuntimeExtras = new HashMap<>();
+        mBuildEnvironment = null;
+        mRuntimeExtra = null;
         mExpectedAuthor = sdkConfiguration.appOwnerName;
 
         prepareBroadcastReceiver();
@@ -1403,191 +1395,67 @@ public class DeployGate {
         return sInstance.mDistributionUserName;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, String value) {
+    public static CustomAttributes getBuildEnvironment() {
         if (sInstance != null) {
-            return sInstance.putBuildEnvironmentValueInternal(key, value);
+            return sInstance.getBuildEnvironmentInternal();
         }
-        return false;
+        return null;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, int value) {
+    public static void setBuildEnvironment(CustomAttributes attrs) {
         if (sInstance != null) {
-            return sInstance.putBuildEnvironmentValueInternal(key, value);
+            sInstance.setBuildEnvironmentInternal(attrs);
         }
-        return false;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, long value) {
+    public static void clearBuildEnvironment() {
         if (sInstance != null) {
-            return sInstance.putBuildEnvironmentValueInternal(key, value);
+            sInstance.clearBuildEnvironmentInternal();
         }
-        return false;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, float value) {
+    public static CustomAttributes getRuntimeExtra() {
         if (sInstance != null) {
-            return sInstance.putBuildEnvironmentValueInternal(key, value);
+            return sInstance.getRuntimeExtraInternal();
         }
-        return false;
+        return null;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, double value) {
+    public static void setRuntimeExtra(CustomAttributes attrs) {
         if (sInstance != null) {
-            return sInstance.putBuildEnvironmentValueInternal(key, value);
+            sInstance.setRuntimeExtraInternal(attrs);
         }
-        return false;
     }
 
-    public static boolean putBuildEnvironmentValue(String key, boolean value) {
+    public static void clearRuntimeExtra() {
         if (sInstance != null) {
-            return sInstance.putBuildEnvironmentValueInternal(key, value);
-        }
-        return false;
-    }
-
-    public static void removeBuildEnvironmentValue(String key) {
-        if (sInstance != null) {
-            sInstance.removeBuildEnvironmentValueInternal(key);
+            sInstance.clearRuntimeExtraInternal();
         }
     }
 
-    public static void removeAllBuildEnvironmentValues() {
-        if (sInstance != null) {
-            sInstance.removeAllBuildEnvironmentValuesInternal();
-        }
+    private CustomAttributes getBuildEnvironmentInternal() {
+        return mBuildEnvironment;
     }
 
-    public static boolean putRuntimeExtraValue(String key, String value) {
-        if (sInstance != null) {
-            return sInstance.putRuntimeExtraValueInternal(key, value);
-        }
-        return false;
+    private void setBuildEnvironmentInternal(CustomAttributes attrs) {
+        mBuildEnvironment = attrs;
     }
 
-    public static boolean putRuntimeExtraValue(String key, int value) {
-        if (sInstance != null) {
-            return sInstance.putRuntimeExtraValueInternal(key, value);
-        }
-        return false;
+
+    private void clearBuildEnvironmentInternal() {
+        mBuildEnvironment = null;
     }
 
-    public static boolean putRuntimeExtraValue(String key, long value) {
-        if (sInstance != null) {
-            return sInstance.putRuntimeExtraValueInternal(key, value);
-        }
-        return false;
+    private CustomAttributes getRuntimeExtraInternal() {
+        return mRuntimeExtra;
     }
 
-    public static boolean putRuntimeExtraValue(String key, float value) {
-        if (sInstance != null) {
-            return sInstance.putRuntimeExtraValueInternal(key, value);
-        }
-        return false;
+
+    private void setRuntimeExtraInternal(CustomAttributes attrs) {
+        mRuntimeExtra = attrs;
     }
 
-    public static boolean putRuntimeExtraValue(String key, double value) {
-        if (sInstance != null) {
-            return sInstance.putRuntimeExtraValueInternal(key, value);
-        }
-        return false;
-    }
-
-    public static boolean putRuntimeExtraValue(String key, boolean value) {
-        if (sInstance != null) {
-            return sInstance.putRuntimeExtraValueInternal(key, value);
-        }
-        return false;
-    }
-
-    public static void removeRuntimeExtraValue(String key) {
-        if (sInstance != null) {
-            sInstance.removeRuntimeExtraValueInternal(key);
-        }
-    }
-
-    public static void removeAllRuntimeExtraValues() {
-        if (sInstance != null) {
-            sInstance.removeAllRuntimeExtraValuesInternal();
-        }
-    }
-
-    private boolean putBuildEnvironmentValueInternal(String key, Object value) {
-        if (mBuildEnvironments.size() >= MAX_BUILD_ENVIRONMENTS_SIZE && !mBuildEnvironments.containsKey(key)) {
-            Log.w(TAG, "BuildEnvironment already full. Ignored: " + key);
-            return false;
-        }
-
-        if (!isValidKey(key)) {
-            return false;
-        }
-
-        if (!isValidValue(value)) {
-            return false;
-        }
-
-        mBuildEnvironments.put(key, value);
-        return true;
-    }
-
-    private void removeBuildEnvironmentValueInternal(String key) {
-        mBuildEnvironments.remove(key);
-    }
-
-    private void removeAllBuildEnvironmentValuesInternal() {
-        mBuildEnvironments.clear();
-    }
-
-    private boolean putRuntimeExtraValueInternal(String key, Object value) {
-        if (mRuntimeExtras.size() >= MAX_RUNTIME_EXTRAS_SIZE && !mRuntimeExtras.containsKey(key)) {
-            Log.w(TAG, "RuntimeExtra already full. Ignored: " + key);
-            return false;
-        }
-
-        if (!isValidKey(key)) {
-            return false;
-        }
-
-        if (!isValidValue(value)) {
-            return false;
-        }
-
-        mRuntimeExtras.put(key, value);
-        return true;
-    }
-
-    private void removeRuntimeExtraValueInternal(String key) {
-        mRuntimeExtras.remove(key);
-    }
-
-    private void removeAllRuntimeExtraValuesInternal() {
-        mRuntimeExtras.clear();
-    }
-
-    private boolean isValidKey(String key) {
-        if (key == null || key.equals("true") || key.equals("false") || key.equals("null")) {
-            Log.w(TAG, "Not allowed key: " + key);
-            return false;
-        }
-
-        if (key.length() < MIN_USER_INPUT_KEY_LENGTH || key.length() > MAX_USER_INPUT_KEY_LENGTH || !USER_INPUT_KEY_PATTERN.matcher(key).matches()) {
-            Log.w(TAG, "Invalid key: " + key);
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean isValidValue(Object value) {
-        if (value == null) {
-            Log.w(TAG, "Value is null");
-            return false;
-        }
-
-        if (value instanceof String && ((String) value).length() > MAX_USER_INPUT_VALUE_LENGTH) {
-            Log.w(TAG, "Value too long: " + value);
-            return false;
-        }
-
-        return true;
+    private void clearRuntimeExtraInternal() {
+        mRuntimeExtra = null;
     }
 }
