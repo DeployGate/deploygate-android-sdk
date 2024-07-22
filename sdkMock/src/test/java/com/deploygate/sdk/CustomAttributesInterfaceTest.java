@@ -1,0 +1,1 @@
+../../../../../../../sdkMock/src/test/java/com/deploygate/sdk/CustomAttributesInterfaceTest.java
