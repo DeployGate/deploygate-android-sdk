@@ -66,16 +66,18 @@ public final class CustomAttributes {
   }
 
   private boolean putInternal(String key, Object value) {
-    if (!isValidKey(key)) {
-      return false;
-    }
+    synchronized (attributes) {
+      if (!isValidKey(key)) {
+        return false;
+      }
 
-    if (!isValidValue(value)) {
-      return false;
-    }
+      if (!isValidValue(value)) {
+        return false;
+      }
 
-    attributes.put(key, value);
-    return true;
+      attributes.put(key, value);
+      return true;
+    }
   }
 
   private boolean isValidKey(String key) {
