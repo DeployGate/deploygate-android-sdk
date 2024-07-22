@@ -8,6 +8,7 @@ public interface DeployGateEvent {
     // namespace:
     //   ACTION => a
     //   EXTRA => e
+    //   KEY => k
     //
     // content:
     //   should be hyphen-separated string and be lower cases
@@ -26,6 +27,11 @@ public interface DeployGateEvent {
     public static final String ACTION_OPEN_COMMENTS = "openComments";
     public static final String ACTION_COMPOSE_COMMENT = "composeComment";
     public static final String ACTION_VISIBILITY_EVENT = "a.visibility-event";
+
+    /**
+     * @since 4.8.0
+     */
+    public static final String ACTION_COLLECT_DEVICE_STATES = "a.collect-device-states";
 
     public static final String EXTRA_AUTHOR = "author";
     public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";
@@ -120,6 +126,31 @@ public interface DeployGateEvent {
      * this value must be nano times.
      */
     public static final String EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS = "e.visibility-event-elapsed-real-time";
+
+    /**
+     * @since 4.8.0
+     */
+    public static final String EXTRA_TARGET_URI_FOR_REPORT_DEVICE_STATES = "e.target-uri-for-report-device-states";
+
+    /**
+     * @since 4.8.0
+     */
+    public static final String KEY_BUILD_ENVIRONMENT = "k.build-environment";
+
+    /**
+     * @since 4.8.0
+     */
+    public static final String KEY_RUNTIME_EXTRAS = "k.runtime-extras";
+
+    /**
+     * @since 4.8.0
+     */
+    public static final String KEY_PACKAGE_NAME = "k.package-name";
+
+    /**
+     * @since 4.8.0
+     */
+    public static final String KEY_EVENT_AT = "k.event-at";
 
     interface VisibilityType {
         int BACKGROUND = 0;
