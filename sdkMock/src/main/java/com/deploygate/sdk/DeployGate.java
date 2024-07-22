@@ -184,19 +184,7 @@ public class DeployGate {
         return null;
     }
 
-    public static void setBuildEnvironment(CustomAttributes attrs) {
-    }
-
-    public static void clearBuildEnvironment() {
-    }
-
     public static CustomAttributes getRuntimeExtra() {
         return null;
-    }
-
-    public static void setRuntimeExtra(CustomAttributes attrs) {
-    }
-
-    public static void clearRuntimeExtra() {
     }
 }

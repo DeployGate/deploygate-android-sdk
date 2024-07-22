@@ -52,6 +52,10 @@ public class DeployGate {
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
     private static final Object sPendingEventLock = new Object();
 
+    private static final Object sLock = new Object();
+    private static CustomAttributes sBuildEnvironment = null;
+    private static CustomAttributes sRuntimeExtra = null;
+
     private static DeployGate sInstance;
 
     private final Context mApplicationContext;
@@ -62,8 +66,6 @@ public class DeployGate {
     private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
     private final HashMap<String, Bundle> mPendingEvents;
-    private CustomAttributes mBuildEnvironment;
-    private CustomAttributes mRuntimeExtra;
     private final String mExpectedAuthor;
     private String mAuthor;
 
@@ -137,11 +139,11 @@ public class DeployGate {
                 Logger.d("collect-device-status event received: %s", targetUri);
 
                 ContentValues cv = new ContentValues();
-                if (mBuildEnvironment != null) {
-                    cv.put(DeployGateEvent.KEY_BUILD_ENVIRONMENT, mBuildEnvironment.toJsonString());
+                if (sBuildEnvironment != null && !sBuildEnvironment.isEmpty()) {
+                    cv.put(DeployGateEvent.KEY_BUILD_ENVIRONMENT, sBuildEnvironment.toJsonString());
                 }
-                if (mRuntimeExtra != null) {
-                    cv.put(DeployGateEvent.KEY_RUNTIME_EXTRAS, mRuntimeExtra.toJsonString());
+                if (sRuntimeExtra != null && !sRuntimeExtra.isEmpty()) {
+                    cv.put(DeployGateEvent.KEY_RUNTIME_EXTRAS, sRuntimeExtra.toJsonString());
                 }
                 cv.put(DeployGateEvent.KEY_EVENT_AT, System.currentTimeMillis());
 
@@ -299,8 +301,6 @@ public class DeployGate {
         mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, sdkConfiguration.customLogConfiguration);
         mCallbacks = new HashSet<>();
         mPendingEvents = new HashMap<>();
-        mBuildEnvironment = null;
-        mRuntimeExtra = null;
         mExpectedAuthor = sdkConfiguration.appOwnerName;
 
         prepareBroadcastReceiver();
@@ -1414,66 +1414,32 @@ public class DeployGate {
     }
 
     public static CustomAttributes getBuildEnvironment() {
-        if (sInstance != null) {
-            return sInstance.getBuildEnvironmentInternal();
+        if (sBuildEnvironment != null) {
+            return sBuildEnvironment;
         }
-        return null;
-    }
 
-    public static void setBuildEnvironment(CustomAttributes attrs) {
-        if (sInstance != null) {
-            sInstance.setBuildEnvironmentInternal(attrs);
+        synchronized (sLock) {
+            if (sBuildEnvironment != null) {
+                return sBuildEnvironment;
+            }
+            sBuildEnvironment = new CustomAttributes();
         }
-    }
 
-    public static void clearBuildEnvironment() {
-        if (sInstance != null) {
-            sInstance.clearBuildEnvironmentInternal();
-        }
+        return sBuildEnvironment;
     }
 
     public static CustomAttributes getRuntimeExtra() {
-        if (sInstance != null) {
-            return sInstance.getRuntimeExtraInternal();
+        if (sRuntimeExtra != null) {
+            return sRuntimeExtra;
         }
-        return null;
-    }
 
-    public static void setRuntimeExtra(CustomAttributes attrs) {
-        if (sInstance != null) {
-            sInstance.setRuntimeExtraInternal(attrs);
+        synchronized (sLock) {
+            if (sRuntimeExtra != null) {
+                return sRuntimeExtra;
+            }
+            sRuntimeExtra = new CustomAttributes();
         }
-    }
 
-    public static void clearRuntimeExtra() {
-        if (sInstance != null) {
-            sInstance.clearRuntimeExtraInternal();
-        }
-    }
-
-    private CustomAttributes getBuildEnvironmentInternal() {
-        return mBuildEnvironment;
-    }
-
-    private void setBuildEnvironmentInternal(CustomAttributes attrs) {
-        mBuildEnvironment = attrs;
-    }
-
-
-    private void clearBuildEnvironmentInternal() {
-        mBuildEnvironment = null;
-    }
-
-    private CustomAttributes getRuntimeExtraInternal() {
-        return mRuntimeExtra;
-    }
-
-
-    private void setRuntimeExtraInternal(CustomAttributes attrs) {
-        mRuntimeExtra = attrs;
-    }
-
-    private void clearRuntimeExtraInternal() {
-        mRuntimeExtra = null;
+        return sRuntimeExtra;
     }
 }

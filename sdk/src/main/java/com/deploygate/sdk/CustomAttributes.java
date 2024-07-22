@@ -59,6 +59,10 @@ public class CustomAttributes {
     return attributes.size();
   }
 
+  public boolean isEmpty() {
+    return attributes.isEmpty();
+  }
+
   public String toJsonString() {
     return new JSONObject(attributes).toString();
   }
