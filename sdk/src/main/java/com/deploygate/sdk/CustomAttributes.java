@@ -4,6 +4,7 @@ import com.deploygate.sdk.internal.Logger;
 
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -62,7 +63,22 @@ public final class CustomAttributes {
   }
 
   String toJsonString() {
-    return new JSONObject(attributes).toString();
+    return toJsonString("");
+  }
+
+  String toJsonString(String keyPrefix) {
+    synchronized (attributes) {
+      if (keyPrefix != null && !keyPrefix.isEmpty()) {
+        HashMap<String, Object> prefixedAttributes = new HashMap<>();
+        for (String key : attributes.keySet()) {
+          String prefixedKey = String.format("%s.%s", keyPrefix, key);
+          prefixedAttributes.put(prefixedKey, attributes.get(key));
+        }
+        return new JSONObject(prefixedAttributes).toString();
+      } else {
+        return new JSONObject(attributes).toString();
+      }
+    }
   }
 
   private boolean putInternal(String key, Object value) {

@@ -139,12 +139,17 @@ public class DeployGate {
                 Logger.d("collect-device-status event received: %s", targetUri);
 
                 ContentValues cv = new ContentValues();
-                if (sBuildEnvironment != null && !sBuildEnvironment.isEmpty()) {
-                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_BUILD_ENVIRONMENT, sBuildEnvironment.toJsonString());
+                String buildEnvironmentJson = getBuildEnvironment().toJsonString();
+                if (!buildEnvironmentJson.equals("{}")) {
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_BUILD_ENVIRONMENT, buildEnvironmentJson);
                 }
-                if (sRuntimeExtra != null && !sRuntimeExtra.isEmpty()) {
-                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, sRuntimeExtra.toJsonString());
+
+                // attribute keys of runtime extra need to prefix with the package name
+                String runtimeExtraJson = getRuntimeExtra().toJsonString(mHostApp.packageName);
+                if (!runtimeExtraJson.equals("{}")) {
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, runtimeExtraJson);
                 }
+
                 cv.put(DeployGateEvent.ATTRIBUTE_KEY_EVENT_AT, System.currentTimeMillis());
 
                 try {
