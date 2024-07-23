@@ -147,8 +147,12 @@ public class DeployGate {
                 }
                 cv.put(DeployGateEvent.ATTRIBUTE_KEY_EVENT_AT, System.currentTimeMillis());
 
-                ContentResolver cr = mApplicationContext.getContentResolver();
-                cr.insert(targetUri, cv);
+                try {
+                    ContentResolver cr = mApplicationContext.getContentResolver();
+                    cr.insert(targetUri, cv);
+                } catch (Throwable t) {
+                    Logger.w(t, "failed to report device states");
+                }
             } else {
                 Logger.w("%s is not supported by this sdk version", action);
             }
