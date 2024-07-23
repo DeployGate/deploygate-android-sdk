@@ -53,8 +53,8 @@ public class DeployGate {
     private static final Object sPendingEventLock = new Object();
 
     private static final Object sLock = new Object();
-    private static CustomAttributes sBuildEnvironment = null;
-    private static CustomAttributes sRuntimeExtra = null;
+    private static CustomAttributes sBuildEnvironment;
+    private static CustomAttributes sRuntimeExtra;
 
     private static DeployGate sInstance;
 

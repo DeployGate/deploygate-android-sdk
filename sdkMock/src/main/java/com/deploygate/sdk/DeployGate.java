@@ -5,6 +5,8 @@ import android.content.Context;
 
 public class DeployGate {
 
+    private static final CustomAttributes sAttributes = new CustomAttributes();
+
     static void clear() {
     }
 
@@ -181,10 +183,10 @@ public class DeployGate {
     }
 
     public static CustomAttributes getBuildEnvironment() {
-        return null;
+        return sAttributes;
     }
 
     public static CustomAttributes getRuntimeExtra() {
-        return null;
+        return sAttributes;
     }
 }

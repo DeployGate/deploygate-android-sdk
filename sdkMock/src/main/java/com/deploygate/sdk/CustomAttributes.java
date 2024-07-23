@@ -44,6 +44,6 @@ public final class CustomAttributes {
   }
 
   String toJsonString() {
-    return null;
+    return "{}";
   }
 }
