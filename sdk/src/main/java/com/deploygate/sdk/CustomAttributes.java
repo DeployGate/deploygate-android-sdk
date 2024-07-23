@@ -2,9 +2,6 @@ package com.deploygate.sdk;
 
 import com.deploygate.sdk.internal.Logger;
 
-import org.json.JSONObject;
-
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -16,7 +13,7 @@ public final class CustomAttributes {
   private static final Pattern VALID_KEY_PATTERN = Pattern.compile("^[a-z][_a-z0-9]{2,31}$");
   private static final int MAX_VALUE_LENGTH = 64;
 
-  private final ConcurrentHashMap<String, Object> attributes;
+  final ConcurrentHashMap<String, Object> attributes;
 
   CustomAttributes() {
     attributes = new ConcurrentHashMap<>();
@@ -60,25 +57,6 @@ public final class CustomAttributes {
 
   public boolean isEmpty() {
     return attributes.isEmpty();
-  }
-
-  String toJsonString() {
-    return toJsonString("");
-  }
-
-  String toJsonString(String keyPrefix) {
-    synchronized (attributes) {
-      if (keyPrefix != null && !keyPrefix.isEmpty()) {
-        HashMap<String, Object> prefixedAttributes = new HashMap<>();
-        for (String key : attributes.keySet()) {
-          String prefixedKey = String.format("%s.%s", keyPrefix, key);
-          prefixedAttributes.put(prefixedKey, attributes.get(key));
-        }
-        return new JSONObject(prefixedAttributes).toString();
-      } else {
-        return new JSONObject(attributes).toString();
-      }
-    }
   }
 
   private boolean putInternal(String key, Object value) {

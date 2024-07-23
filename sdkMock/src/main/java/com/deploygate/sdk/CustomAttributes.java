@@ -42,8 +42,4 @@ public final class CustomAttributes {
   public boolean isEmpty() {
     return true;
   }
-
-  String toJsonString() {
-    return "{}";
-  }
 }

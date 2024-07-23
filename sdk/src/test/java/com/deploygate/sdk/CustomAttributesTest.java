@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.common.truth.Truth;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -141,27 +140,5 @@ public class CustomAttributesTest {
 
     attributes.putString("key4", "value");
     Truth.assertThat(attributes.isEmpty()).isFalse();
-  }
-
-  @Test
-  public void toJsonString() {
-    attributes.putString("valid_string", "value");
-    attributes.putInt("valid_int", 1);
-    attributes.putLong("valid_long", 1L);
-    attributes.putFloat("valid_float", 1.1f);
-    attributes.putDouble("valid_double", 1.1);
-    attributes.putBoolean("valid_boolean", true);
-
-    try {
-      JSONObject actualJson = new JSONObject(attributes.toJsonString());
-      Truth.assertThat(actualJson.getString("valid_string")).isEqualTo("value");
-      Truth.assertThat(actualJson.getInt("valid_int")).isEqualTo(1);
-      Truth.assertThat(actualJson.getLong("valid_long")).isEqualTo(1L);
-      Truth.assertThat((float) actualJson.getDouble("valid_float")).isEqualTo(1.1f);
-      Truth.assertThat(actualJson.getDouble("valid_double")).isEqualTo(1.1);
-      Truth.assertThat(actualJson.getBoolean("valid_boolean")).isTrue();
-    } catch (Exception e) {
-      Truth.assertWithMessage("Failed to parse JSON").fail();
-    }
   }
 }

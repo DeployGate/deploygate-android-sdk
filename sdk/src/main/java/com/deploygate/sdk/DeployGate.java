@@ -24,11 +24,14 @@ import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -55,6 +58,7 @@ public class DeployGate {
     private static final Object sLock = new Object();
     private static CustomAttributes sBuildEnvironment;
     private static CustomAttributes sRuntimeExtra;
+    private static CustomAttributes sSdkRuntimeExtra;
 
     private static DeployGate sInstance;
 
@@ -139,14 +143,32 @@ public class DeployGate {
                 Logger.d("collect-device-status event received: %s", targetUri);
 
                 ContentValues cv = new ContentValues();
-                String buildEnvironmentJson = getBuildEnvironment().toJsonString();
-                if (!buildEnvironmentJson.equals("{}")) {
-                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_BUILD_ENVIRONMENT, buildEnvironmentJson);
+                synchronized (getBuildEnvironment().attributes) {
+                    if (!getBuildEnvironment().attributes.isEmpty()) {
+                        String buildEnvironmentJson = new JSONObject(getBuildEnvironment().attributes).toString();
+                        cv.put(DeployGateEvent.ATTRIBUTE_KEY_BUILD_ENVIRONMENT, buildEnvironmentJson);
+                    }
                 }
 
-                // attribute keys of runtime extra need to prefix with the package name
-                String runtimeExtraJson = getRuntimeExtra().toJsonString(mHostApp.packageName);
-                if (!runtimeExtraJson.equals("{}")) {
+                ConcurrentHashMap<String, Object> mergedRuntimeExtraHashMap = new ConcurrentHashMap<>();
+                // attribute keys of runtime extra created by user need to prefix with the package name
+                synchronized (getRuntimeExtra().attributes) {
+                    if (!getRuntimeExtra().attributes.isEmpty()) {
+                        for (Map.Entry<String, Object> attr : getRuntimeExtra().attributes.entrySet()) {
+                            String userKey = String.format("%s.%s", mHostApp.packageName, attr.getKey());
+                            mergedRuntimeExtraHashMap.put(userKey, attr.getValue());
+                        }
+                    }
+                }
+
+                synchronized (getSdkRuntimeExtra().attributes) {
+                    if (!getSdkRuntimeExtra().attributes.isEmpty()) {
+                        mergedRuntimeExtraHashMap.putAll(getSdkRuntimeExtra().attributes);
+                    }
+                }
+
+                if (!mergedRuntimeExtraHashMap.isEmpty()) {
+                    String runtimeExtraJson = new JSONObject(mergedRuntimeExtraHashMap).toString();
                     cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, runtimeExtraJson);
                 }
 
@@ -1450,5 +1472,20 @@ public class DeployGate {
         }
 
         return sRuntimeExtra;
+    }
+
+    private static CustomAttributes getSdkRuntimeExtra() {
+        if (sSdkRuntimeExtra != null) {
+            return sSdkRuntimeExtra;
+        }
+
+        synchronized (sLock) {
+            if (sSdkRuntimeExtra != null) {
+                return sSdkRuntimeExtra;
+            }
+            sSdkRuntimeExtra = new CustomAttributes();
+        }
+
+        return sSdkRuntimeExtra;
     }
 }
