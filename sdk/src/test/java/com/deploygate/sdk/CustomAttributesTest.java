@@ -97,6 +97,53 @@ public class CustomAttributesTest {
   }
 
   @Test
+  public void size() {
+    Truth.assertThat(attributes.size()).isEqualTo(0);
+
+    attributes.putString("key1", "value");
+    Truth.assertThat(attributes.size()).isEqualTo(1);
+
+    attributes.putString("key2", "value");
+    attributes.putString("key3", "value");
+    attributes.putString("key4", "value");
+    attributes.putString("key5", "value");
+    attributes.putString("key6", "value");
+    attributes.putString("key7", "value");
+    attributes.putString("key8", "value");
+    Truth.assertThat(attributes.size()).isEqualTo(8);
+
+    attributes.putString("key9", "value");
+    Truth.assertThat(attributes.size()).isEqualTo(8);
+
+    attributes.remove("key1");
+    Truth.assertThat(attributes.size()).isEqualTo(7);
+
+    attributes.removeAll();
+    Truth.assertThat(attributes.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void isEmpty() {
+    Truth.assertThat(attributes.isEmpty()).isTrue();
+
+    attributes.putString("key1", "value");
+    Truth.assertThat(attributes.isEmpty()).isFalse();
+
+    attributes.putString("key2", "value");
+    attributes.putString("key3", "value");
+    Truth.assertThat(attributes.isEmpty()).isFalse();
+
+    attributes.remove("key1");
+    Truth.assertThat(attributes.isEmpty()).isFalse();
+
+    attributes.removeAll();
+    Truth.assertThat(attributes.isEmpty()).isTrue();
+
+    attributes.putString("key4", "value");
+    Truth.assertThat(attributes.isEmpty()).isFalse();
+  }
+
+  @Test
   public void toJsonString() {
     attributes.putString("valid_string", "value");
     attributes.putInt("valid_int", 1);
