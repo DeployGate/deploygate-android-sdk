@@ -22,7 +22,7 @@ public class CustomAttributesTest {
   }
 
   @Test
-  public void put__keyPattern() {
+  public void put__accept_when_valid_key() {
     Truth.assertThat(attributes.putString("valid", "value")).isTrue();
     Truth.assertThat(attributes.putString("valid_underscore", "value")).isTrue();
     Truth.assertThat(attributes.putString("valid_1_number", "value")).isTrue();
@@ -46,7 +46,7 @@ public class CustomAttributesTest {
   }
 
   @Test
-  public void put__valuePattern() {
+  public void put__accept_when_valid_value() {
     Truth.assertThat(attributes.putString("valid_string", "value")).isTrue();
     Truth.assertThat(attributes.putInt("valid_int", 1)).isTrue();
     Truth.assertThat(attributes.putLong("valid_long", 1L)).isTrue();
@@ -58,7 +58,7 @@ public class CustomAttributesTest {
   }
 
   @Test
-  public void put_remove_removeAll_maxSize() {
+  public void not_exceed_max_size() {
     Truth.assertThat(attributes.putString("key1", "value")).isTrue();
     Truth.assertThat(attributes.putString("key2", "value")).isTrue();
     Truth.assertThat(attributes.putString("key3", "value")).isTrue();
