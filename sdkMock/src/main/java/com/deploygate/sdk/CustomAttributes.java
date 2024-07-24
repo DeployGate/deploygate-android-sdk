@@ -34,12 +34,4 @@ public final class CustomAttributes {
 
   public void removeAll() {
   }
-
-  public int size() {
-    return 0;
-  }
-
-  public boolean isEmpty() {
-    return true;
-  }
 }

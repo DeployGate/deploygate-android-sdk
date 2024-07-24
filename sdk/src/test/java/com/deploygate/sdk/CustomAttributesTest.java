@@ -9,6 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @RunWith(AndroidJUnit4.class)
 public class CustomAttributesTest {
 
@@ -53,7 +56,37 @@ public class CustomAttributesTest {
     Truth.assertThat(attributes.putDouble("valid_double", 1.1)).isTrue();
     Truth.assertThat(attributes.putBoolean("valid_boolean", true)).isTrue();
 
+    String tooLongString = "this is too long string value. we cannot accept value if size over 64.";
     Truth.assertThat(attributes.putString("invalid_too_long_string", "this is too long string value. we cannot accept value if size over 64.")).isFalse();
+  }
+
+  @Test
+  public void size() {
+    Truth.assertThat(attributes.size()).isEqualTo(0);
+
+    attributes.putString("key1", "value1");
+    Truth.assertThat(attributes.size()).isEqualTo(1);
+
+    attributes.putString("key1", "overwrite1");
+    Truth.assertThat(attributes.size()).isEqualTo(1);
+
+    attributes.putString("key2", "value2");
+    attributes.putString("key3", "value3");
+    attributes.putString("key4", "value4");
+    attributes.putString("key5", "value5");
+    attributes.putString("key6", "value6");
+    attributes.putString("key7", "value7");
+    attributes.putString("key8", "value8");
+    Truth.assertThat(attributes.size()).isEqualTo(8);
+
+    attributes.putString("key9", "value9");
+    Truth.assertThat(attributes.size()).isEqualTo(8);
+
+    attributes.remove("key1");
+    Truth.assertThat(attributes.size()).isEqualTo(7);
+
+    attributes.removeAll();
+    Truth.assertThat(attributes.size()).isEqualTo(0);
   }
 
   @Test
@@ -95,56 +128,36 @@ public class CustomAttributesTest {
     Truth.assertThat(attributes.putString("key9", "another_value9")).isFalse();
   }
 
-  @Test
-  public void size() {
-    Truth.assertThat(attributes.size()).isEqualTo(0);
+  @Test()
+  public void not_exceed_max_size_multi_thread() {
+    // prepare attributes with max size
+    for (int i = 0; i < 8; i++) {
+      attributes.putString("key" + i, "value" + i);
+    }
 
-    attributes.putString("key1", "value1");
-    Truth.assertThat(attributes.size()).isEqualTo(1);
+    // try to put value with multi thread
+    ExecutorService executors = Executors.newCachedThreadPool();
+    for (int i = 0; i < 100; i++) {
+      final int index = i;
+      executors.submit(new Runnable() {
+        @Override
+        public void run() {
+          attributes.putString("key" + index, "value" + index);
+        }
+      });
+    }
 
-    attributes.putString("key1", "overwrite1");
-    Truth.assertThat(attributes.size()).isEqualTo(1);
-
-    attributes.putString("key2", "value2");
-    attributes.putString("key3", "value3");
-    attributes.putString("key4", "value4");
-    attributes.putString("key5", "value5");
-    attributes.putString("key6", "value6");
-    attributes.putString("key7", "value7");
-    attributes.putString("key8", "value8");
     Truth.assertThat(attributes.size()).isEqualTo(8);
-
-    attributes.putString("key9", "value9");
-    Truth.assertThat(attributes.size()).isEqualTo(8);
-
-    attributes.remove("key1");
-    Truth.assertThat(attributes.size()).isEqualTo(7);
-
-    attributes.removeAll();
-    Truth.assertThat(attributes.size()).isEqualTo(0);
-  }
-
-  @Test
-  public void isEmpty() {
-    Truth.assertThat(attributes.isEmpty()).isTrue();
-
-    attributes.putString("key1", "value1");
-    Truth.assertThat(attributes.isEmpty()).isFalse();
-
-    attributes.putString("key1", "overwrite1");
-    Truth.assertThat(attributes.isEmpty()).isFalse();
-
-    attributes.putString("key2", "value2");
-    attributes.putString("key3", "value3");
-    Truth.assertThat(attributes.isEmpty()).isFalse();
-
-    attributes.remove("key1");
-    Truth.assertThat(attributes.isEmpty()).isFalse();
-
-    attributes.removeAll();
-    Truth.assertThat(attributes.isEmpty()).isTrue();
-
-    attributes.putString("key4", "value4");
-    Truth.assertThat(attributes.isEmpty()).isFalse();
+    String expectedJSON = "{" +
+        "\"key0\":\"value0\"," +
+        "\"key1\":\"value1\"," +
+        "\"key2\":\"value2\"," +
+        "\"key3\":\"value3\"," +
+        "\"key4\":\"value4\"," +
+        "\"key5\":\"value5\"," +
+        "\"key6\":\"value6\"," +
+        "\"key7\":\"value7\"" +
+        "}";
+    Truth.assertThat(attributes.getJSONString()).isEqualTo(expectedJSON);
   }
 }

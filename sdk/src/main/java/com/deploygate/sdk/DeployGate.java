@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -143,28 +142,15 @@ public class DeployGate {
                 Logger.d("collect-device-status event received: %s", targetUri);
 
                 ContentValues cv = new ContentValues();
-                synchronized (getBuildEnvironment().attributes) {
-                    if (!getBuildEnvironment().attributes.isEmpty()) {
-                        String buildEnvironmentJson = new JSONObject(getBuildEnvironment().attributes).toString();
-                        cv.put(DeployGateEvent.ATTRIBUTE_KEY_BUILD_ENVIRONMENT, buildEnvironmentJson);
-                    }
+
+                String buildEnvironmentJSON = getBuildEnvironment().getJSONString();
+                if (!buildEnvironmentJSON.equals("{}")) {
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_BUILD_ENVIRONMENT, buildEnvironmentJSON);
                 }
 
-                ConcurrentHashMap<String, Object> mergedRuntimeExtraHashMap = new ConcurrentHashMap<>();
-                // attribute keys of runtime extra created by user need to prefix with the package name
-                synchronized (getRuntimeExtra().attributes) {
-                    if (!getRuntimeExtra().attributes.isEmpty()) {
-                        for (Map.Entry<String, Object> attr : getRuntimeExtra().attributes.entrySet()) {
-                            String userKey = String.format("%s.%s", mHostApp.packageName, attr.getKey());
-                            mergedRuntimeExtraHashMap.put(userKey, attr.getValue());
-                        }
-                    }
-                }
-
-                synchronized (getSdkRuntimeExtra().attributes) {
-                    if (!getSdkRuntimeExtra().attributes.isEmpty()) {
-                        mergedRuntimeExtraHashMap.putAll(getSdkRuntimeExtra().attributes);
-                    }
+                String runtimeExtraJSON = getRuntimeExtra().getJSONString();
+                if (!runtimeExtraJSON.equals("{}")) {
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, runtimeExtraJSON);
                 }
 
                 if (!mergedRuntimeExtraHashMap.isEmpty()) {

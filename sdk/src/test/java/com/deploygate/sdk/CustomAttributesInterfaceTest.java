@@ -62,14 +62,4 @@ public class CustomAttributesInterfaceTest {
   public void removeAll() {
     attributes.removeAll();
   }
-
-  @Test
-  public void size() {
-    Truth.assertThat(attributes.size()).isInstanceOf(Integer.class);
-  }
-
-  @Test
-  public void isEmpty() {
-    Truth.assertThat(attributes.isEmpty()).isInstanceOf(Boolean.class);
-  }
 }

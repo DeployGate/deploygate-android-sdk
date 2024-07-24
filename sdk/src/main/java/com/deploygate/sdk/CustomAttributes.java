@@ -2,7 +2,9 @@ package com.deploygate.sdk;
 
 import com.deploygate.sdk.internal.Logger;
 
-import java.util.concurrent.ConcurrentHashMap;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.regex.Pattern;
 
 public final class CustomAttributes {
@@ -13,10 +15,12 @@ public final class CustomAttributes {
   private static final Pattern VALID_KEY_PATTERN = Pattern.compile("^[a-z][_a-z0-9]{2,31}$");
   private static final int MAX_VALUE_LENGTH = 64;
 
-  final ConcurrentHashMap<String, Object> attributes;
+  private final Object mLock;
+  private JSONObject attributes;
 
   CustomAttributes() {
-    attributes = new ConcurrentHashMap<>();
+    mLock = new Object();
+    attributes = new JSONObject();
   }
 
   public boolean putString(String key, String value) {
@@ -44,42 +48,59 @@ public final class CustomAttributes {
   }
 
   public void remove(String key) {
-    attributes.remove(key);
+    synchronized (mLock) {
+      attributes.remove(key);
+    }
   }
 
   public void removeAll() {
-    attributes.clear();
+    synchronized (mLock) {
+      // recreate new object instead of removing all keys
+      attributes = new JSONObject();
+    }
   }
 
-  public int size() {
-    return attributes.size();
+  int size() {
+    synchronized (mLock) {
+      return attributes.length();
+    }
   }
 
-  public boolean isEmpty() {
-    return attributes.isEmpty();
+  String getJSONString() {
+    synchronized (mLock) {
+      return attributes.toString();
+    }
   }
 
   private boolean putInternal(String key, Object value) {
-    synchronized (attributes) {
-      if (!isValidKey(key)) {
-        return false;
-      }
-
-      if (!isValidValue(value)) {
-        return false;
-      }
-
-      attributes.put(key, value);
-      return true;
-    }
-  }
-
-  private boolean isValidKey(String key) {
-    if (size() >= MAX_ATTRIBUTES_SIZE && !attributes.containsKey(key)) {
-      Logger.w(TAG, "Attributes already reached max size. Ignored: " + key);
+    if (!isValidKey(key)) {
       return false;
     }
 
+    if (!isValidValue(value)) {
+      return false;
+    }
+
+    synchronized (mLock) {
+      try {
+        attributes.put(key, value);
+
+        if (attributes.length() > MAX_ATTRIBUTES_SIZE) {
+          // rollback put operation
+          attributes.remove(key);
+          Logger.w(TAG, "Attributes already reached max size. Ignored: " + key);
+          return false;
+        }
+      } catch (JSONException e) {
+        Logger.w(TAG, "Failed to put attribute: " + key, e);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private boolean isValidKey(String key) {
     if (key == null || key.equals("true") || key.equals("false") || key.equals("null")) {
       Logger.w(TAG, "Not allowed key: " + key);
       return false;
@@ -100,8 +121,8 @@ public final class CustomAttributes {
     }
 
     if (value instanceof String && ((String) value).length() > MAX_VALUE_LENGTH) {
-        Logger.w(TAG, "Value too long: " + value);
-        return false;
+      Logger.w(TAG, "Value too long: " + value);
+      return false;
     } else if (value instanceof String || value instanceof Number || value instanceof Boolean) {
       return true;
     } else {
