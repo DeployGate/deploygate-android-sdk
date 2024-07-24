@@ -7,6 +7,10 @@ import org.json.JSONObject;
 
 import java.util.regex.Pattern;
 
+/**
+ * This class provides store key-value pairs.
+ * These methods are thread-safe.
+ */
 public final class CustomAttributes {
 
   private static final String TAG = "CustomAttributes";
@@ -23,36 +27,91 @@ public final class CustomAttributes {
     attributes = new JSONObject();
   }
 
+  /**
+   * Put a string value with the key.
+   * If the key already exists, the value will be overwritten.
+   * @param key key must be non-null and match the valid pattern.
+   * @param value value must be non-null and its length must be less than 64.
+   * @return true if the value is put successfully, otherwise false.
+   * @see CustomAttributes#VALID_KEY_PATTERN
+   */
   public boolean putString(String key, String value) {
     return putInternal(key, value);
   }
 
+  /**
+   * Put an int value with the key.
+   * If the key already exists, the value will be overwritten.
+   * @param key key must be non-null and match the valid pattern.
+   * @param value int value
+   * @return true if the value is put successfully, otherwise false.
+   * @see CustomAttributes#VALID_KEY_PATTERN
+   */
   public boolean putInt(String key, int value) {
     return putInternal(key, value);
   }
 
+  /**
+   * Put a long value with the key.
+   * If the key already exists, the value will be overwritten.
+   * @param key key must be non-null and match the valid pattern.
+   * @param value long value
+   * @return true if the value is put successfully, otherwise false.
+   * @see CustomAttributes#VALID_KEY_PATTERN
+   */
   public boolean putLong(String key, long value) {
     return putInternal(key, value);
   }
 
+  /**
+   * Put a float value with the key.
+   * If the key already exists, the value will be overwritten.
+   * @param key key must be non-null and match the valid pattern.
+   * @param value float value
+   * @return true if the value is put successfully, otherwise false.
+   * @see CustomAttributes#VALID_KEY_PATTERN
+   */
   public boolean putFloat(String key, float value) {
     return putInternal(key, value);
   }
 
+  /**
+   * Put a double value with the key.
+   * If the key already exists, the value will be overwritten.
+   * @param key key must be non-null and match the valid pattern.
+   * @param value double value
+   * @return true if the value is put successfully, otherwise false.
+   * @see CustomAttributes#VALID_KEY_PATTERN
+   */
   public boolean putDouble(String key, double value) {
     return putInternal(key, value);
   }
 
+  /**
+   * Put a boolean value with the key.
+   * If the key already exists, the value will be overwritten.
+   * @param key key must be non-null and match the valid pattern.
+   * @param value boolean value
+   * @return true if the value is put successfully, otherwise false.
+   * @see CustomAttributes#VALID_KEY_PATTERN
+   */
   public boolean putBoolean(String key, boolean value) {
     return putInternal(key, value);
   }
 
+  /**
+   * Remove the value with the key.
+   * @param key name of the key to be removed.
+   */
   public void remove(String key) {
     synchronized (mLock) {
       attributes.remove(key);
     }
   }
 
+  /**
+   * Remove all key-value pairs.
+   */
   public void removeAll() {
     synchronized (mLock) {
       // recreate new object instead of removing all keys
