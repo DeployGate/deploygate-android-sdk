@@ -3,6 +3,8 @@ package com.deploygate.sdk;
 import androidx.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.google.common.truth.Truth;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,46 +25,51 @@ public class CustomAttributesInterfaceTest {
 
   @Test
   public void putString() {
-    attributes.putString("key", "value");
+    Truth.assertThat(attributes.putString("key", "value")).isInstanceOf(Boolean.class);
   }
 
   @Test
   public void putInt() {
-    attributes.putInt("key", 1);
+    Truth.assertThat(attributes.putInt("key", 1)).isInstanceOf(Boolean.class);
   }
 
   @Test
   public void putLong() {
-    attributes.putLong("key", 1L);
+    Truth.assertThat(attributes.putLong("key", 1L)).isInstanceOf(Boolean.class);
   }
 
   @Test
   public void putFloat() {
-    attributes.putFloat("key", 1.0f);
+    Truth.assertThat(attributes.putFloat("key", 1.0f)).isInstanceOf(Boolean.class);
   }
 
   @Test
   public void putDouble() {
-    attributes.putDouble("key", 1.0);
+    Truth.assertThat(attributes.putDouble("key", 1.0)).isInstanceOf(Boolean.class);
   }
 
+  @Test
   public void putBoolean() {
-    attributes.putBoolean("key", true);
+    Truth.assertThat(attributes.putBoolean("key", true)).isInstanceOf(Boolean.class);
   }
 
+  @Test
   public void remove() {
     attributes.remove("key");
   }
 
+  @Test
   public void removeAll() {
     attributes.removeAll();
   }
 
-  public int size() {
-    return attributes.size();
+  @Test
+  public void size() {
+    Truth.assertThat(attributes.size()).isInstanceOf(Integer.class);
   }
 
-  public boolean isEmpty() {
-    return attributes.isEmpty();
+  @Test
+  public void isEmpty() {
+    Truth.assertThat(attributes.isEmpty()).isInstanceOf(Boolean.class);
   }
 }

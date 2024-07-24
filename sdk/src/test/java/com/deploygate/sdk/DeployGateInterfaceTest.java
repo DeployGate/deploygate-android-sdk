@@ -367,11 +367,11 @@ public class DeployGateInterfaceTest {
 
     @Test
     public void getBuildEnvironment() {
-        DeployGate.getBuildEnvironment();
+        Truth.assertThat(DeployGate.getBuildEnvironment()).isNotNull();
     }
 
     @Test
     public void getRuntimeExtra() {
-        DeployGate.getRuntimeExtra();
+        Truth.assertThat(DeployGate.getRuntimeExtra()).isNotNull();
     }
 }
