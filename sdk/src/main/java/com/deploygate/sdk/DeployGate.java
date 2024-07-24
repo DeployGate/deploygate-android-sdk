@@ -57,7 +57,7 @@ public class DeployGate {
     private static final Object sLock = new Object();
     private static CustomAttributes sBuildEnvironment;
     private static CustomAttributes sRuntimeExtra;
-    private static CustomAttributes sSdkRuntimeExtra;
+    private static CustomAttributes sSdkDeviceStates;
 
     private static DeployGate sInstance;
 
@@ -153,9 +153,9 @@ public class DeployGate {
                     cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, runtimeExtraJSON);
                 }
 
-                if (!mergedRuntimeExtraHashMap.isEmpty()) {
-                    String runtimeExtraJson = new JSONObject(mergedRuntimeExtraHashMap).toString();
-                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, runtimeExtraJson);
+                String sdkDeviceStatusJSON = getSdkDeviceStates().getJSONString();
+                if (!sdkDeviceStatusJSON.equals("{}")) {
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_SDK_DEVICE_STATES, sdkDeviceStatusJSON);
                 }
 
                 cv.put(DeployGateEvent.ATTRIBUTE_KEY_EVENT_AT, System.currentTimeMillis());
@@ -1460,18 +1460,18 @@ public class DeployGate {
         return sRuntimeExtra;
     }
 
-    private static CustomAttributes getSdkRuntimeExtra() {
-        if (sSdkRuntimeExtra != null) {
-            return sSdkRuntimeExtra;
+    private static CustomAttributes getSdkDeviceStates() {
+        if (sSdkDeviceStates != null) {
+            return sSdkDeviceStates;
         }
 
         synchronized (sLock) {
-            if (sSdkRuntimeExtra != null) {
-                return sSdkRuntimeExtra;
+            if (sSdkDeviceStates != null) {
+                return sSdkDeviceStates;
             }
-            sSdkRuntimeExtra = new CustomAttributes();
+            sSdkDeviceStates = new CustomAttributes();
         }
 
-        return sSdkRuntimeExtra;
+        return sSdkDeviceStates;
     }
 }

@@ -145,6 +145,11 @@ public interface DeployGateEvent {
     /**
      * @since 4.8.0
      */
+    public static final String ATTRIBUTE_KEY_SDK_DEVICE_STATES = "ak.sdk-device-states";
+
+    /**
+     * @since 4.8.0
+     */
     public static final String ATTRIBUTE_KEY_EVENT_AT = "ak.event-at";
 
     interface VisibilityType {
