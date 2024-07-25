@@ -90,6 +90,46 @@ public class CustomAttributesTest {
   }
 
   @Test
+  public void toJSONString() {
+    Truth.assertThat(attributes.getJSONString()).isEqualTo("{}");
+
+    attributes.putString("string", "value");
+    attributes.putInt("int", Integer.MAX_VALUE);
+    attributes.putLong("long", Long.MAX_VALUE);
+    attributes.putFloat("float", Float.MAX_VALUE);
+    attributes.putDouble("double", Double.MAX_VALUE);
+    attributes.putBoolean("boolean", true);
+
+    String expectedJSON = "{" +
+        "\"string\":\"value\"," +
+        "\"int\":2147483647," +
+        "\"long\":9223372036854775807," +
+        "\"float\":3.4028235E38," +
+        "\"double\":1.7976931348623157E308," +
+        "\"boolean\":true" +
+        "}";
+    Truth.assertThat(attributes.getJSONString()).isEqualTo(expectedJSON);
+
+    attributes.removeAll();
+    attributes.putString("string2", "value2");
+    attributes.putInt("int2", Integer.MIN_VALUE);
+    attributes.putLong("long2", Long.MIN_VALUE);
+    attributes.putFloat("float2", Float.MIN_VALUE);
+    attributes.putDouble("double2", Double.MIN_VALUE);
+    attributes.putBoolean("boolean2", false);
+
+    String expectedJSON2 = "{" +
+        "\"string2\":\"value2\"," +
+        "\"int2\":-2147483648," +
+        "\"long2\":-9223372036854775808," +
+        "\"float2\":1.4E-45," +
+        "\"double2\":4.9E-324," +
+        "\"boolean2\":false" +
+        "}";
+    Truth.assertThat(attributes.getJSONString()).isEqualTo(expectedJSON2);
+  }
+
+  @Test
   public void not_exceed_max_size() {
     Truth.assertThat(attributes.putString("key1", "value1")).isTrue();
     Truth.assertThat(attributes.putString("key2", "value2")).isTrue();
