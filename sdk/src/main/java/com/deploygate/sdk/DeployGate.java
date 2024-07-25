@@ -3,10 +3,13 @@ package com.deploygate.sdk;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,6 +23,8 @@ import com.deploygate.sdk.internal.VisibilityLifecycleCallbacks;
 import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +53,11 @@ public class DeployGate {
     private static final String ACTION_DEPLOYGATE_STARTED = "com.deploygate.action.ServiceStarted";
     private static final String DEPLOYGATE_PACKAGE = "com.deploygate";
     private static final Object sPendingEventLock = new Object();
+
+    private static final Object sLock = new Object();
+    private static CustomAttributes sBuildEnvironment;
+    private static CustomAttributes sRuntimeExtra;
+    private static CustomAttributes sSdkDeviceStates;
 
     private static DeployGate sInstance;
 
@@ -126,6 +136,35 @@ public class DeployGate {
                     onDisableStreamedLogcat();
                 } else {
                     Logger.w("streamed logcat is not supported");
+                }
+            } else if (DeployGateEvent.ACTION_COLLECT_DEVICE_STATES.equals(action)) {
+                Uri targetUri = Uri.parse(extras.getString(DeployGateEvent.EXTRA_TARGET_URI_FOR_REPORT_DEVICE_STATES));
+                Logger.d("collect-device-status event received: %s", targetUri);
+
+                ContentValues cv = new ContentValues();
+
+                String buildEnvironmentJSON = getBuildEnvironment().getJSONString();
+                if (!buildEnvironmentJSON.equals("{}")) {
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_BUILD_ENVIRONMENT, buildEnvironmentJSON);
+                }
+
+                String runtimeExtraJSON = getRuntimeExtra().getJSONString();
+                if (!runtimeExtraJSON.equals("{}")) {
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, runtimeExtraJSON);
+                }
+
+                String sdkDeviceStatusJSON = getSdkDeviceStates().getJSONString();
+                if (!sdkDeviceStatusJSON.equals("{}")) {
+                    cv.put(DeployGateEvent.ATTRIBUTE_KEY_SDK_DEVICE_STATES, sdkDeviceStatusJSON);
+                }
+
+                cv.put(DeployGateEvent.ATTRIBUTE_KEY_EVENT_AT, System.currentTimeMillis());
+
+                try {
+                    ContentResolver cr = mApplicationContext.getContentResolver();
+                    cr.insert(targetUri, cv);
+                } catch (Throwable t) {
+                    Logger.w(t, "failed to report device states");
                 }
             } else {
                 Logger.w("%s is not supported by this sdk version", action);
@@ -1389,5 +1428,50 @@ public class DeployGate {
         }
 
         return sInstance.mDistributionUserName;
+    }
+
+    public static CustomAttributes getBuildEnvironment() {
+        if (sBuildEnvironment != null) {
+            return sBuildEnvironment;
+        }
+
+        synchronized (sLock) {
+            if (sBuildEnvironment != null) {
+                return sBuildEnvironment;
+            }
+            sBuildEnvironment = new CustomAttributes();
+        }
+
+        return sBuildEnvironment;
+    }
+
+    public static CustomAttributes getRuntimeExtra() {
+        if (sRuntimeExtra != null) {
+            return sRuntimeExtra;
+        }
+
+        synchronized (sLock) {
+            if (sRuntimeExtra != null) {
+                return sRuntimeExtra;
+            }
+            sRuntimeExtra = new CustomAttributes();
+        }
+
+        return sRuntimeExtra;
+    }
+
+    private static CustomAttributes getSdkDeviceStates() {
+        if (sSdkDeviceStates != null) {
+            return sSdkDeviceStates;
+        }
+
+        synchronized (sLock) {
+            if (sSdkDeviceStates != null) {
+                return sSdkDeviceStates;
+            }
+            sSdkDeviceStates = new CustomAttributes();
+        }
+
+        return sSdkDeviceStates;
     }
 }

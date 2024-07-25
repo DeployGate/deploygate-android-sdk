@@ -1,9 +1,11 @@
 package com.deploygate.sample;
 
 import android.app.Application;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.deploygate.sdk.CustomAttributes;
 import com.deploygate.sdk.DeployGate;
 import com.deploygate.sdk.DeployGateCallback;
 
@@ -34,6 +36,10 @@ public class App extends Application {
                 if (isServiceAvailable) {
                     Log.i(TAG, "SDK is available");
                     DeployGate.logInfo("SDK is available");
+
+                    CustomAttributes attrs = DeployGate.getBuildEnvironment();
+                    attrs.putString("build_type", BuildConfig.BUILD_TYPE);
+                    attrs.putString("flavor", BuildConfig.FLAVOR);
                 } else {
                     Log.i(TAG, "SDK is unavailable");
                     DeployGate.logInfo("SDK is unavailable"); // this fails silently
@@ -83,5 +89,15 @@ public class App extends Application {
         // DeployGate.install(this, "YOURUSERNAME");
         //
         // You can use DeployGate.isAuthorized() later to check the installation is valid or not.
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        CustomAttributes attrs = DeployGate.getRuntimeExtra();
+        attrs.putString("locale", newConfig.locale.toString());
+        attrs.putInt("orientation", newConfig.orientation);
+        attrs.putFloat("font_scale", newConfig.fontScale);
     }
 }

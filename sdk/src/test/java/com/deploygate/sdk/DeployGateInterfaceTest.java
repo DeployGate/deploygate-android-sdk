@@ -364,4 +364,14 @@ public class DeployGateInterfaceTest {
     public void getDistributionUserName() {
         Truth.assertThat(DeployGate.getDistributionUserName()).isNull();
     }
+
+    @Test
+    public void getBuildEnvironment() {
+        Truth.assertThat(DeployGate.getBuildEnvironment()).isNotNull();
+    }
+
+    @Test
+    public void getRuntimeExtra() {
+        Truth.assertThat(DeployGate.getRuntimeExtra()).isNotNull();
+    }
 }
