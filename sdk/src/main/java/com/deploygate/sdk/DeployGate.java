@@ -139,8 +139,6 @@ public class DeployGate {
                 }
             } else if (DeployGateEvent.ACTION_COLLECT_DEVICE_STATES.equals(action)) {
                 Uri targetUri = Uri.parse(extras.getString(DeployGateEvent.EXTRA_TARGET_URI_FOR_REPORT_DEVICE_STATES));
-                Logger.d("collect-device-status event received: %s", targetUri);
-
                 ContentValues cv = new ContentValues();
 
                 String buildEnvironmentJSON = getBuildEnvironment().getJSONString();

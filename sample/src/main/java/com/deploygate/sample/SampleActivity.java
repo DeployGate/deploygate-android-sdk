@@ -55,7 +55,6 @@ public class SampleActivity extends Activity implements DeployGateCallback {
         mLogMessage = (EditText) findViewById(R.id.message);
         mDistributionComments = (LinearLayout) findViewById(R.id.distributionComments);
 
-
         CustomAttributes attrs = DeployGate.getRuntimeExtra();
         attrs.putString("string", "value");
         attrs.putInt("int", 123);
