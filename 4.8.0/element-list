@@ -1,0 +1,16 @@
+$dokka.format:javadoc-v1
+$dokka.linkExtension:html
+$dokka.location:com.deploygate.sdk.internal/VisibilityLifecycleCallbacks.OnVisibilityChangeListener///PointingToDeclaration/com/deploygate/sdk/internal/VisibilityLifecycleCallbacks.OnVisibilityChangeListener.html
+$dokka.location:com.deploygate.sdk/CustomLogConfiguration.Backpressure///PointingToDeclaration/com/deploygate/sdk/CustomLogConfiguration.Backpressure.html
+$dokka.location:com.deploygate.sdk/CustomLogConfiguration.Builder///PointingToDeclaration/com/deploygate/sdk/CustomLogConfiguration.Builder.html
+$dokka.location:com.deploygate.sdk/DeployGateSdkConfiguration.Builder///PointingToDeclaration/com/deploygate/sdk/DeployGateSdkConfiguration.Builder.html
+$dokka.location:com.deploygate.service/DeployGateEvent.VisibilityType///PointingToDeclaration/com/deploygate/service/DeployGateEvent.VisibilityType.html
+$dokka.location:com.deploygate.service/IDeployGateSdkService.Default///PointingToDeclaration/com/deploygate/service/IDeployGateSdkService.Default.html
+$dokka.location:com.deploygate.service/IDeployGateSdkService.Stub///PointingToDeclaration/com/deploygate/service/IDeployGateSdkService.Stub.html
+$dokka.location:com.deploygate.service/IDeployGateSdkServiceCallback.Default///PointingToDeclaration/com/deploygate/service/IDeployGateSdkServiceCallback.Default.html
+$dokka.location:com.deploygate.service/IDeployGateSdkServiceCallback.Stub///PointingToDeclaration/com/deploygate/service/IDeployGateSdkServiceCallback.Stub.html
+com.deploygate.sdk
+com.deploygate.sdk.internal
+com.deploygate.sdk.internal.annotations
+com.deploygate.service
+
