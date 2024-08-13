@@ -49,9 +49,15 @@ And also, you need to call `DeployGate#install` in your Application class, Conte
 For example, add to your custom application class, content provider, or else.
 
 ```java
-DeployGate.install(context, /** forceApplyOnReleaseBuild */ false);
-```
+import com.deploygate.sdk.DeployGate;
+import com.deploygate.sdk.DeployGateSdkConfiguration;
 
+DeployGateSdkConfiguration config =
+                new DeployGateSdkConfiguration().
+                   setEnabledOnNonDebuggableBuild(true). // Make sure you set true here.
+                   build();
+DeployGate.install(context, config);
+```
 
 ## Usage
 
@@ -83,6 +89,43 @@ DeployGate.registerCallback(new DeployGateCallback() {
 ```
 
 See [SDK Sample](./sample) for more examples.
+
+### Capture feature
+
+Workspaces, which have activated the Capture feature, can storee screenshots, device states and Logcat at DeployGate. The Capture feature is enabled by default.
+
+```java
+import com.deploygate.sdk.DeployGate;
+import com.deploygate.sdk.DeployGateSdkConfiguration;
+
+DeployGateSdkConfiguration config =
+                new DeployGateSdkConfiguration().
+                   setCaptureEnabled(true). // Defaults to true
+                   build();
+DeployGate.install(context, config);
+```
+
+Please refer to https://docs.deploygate.com/docs/developer-guide/capture/about-capture for the details.
+
+#### Custom Attributes
+
+You can add attributes to Captures.
+
+```java
+import com.deploygate.sdk.DeployGate;
+
+CustomAttributes buildEnvironment = DeployGate.getBuildEnvironment();
+buildEnvironment.putString("git_ref", BuildConfig.BUILD_GIT_REF);
+
+CustomAttributes runtimeExtra = DeployGate.getRuntimeExtra();
+runtimeExtra.putString("is_authorized", authorizationRepository.isAuthorized());
+```
+
+**Limitation**
+
+- `buildEnvironment` and `runtimeExtra` allow only at most **8** attributes.
+- Attribute keys must consist of `_a-z0-9` and must start with `a-z`.
+- Every value must be equal or shorter than 64 length.
 
 ## Mock
 
