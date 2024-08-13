@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/DeployGate/deploygate-android-sdk.svg?branch=master)](https://travis-ci.org/DeployGate/deploygate-android-sdk)
 [![Download](https://img.shields.io/maven-central/v/com.deploygate/sdk)](https://ossindex.sonatype.org/component/pkg:maven/com.deploygate/sdk)
 
-You can integrate DeployGate's realtime remote logging & crash reporting without code modification on your apps in development.
+You can integrate DeployGate's realtime remote logging & crash reporting without code modification on your apps in development. [Sample Code](./sample).
 
 > 4.3.0 and later require Android Studio whose versions are the latest patch version of 3.3 or above.
 > For the more details, please see https://developer.android.com/studio/releases/gradle-plugin#4.0.1
@@ -52,7 +52,6 @@ For example, add to your custom application class, content provider, or else.
 DeployGate.install(context, /** forceApplyOnReleaseBuild */ false);
 ```
 
-
 ## Usage
 
 You can retrieve detailed information on current running build and status change events through functions and callback listeners.
@@ -82,7 +81,7 @@ DeployGate.registerCallback(new DeployGateCallback() {
 }, true);
 ```
 
-See [SDK Sample](./sample) for more examples.
+For the more details, pelase refer to [DeployGate Docs - Android SDK](https://docs.deploygate.com/docs/developer-tools/android-sdk/)
 
 ## Mock
 
