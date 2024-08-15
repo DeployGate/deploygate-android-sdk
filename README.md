@@ -53,9 +53,9 @@ import com.deploygate.sdk.DeployGate;
 import com.deploygate.sdk.DeployGateSdkConfiguration;
 
 DeployGateSdkConfiguration config =
-                new DeployGateSdkConfiguration().
-                   setEnabledOnNonDebuggableBuild(true). // Make sure you set true here.
-                   build();
+    new DeployGateSdkConfiguration.Builder().
+        setEnabledOnNonDebuggableBuild(true). // Make sure you set true here.
+        build();
 DeployGate.install(context, config);
 ```
 
@@ -98,10 +98,10 @@ Workspaces, which have activated the Capture feature, can storee screenshots, de
 import com.deploygate.sdk.DeployGate;
 import com.deploygate.sdk.DeployGateSdkConfiguration;
 
-DeployGateSdkConfiguration config =
-                new DeployGateSdkConfiguration().
-                   setCaptureEnabled(true). // Defaults to true
-                   build();
+DeployGateSdkConfiguration config = 
+    new DeployGateSdkConfiguration.Builder()
+        .setCaptureEnabled(true) // Defaults to true
+        .build();
 DeployGate.install(context, config);
 ```
 
