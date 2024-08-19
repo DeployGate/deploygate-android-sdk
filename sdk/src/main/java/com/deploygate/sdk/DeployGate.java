@@ -826,6 +826,165 @@ public class DeployGate {
     }
 
     /**
+     * Register a callback listener about the DeployGate initialization event.
+     * Don't forget to call {@link #unregisterInitializeCallback(DeployGateInitializeCallback)}
+     * when the callback is no longer needed (e.g., on destroying an activity.)
+     * If the listener has already in the callback list, just ignored.
+     *
+     * @param callback           callback listener
+     * @param refreshImmediately if you want to receive current states, set this
+     *                           true.
+     * @since 4.9.0
+     */
+    public static void registerInitializeCallback(
+            DeployGateInitializeCallback callback,
+            boolean refreshImmediately
+    ) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.registerInitializeCallbackInternal(callback, refreshImmediately);
+    }
+
+    private void registerInitializeCallbackInternal(
+            DeployGateInitializeCallback callback,
+            boolean refreshImmediately
+    ) {
+        mInitializeCallbacks.add(callback);
+        if (refreshImmediately) {
+            refresh();
+        }
+    }
+
+    /**
+     * Unregister a callback listener.
+     * If the listener was not registered, just ignored.
+     *
+     * @param callback callback listener to be removed
+     * @since 4.9.0
+     */
+    public static void unregisterInitializeCallback(DeployGateInitializeCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.mInitializeCallbacks.remove(callback);
+    }
+
+    /**
+     * Register a callback listener about the app status on DeployGate.
+     * Don't forget to call {@link #unregisterStatusChangeCallback(DeployGateStatusChangeCallback)}
+     * when the callback is no longer needed (e.g., on destroying an activity.)
+     * If the listener has already in the callback list, just ignored.
+     *
+     * @param callback           callback listener
+     * @param refreshImmediately if you want to receive current states, set this
+     *                           true.
+     * @since 4.9.0
+     */
+    public static void registerStatusChangeCallback(
+            DeployGateStatusChangeCallback callback,
+            boolean refreshImmediately
+    ) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.registerStatusChangeCallbackInternal(callback, refreshImmediately);
+    }
+
+    private void registerStatusChangeCallbackInternal(
+            DeployGateStatusChangeCallback callback,
+            boolean refreshImmediately
+    ) {
+        mStatusChangeCallbacks.add(callback);
+        if (refreshImmediately) {
+            refresh();
+        }
+    }
+
+    /**
+     * Unregister a callback listener.
+     * If the listener was not registered, just ignored.
+     *
+     * @param callback callback listener to be removed
+     * @since 4.9.0
+     */
+    public static void unregisterStatusChangeCallback(DeployGateStatusChangeCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.mStatusChangeCallbacks.remove(callback);
+    }
+
+    /**
+     * Register a callback listener about the new version of the app is available.
+     * Don't forget to call {@link #unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback)}
+     * when the callback is no longer needed (e.g., on destroying an activity.)
+     * If the listener has already in the callback list, just ignored.
+     *
+     * @param callback           callback listener
+     * @param refreshImmediately if you want to receive current states, set this
+     *                           true.
+     * @since 4.9.0
+     */
+    public static void registerUpdateAvailableCallback(
+            DeployGateUpdateAvailableCallback callback,
+            boolean refreshImmediately
+    ) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.registerUpdateAvailableCallbackInternal(callback, refreshImmediately);
+    }
+
+    private void registerUpdateAvailableCallbackInternal(
+            DeployGateUpdateAvailableCallback callback,
+            boolean refreshImmediately
+    ) {
+        mUpdateAvailableCallbacks.add(callback);
+        if (refreshImmediately) {
+            refresh();
+        }
+    }
+
+    /**
+     * Unregister a callback listener.
+     * If the listener was not registered, just ignored.
+     *
+     * @param callback callback listener to be removed
+     * @since 4.9.0
+     */
+    public static void unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.mUpdateAvailableCallbacks.remove(callback);
+    }
+
+    /**
      * Register a DeployGate event callback listener. Don't forget to call
      * {@link #unregisterCallback(DeployGateCallback)} when the callback is no
      * longer needed (e.g., on destroying an activity.) If the listener has
@@ -838,7 +997,12 @@ public class DeployGate {
      *         true.
      *
      * @since r1
+     * @deprecated since 4.9.0. Use each register method for separated callbacks instead.
+     * @see #registerInitializeCallback(DeployGateInitializeCallback, boolean)
+     * @see #registerStatusChangeCallback(DeployGateStatusChangeCallback, boolean)
+     * @see #registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback, boolean)
      */
+    @Deprecated
     public static void registerCallback(
             DeployGateCallback listener,
             boolean refreshImmediately
@@ -871,7 +1035,12 @@ public class DeployGate {
      *         callback listener to be removed
      *
      * @since r1
+     * @deprecated since 4.9.0. Use each unregister method for separated callbacks instead.
+     * @see #unregisterInitializeCallback(DeployGateInitializeCallback)
+     * @see #unregisterStatusChangeCallback(DeployGateStatusChangeCallback)
+     * @see #unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback)
      */
+    @Deprecated
     public static void unregisterCallback(DeployGateCallback listener) {
         if (sInstance == null) {
             return;
