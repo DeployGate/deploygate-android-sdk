@@ -16,9 +16,11 @@ import android.widget.Toast;
 
 import com.deploygate.sdk.CustomAttributes;
 import com.deploygate.sdk.DeployGate;
-import com.deploygate.sdk.DeployGateCallback;
+import com.deploygate.sdk.DeployGateInitializeCallback;
+import com.deploygate.sdk.DeployGateStatusChangeCallback;
+import com.deploygate.sdk.DeployGateUpdateAvailableCallback;
 
-public class SampleActivity extends Activity implements DeployGateCallback {
+public class SampleActivity extends Activity implements DeployGateInitializeCallback, DeployGateStatusChangeCallback, DeployGateUpdateAvailableCallback {
 
     private static final String TAG = "SampleActivity";
 
@@ -68,8 +70,14 @@ public class SampleActivity extends Activity implements DeployGateCallback {
     protected void onResume() {
         super.onResume();
 
-        // register for callback, also request refreshing (second argument)
-        DeployGate.registerCallback(this, true);
+        // register for callbacks
+        DeployGate.registerInitializeCallback(this, false);
+        DeployGate.registerStatusChangeCallback(this, false);
+        // call register method with second argument true to get the status immediately
+        DeployGate.registerUpdateAvailableCallback(this, true);
+
+        // or you can also call DeployGate.refresh() if you want to check the status immediately
+        // DeployGate.refresh();
     }
 
     @Override
@@ -77,7 +85,9 @@ public class SampleActivity extends Activity implements DeployGateCallback {
         super.onPause();
 
         // unregister to stop callback
-        DeployGate.unregisterCallback(this);
+        DeployGate.unregisterInitializeCallback(this);
+        DeployGate.unregisterStatusChangeCallback(this);
+        DeployGate.unregisterUpdateAvailableCallback(this);
     }
 
 
