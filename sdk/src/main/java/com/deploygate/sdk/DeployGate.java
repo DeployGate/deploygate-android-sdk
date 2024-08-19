@@ -24,8 +24,6 @@ import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,6 +66,9 @@ public class DeployGate {
     private final ILogcatInstructionSerializer mLogcatInstructionSerializer;
     private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
     private final HashSet<DeployGateCallback> mCallbacks;
+    private final HashSet<DeployGateInitializeCallback> mInitializeCallbacks;
+    private final HashSet<DeployGateStatusChangeCallback> mStatusChangeCallbacks;
+    private final HashSet<DeployGateUpdateAvailableCallback> mUpdateAvailableCallbacks;
     private final HashMap<String, Bundle> mPendingEvents;
     private final String mExpectedAuthor;
     private String mAuthor;
@@ -194,8 +195,19 @@ public class DeployGate {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    // call onInitialized on each callbacks
                     for (DeployGateCallback callback : mCallbacks) {
                         callback.onInitialized(true);
+                    }
+                    for (DeployGateInitializeCallback callback : mInitializeCallbacks) {
+                        callback.onInitialized(true);
+                    }
+
+                    // after call onInitialized, then call onStatusChanged
+                    for (DeployGateCallback callback : mCallbacks) {
+                        callback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
+                    }
+                    for (DeployGateStatusChangeCallback callback : mStatusChangeCallbacks) {
                         callback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
                     }
                 }
@@ -230,6 +242,10 @@ public class DeployGate {
                 @Override
                 public void run() {
                     for (DeployGateCallback callback : mCallbacks) {
+                        callback.onUpdateAvailable(serial, versionName, versionCode);
+                    }
+
+                    for (DeployGateUpdateAvailableCallback callback : mUpdateAvailableCallbacks) {
                         callback.onUpdateAvailable(serial, versionName, versionCode);
                     }
                 }
@@ -288,10 +304,22 @@ public class DeployGate {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                // call onInitialized on each callbacks
                 for (DeployGateCallback callback : mCallbacks) {
                     callback.onInitialized(false);
+                }
+                for (DeployGateInitializeCallback callback : mInitializeCallbacks) {
+                    callback.onInitialized(false);
+                }
+
+                // after call onInitialized, then call onStatusChanged
+                for (DeployGateCallback callback : mCallbacks) {
                     callback.onStatusChanged(false, false, null, false);
                 }
+                for (DeployGateStatusChangeCallback callback : mStatusChangeCallbacks) {
+                    callback.onStatusChanged(false, false, null, false);
+                }
+
             }
         });
     }
@@ -315,6 +343,9 @@ public class DeployGate {
         mLogcatInstructionSerializer = mHostApp.canUseLogcat ? new LogcatInstructionSerializer(mHostApp.packageName) : ILogcatInstructionSerializer.NULL_INSTANCE;
         mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, sdkConfiguration.customLogConfiguration);
         mCallbacks = new HashSet<>();
+        mInitializeCallbacks = new HashSet<>();
+        mStatusChangeCallbacks = new HashSet<>();
+        mUpdateAvailableCallbacks = new HashSet<>();
         mPendingEvents = new HashMap<>();
         mExpectedAuthor = sdkConfiguration.appOwnerName;
 
@@ -322,6 +353,18 @@ public class DeployGate {
 
         if (sdkConfiguration.callback != null) {
             mCallbacks.add(sdkConfiguration.callback);
+        }
+
+        if (sdkConfiguration.initializeCallback != null) {
+            mInitializeCallbacks.add(sdkConfiguration.initializeCallback);
+        }
+
+        if (sdkConfiguration.statusChangeCallback != null) {
+            mStatusChangeCallbacks.add(sdkConfiguration.statusChangeCallback);
+        }
+
+        if (sdkConfiguration.updateAvailableCallback != null) {
+            mUpdateAvailableCallbacks.add(sdkConfiguration.updateAvailableCallback);
         }
 
         mInitializedLatch = new CountDownLatch(1);
