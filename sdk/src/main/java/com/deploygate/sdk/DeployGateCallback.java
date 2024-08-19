@@ -6,8 +6,10 @@ package com.deploygate.sdk;
  * {@link DeployGate#registerCallback(DeployGateCallback, boolean)} to listen.
  *
  * @author tnj
+ * @deprecated since 4.9.0. Use each extended callback interfaces instead.
  */
-public interface DeployGateCallback {
+@Deprecated
+public interface DeployGateCallback extends DeployGateInitializeCallback, DeployGateStatusChangeCallback, DeployGateUpdateAvailableCallback {
     /**
      * Callback to tell the finish of DeployGate service initialization
      * procedure.
@@ -15,7 +17,10 @@ public interface DeployGateCallback {
      * @param isServiceAvailable
      *         true if DeployGate service is available on the
      *         device.
+     * @deprecated since 4.9.0. Use {@link DeployGateInitializeCallback#onInitialized(boolean)} instead.
      */
+    @Deprecated
+    @Override
     public void onInitialized(boolean isServiceAvailable);
 
     /**
@@ -34,7 +39,10 @@ public interface DeployGateCallback {
      *         isAuthorized is true.
      * @param isStopped
      *         Reserved.
+     * @deprecated since 4.9.0. Use {@link DeployGateStatusChangeCallback#onStatusChanged(boolean, boolean, String, boolean)} instead.
      */
+    @Deprecated
+    @Override
     public void onStatusChanged(
             boolean isManaged,
             boolean isAuthorized,
@@ -51,7 +59,10 @@ public interface DeployGateCallback {
      *         user-defined version name of new version
      * @param versionCode
      *         user-defined version code of new version
+     * @deprecated since 4.9.0. Use {@link DeployGateUpdateAvailableCallback#onUpdateAvailable(int, String, int)} instead.
      */
+    @Deprecated
+    @Override
     public void onUpdateAvailable(
             int revision,
             String versionName,
