@@ -1664,4 +1664,16 @@ public class DeployGate {
 
         return sSdkDeviceStates;
     }
+
+    static HashSet<DeployGateInitializeCallback> getInitializeCallbacks() {
+        return sInstance != null ? sInstance.mInitializeCallbacks : null;
+    }
+
+    static HashSet<DeployGateStatusChangeCallback> getStatusChangeCallbacks() {
+        return sInstance != null ? sInstance.mStatusChangeCallbacks : null;
+    }
+
+    static HashSet<DeployGateUpdateAvailableCallback> getUpdateAvailableCallbacks() {
+        return sInstance != null ? sInstance.mUpdateAvailableCallbacks : null;
+    }
 }
