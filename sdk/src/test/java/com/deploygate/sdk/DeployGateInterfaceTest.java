@@ -214,56 +214,32 @@ public class DeployGateInterfaceTest {
             }
         }, false);
 
-        DeployGate.registerInitializeCallback(null, true);
-        DeployGate.registerInitializeCallback(null, false);
-        DeployGate.registerInitializeCallback(initializeCallback, true);
-        DeployGate.registerInitializeCallback(initializeCallback, false);
+        DeployGate.registerInitializeCallback(null);
+        DeployGate.registerInitializeCallback(initializeCallback);
         DeployGate.registerInitializeCallback(new DeployGateInitializeCallback() {
             @Override
             public void onInitialized(boolean isServiceAvailable) {
 
             }
-        }, true);
-        DeployGate.registerInitializeCallback(new DeployGateInitializeCallback() {
-            @Override
-            public void onInitialized(boolean isServiceAvailable) {
+        });
 
-            }
-        }, false);
-
-        DeployGate.registerStatusChangeCallback(null, true);
-        DeployGate.registerStatusChangeCallback(null, false);
-        DeployGate.registerStatusChangeCallback(statusChangeCallback, true);
-        DeployGate.registerStatusChangeCallback(statusChangeCallback, false);
+        DeployGate.registerStatusChangeCallback(null);
+        DeployGate.registerStatusChangeCallback(statusChangeCallback);
         DeployGate.registerStatusChangeCallback(new DeployGateStatusChangeCallback() {
             @Override
             public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
 
             }
-        }, true);
-        DeployGate.registerStatusChangeCallback(new DeployGateStatusChangeCallback() {
-            @Override
-            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+        });
 
-            }
-        }, false);
-
-        DeployGate.registerUpdateAvailableCallback(null, true);
-        DeployGate.registerUpdateAvailableCallback(null, false);
-        DeployGate.registerUpdateAvailableCallback(updateAvailableCallback, true);
-        DeployGate.registerUpdateAvailableCallback(updateAvailableCallback, false);
+        DeployGate.registerUpdateAvailableCallback(null);
+        DeployGate.registerUpdateAvailableCallback(updateAvailableCallback);
         DeployGate.registerUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
             @Override
             public void onUpdateAvailable(int revision, String versionName, int versionCode) {
 
             }
-        }, true);
-        DeployGate.registerUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
-            @Override
-            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
-
-            }
-        }, false);
+        });
     }
 
     @Test

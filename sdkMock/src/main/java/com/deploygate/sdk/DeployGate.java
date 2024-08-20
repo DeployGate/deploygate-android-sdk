@@ -71,28 +71,19 @@ public class DeployGate {
     public static void refresh() {
     }
 
-    public static void registerInitializeCallback(
-            DeployGateInitializeCallback callback,
-            boolean refreshImmediately
-    ) {
+    public static void registerInitializeCallback(DeployGateInitializeCallback callback) {
     }
 
     public static void unregisterInitializeCallback(DeployGateInitializeCallback callback) {
     }
 
-    public static void registerStatusChangeCallback(
-            DeployGateStatusChangeCallback callback,
-            boolean refreshImmediately
-    ) {
+    public static void registerStatusChangeCallback(DeployGateStatusChangeCallback callback) {
     }
 
     public static void unregisterStatusChangeCallback(DeployGateStatusChangeCallback callback) {
     }
 
-    public static void registerUpdateAvailableCallback(
-            DeployGateUpdateAvailableCallback callback,
-            boolean refreshImmediately
-    ) {
+    public static void registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback callback) {
     }
 
     public static void unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback callback) {

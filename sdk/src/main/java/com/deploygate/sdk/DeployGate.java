@@ -809,15 +809,10 @@ public class DeployGate {
      * when the callback is no longer needed (e.g., on destroying an activity.)
      * If the listener has already in the callback list, just ignored.
      *
-     * @param callback           callback listener
-     * @param refreshImmediately if you want to receive current states, set this
-     *                           true.
+     * @param callback callback listener
      * @since 4.9.0
      */
-    public static void registerInitializeCallback(
-            DeployGateInitializeCallback callback,
-            boolean refreshImmediately
-    ) {
+    public static void registerInitializeCallback(DeployGateInitializeCallback callback) {
         if (sInstance == null) {
             return;
         }
@@ -825,17 +820,11 @@ public class DeployGate {
             return;
         }
 
-        sInstance.registerInitializeCallbackInternal(callback, refreshImmediately);
+        sInstance.registerInitializeCallbackInternal(callback);
     }
 
-    private void registerInitializeCallbackInternal(
-            DeployGateInitializeCallback callback,
-            boolean refreshImmediately
-    ) {
+    private void registerInitializeCallbackInternal(DeployGateInitializeCallback callback) {
         mInitializeCallbacks.add(callback);
-        if (refreshImmediately) {
-            refresh();
-        }
     }
 
     /**
@@ -862,15 +851,10 @@ public class DeployGate {
      * when the callback is no longer needed (e.g., on destroying an activity.)
      * If the listener has already in the callback list, just ignored.
      *
-     * @param callback           callback listener
-     * @param refreshImmediately if you want to receive current states, set this
-     *                           true.
+     * @param callback callback listener
      * @since 4.9.0
      */
-    public static void registerStatusChangeCallback(
-            DeployGateStatusChangeCallback callback,
-            boolean refreshImmediately
-    ) {
+    public static void registerStatusChangeCallback(DeployGateStatusChangeCallback callback) {
         if (sInstance == null) {
             return;
         }
@@ -878,17 +862,11 @@ public class DeployGate {
             return;
         }
 
-        sInstance.registerStatusChangeCallbackInternal(callback, refreshImmediately);
+        sInstance.registerStatusChangeCallbackInternal(callback);
     }
 
-    private void registerStatusChangeCallbackInternal(
-            DeployGateStatusChangeCallback callback,
-            boolean refreshImmediately
-    ) {
+    private void registerStatusChangeCallbackInternal(DeployGateStatusChangeCallback callback) {
         mStatusChangeCallbacks.add(callback);
-        if (refreshImmediately) {
-            refresh();
-        }
     }
 
     /**
@@ -915,15 +893,10 @@ public class DeployGate {
      * when the callback is no longer needed (e.g., on destroying an activity.)
      * If the listener has already in the callback list, just ignored.
      *
-     * @param callback           callback listener
-     * @param refreshImmediately if you want to receive current states, set this
-     *                           true.
+     * @param callback callback listener
      * @since 4.9.0
      */
-    public static void registerUpdateAvailableCallback(
-            DeployGateUpdateAvailableCallback callback,
-            boolean refreshImmediately
-    ) {
+    public static void registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback callback) {
         if (sInstance == null) {
             return;
         }
@@ -931,17 +904,11 @@ public class DeployGate {
             return;
         }
 
-        sInstance.registerUpdateAvailableCallbackInternal(callback, refreshImmediately);
+        sInstance.registerUpdateAvailableCallbackInternal(callback);
     }
 
-    private void registerUpdateAvailableCallbackInternal(
-            DeployGateUpdateAvailableCallback callback,
-            boolean refreshImmediately
-    ) {
+    private void registerUpdateAvailableCallbackInternal(DeployGateUpdateAvailableCallback callback) {
         mUpdateAvailableCallbacks.add(callback);
-        if (refreshImmediately) {
-            refresh();
-        }
     }
 
     /**
@@ -976,9 +943,9 @@ public class DeployGate {
      *
      * @since r1
      * @deprecated since 4.9.0. Use each register method for separated callbacks instead.
-     * @see #registerInitializeCallback(DeployGateInitializeCallback, boolean)
-     * @see #registerStatusChangeCallback(DeployGateStatusChangeCallback, boolean)
-     * @see #registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback, boolean)
+     * @see #registerInitializeCallback(DeployGateInitializeCallback)
+     * @see #registerStatusChangeCallback(DeployGateStatusChangeCallback)
+     * @see #registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback)
      */
     @Deprecated
     public static void registerCallback(
