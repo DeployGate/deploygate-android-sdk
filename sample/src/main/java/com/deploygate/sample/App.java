@@ -74,7 +74,7 @@ public class App extends Application {
         // If you want to prevent the app distributed by someone else, specify your username on DeployGate
         // with setAuthor method when creating DeployGate SdkConfiguration. like:
         //
-        // builder.setAuthor("YOURUSERNAME")
+        // builder.setAuthor("YOURUSERNAME");
         //
         // You can use DeployGate.isAuthorized() later to check the installation is valid or not.
     }
