@@ -1,8 +1,7 @@
 package com.deploygate.sdk;
 
 /**
- * A callback interface to receive the app status on the DeployGate. Implement this and pass to
- * {@link DeployGate#registerStatusChangeCallback(DeployGateStatusChangeCallback)} to listen.
+ * A callback interface to receive the app status on the DeployGate.
  *
  * @since 4.9.0.
  * @see DeployGate#registerStatusChangeCallback(DeployGateStatusChangeCallback)

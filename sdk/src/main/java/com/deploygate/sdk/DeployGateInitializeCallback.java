@@ -1,8 +1,7 @@
 package com.deploygate.sdk;
 
 /**
- * A callback interface to receive DeployGate service initialization events.Implement this and pass to
- * {@link DeployGate#registerInitializeCallback(DeployGateInitializeCallback)} to listen.
+ * A callback interface to receive DeployGate service initialization events.
  *
  * @since 4.9.0.
  * @see DeployGate#registerInitializeCallback(DeployGateInitializeCallback)

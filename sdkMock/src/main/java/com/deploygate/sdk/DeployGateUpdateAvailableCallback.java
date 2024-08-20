@@ -1,8 +1,7 @@
 package com.deploygate.sdk;
 
 /**
- * A callback interface to receive the app update event. Implement this and pass to
- * {@link DeployGate#registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback)} to listen.
+ * A callback interface to receive the app update event.
  *
  * @since 4.9.0.
  * @see DeployGate#registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback)

@@ -28,7 +28,7 @@ public class App extends Application {
         // Refer the comment on stableReal/AndroidManifest.xml included in this sample.
 
         DeployGateSdkConfiguration configuration = new DeployGateSdkConfiguration.Builder()
-            // Please note that these callback is called if you have removed the content provider.
+            // Please note that this callback is called iff you have removed the content provider.
             // For those who wanna use the content provider, SDK provides DeployGate#registerXXXCallback for your use-case.
             .setInitializeCallback(isServiceAvailable -> {
                 if (isServiceAvailable) {
