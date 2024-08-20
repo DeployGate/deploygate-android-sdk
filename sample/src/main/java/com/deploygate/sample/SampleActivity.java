@@ -71,13 +71,12 @@ public class SampleActivity extends Activity implements DeployGateInitializeCall
         super.onResume();
 
         // register for callbacks
-        DeployGate.registerInitializeCallback(this, false);
-        DeployGate.registerStatusChangeCallback(this, false);
-        // call register method with second argument true to get the status immediately
-        DeployGate.registerUpdateAvailableCallback(this, true);
+        DeployGate.registerInitializeCallback(this);
+        DeployGate.registerStatusChangeCallback(this);
+        DeployGate.registerUpdateAvailableCallback(this);
 
-        // or you can also call DeployGate.refresh() if you want to check the status immediately
-        // DeployGate.refresh();
+        // finally, call refresh() method if you want to check the status immediately
+        DeployGate.refresh();
     }
 
     @Override
