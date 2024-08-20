@@ -162,25 +162,10 @@ public final class DeployGateSdkConfiguration {
          * @see #setUpdateAvailableCallback(DeployGateUpdateAvailableCallback)
          */
         @Deprecated
-        public Builder setCallback(final DeployGateCallback callback) {
-            this.setInitializeCallback(new DeployGateInitializeCallback() {
-                @Override
-                public void onInitialized(boolean isServiceAvailable) {
-                    callback.onInitialized(isServiceAvailable);
-                }
-            });
-            this.setStatusChangeCallback(new DeployGateStatusChangeCallback() {
-                @Override
-                public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
-                    callback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
-                }
-            });
-            this.setUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
-                @Override
-                public void onUpdateAvailable(int revision, String versionName, int versionCode) {
-                    callback.onUpdateAvailable(revision, versionName, versionCode);
-                }
-            });
+        public Builder setCallback(DeployGateCallback callback) {
+            setInitializeCallback(callback);
+            setStatusChangeCallback(callback);
+            setUpdateAvailableCallback(callback);
             return this;
         }
 

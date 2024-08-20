@@ -32,7 +32,7 @@ public final class DeployGateSdkConfiguration {
             return this;
         }
 
-        public Builder setCallback(final DeployGateCallback callback) {
+        public Builder setCallback(DeployGateCallback callback) {
             return this;
         }
 
