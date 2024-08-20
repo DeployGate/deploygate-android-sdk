@@ -842,7 +842,11 @@ public class DeployGate {
             return;
         }
 
-        sInstance.mInitializeCallbacks.remove(callback);
+        sInstance.unregisterInitializeCallbackInternal(callback);
+    }
+
+    private void unregisterInitializeCallbackInternal(DeployGateInitializeCallback callback) {
+        mInitializeCallbacks.remove(callback);
     }
 
     /**
@@ -884,7 +888,11 @@ public class DeployGate {
             return;
         }
 
-        sInstance.mStatusChangeCallbacks.remove(callback);
+        sInstance.unregisterStatusChangeCallbackInternal(callback);
+    }
+
+    private void unregisterStatusChangeCallbackInternal(DeployGateStatusChangeCallback callback) {
+        mStatusChangeCallbacks.remove(callback);
     }
 
     /**
@@ -926,7 +934,11 @@ public class DeployGate {
             return;
         }
 
-        sInstance.mUpdateAvailableCallbacks.remove(callback);
+        sInstance.unregisterUpdateAvailableCallbackInternal(callback);
+    }
+
+    private void unregisterUpdateAvailableCallbackInternal(DeployGateUpdateAvailableCallback callback) {
+        mUpdateAvailableCallbacks.remove(callback);
     }
 
     /**
@@ -997,9 +1009,13 @@ public class DeployGate {
             return;
         }
 
-        sInstance.mInitializeCallbacks.remove(listener);
-        sInstance.mStatusChangeCallbacks.remove(listener);
-        sInstance.mUpdateAvailableCallbacks.remove(listener);
+        sInstance.unregisterCallbackInternal(listener);
+    }
+
+    private void unregisterCallbackInternal(DeployGateCallback listener) {
+        mInitializeCallbacks.remove(listener);
+        mStatusChangeCallbacks.remove(listener);
+        mUpdateAvailableCallbacks.remove(listener);
     }
 
     /**
