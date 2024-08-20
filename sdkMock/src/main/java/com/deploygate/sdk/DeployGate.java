@@ -91,7 +91,7 @@ public class DeployGate {
 
     @Deprecated
     public static void registerCallback(
-            final DeployGateCallback listener,
+            DeployGateCallback listener,
             boolean refreshImmediately
     ) {
     }

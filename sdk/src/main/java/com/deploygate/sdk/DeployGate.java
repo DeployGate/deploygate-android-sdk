@@ -963,27 +963,12 @@ public class DeployGate {
     }
 
     private void registerCallbackInternal(
-            final DeployGateCallback listener,
+            DeployGateCallback listener,
             boolean callbackImmediately
     ) {
-        mInitializeCallbacks.add(new DeployGateInitializeCallback() {
-            @Override
-            public void onInitialized(boolean isServiceAvailable) {
-                listener.onInitialized(isServiceAvailable);
-            }
-        });
-        mStatusChangeCallbacks.add(new DeployGateStatusChangeCallback() {
-            @Override
-            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
-                listener.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
-            }
-        });
-        mUpdateAvailableCallbacks.add(new DeployGateUpdateAvailableCallback() {
-            @Override
-            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
-                listener.onUpdateAvailable(revision, versionName, versionCode);
-            }
-        });
+        mInitializeCallbacks.add(listener);
+        mStatusChangeCallbacks.add(listener);
+        mUpdateAvailableCallbacks.add(listener);
 
         if (callbackImmediately) {
             refresh();
@@ -1012,24 +997,9 @@ public class DeployGate {
             return;
         }
 
-        sInstance.mInitializeCallbacks.remove(new DeployGateInitializeCallback() {
-            @Override
-            public void onInitialized(boolean isServiceAvailable) {
-                listener.onInitialized(isServiceAvailable);
-            }
-        });
-        sInstance.mStatusChangeCallbacks.remove(new DeployGateStatusChangeCallback() {
-            @Override
-            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
-                listener.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
-            }
-        });
-        sInstance.mUpdateAvailableCallbacks.remove(new DeployGateUpdateAvailableCallback() {
-            @Override
-            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
-                listener.onUpdateAvailable(revision, versionName, versionCode);
-            }
-        });
+        sInstance.mInitializeCallbacks.remove(listener);
+        sInstance.mStatusChangeCallbacks.remove(listener);
+        sInstance.mUpdateAvailableCallbacks.remove(listener);
     }
 
     /**
