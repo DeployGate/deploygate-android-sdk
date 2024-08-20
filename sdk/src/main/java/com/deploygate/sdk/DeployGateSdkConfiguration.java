@@ -12,7 +12,6 @@ public final class DeployGateSdkConfiguration {
 
     final boolean isCrashReportingEnabled;
 
-    final DeployGateCallback callback;
     final DeployGateInitializeCallback initializeCallback;
     final DeployGateStatusChangeCallback statusChangeCallback;
     final DeployGateUpdateAvailableCallback updateAvailableCallback;
@@ -29,7 +28,6 @@ public final class DeployGateSdkConfiguration {
                 builder.appOwnerName,
                 builder.isCrashReportingEnabled,
                 builder.isCaptureEnabled,
-                builder.callback,
                 builder.initializeCallback,
                 builder.statusChangeCallback,
                 builder.updateAvailableCallback
@@ -43,7 +41,6 @@ public final class DeployGateSdkConfiguration {
             String appOwnerName,
             boolean isCrashReportingEnabled,
             boolean isCaptureEnabled,
-            DeployGateCallback callback,
             DeployGateInitializeCallback initializeCallback,
             DeployGateStatusChangeCallback statusChangeCallback,
             DeployGateUpdateAvailableCallback updateAvailableCallback
@@ -54,7 +51,6 @@ public final class DeployGateSdkConfiguration {
         this.appOwnerName = appOwnerName;
         this.isCrashReportingEnabled = isCrashReportingEnabled;
         this.isCaptureEnabled = isCaptureEnabled;
-        this.callback = callback;
         this.initializeCallback = initializeCallback;
         this.statusChangeCallback = statusChangeCallback;
         this.updateAvailableCallback = updateAvailableCallback;
@@ -72,7 +68,6 @@ public final class DeployGateSdkConfiguration {
 
         private boolean isCaptureEnabled = true;
 
-        private DeployGateCallback callback = null;
         private DeployGateInitializeCallback initializeCallback = null;
         private DeployGateStatusChangeCallback statusChangeCallback = null;
         private DeployGateUpdateAvailableCallback updateAvailableCallback = null;
@@ -162,10 +157,30 @@ public final class DeployGateSdkConfiguration {
          *   Set an instance of callback. The reference won't be released. Please use {@link DeployGate#registerCallback(DeployGateCallback, boolean)} for memory sensitive works.
          * @return self
          * @deprecated since 4.9.0. Use each extended callback interfaces instead.
+         * @see #setInitializeCallback(DeployGateInitializeCallback)
+         * @see #setStatusChangeCallback(DeployGateStatusChangeCallback)
+         * @see #setUpdateAvailableCallback(DeployGateUpdateAvailableCallback)
          */
         @Deprecated
-        public Builder setCallback(DeployGateCallback callback) {
-            this.callback = callback;
+        public Builder setCallback(final DeployGateCallback callback) {
+            this.setInitializeCallback(new DeployGateInitializeCallback() {
+                @Override
+                public void onInitialized(boolean isServiceAvailable) {
+                    callback.onInitialized(isServiceAvailable);
+                }
+            });
+            this.setStatusChangeCallback(new DeployGateStatusChangeCallback() {
+                @Override
+                public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+                    callback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
+                }
+            });
+            this.setUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
+                @Override
+                public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+                    callback.onUpdateAvailable(revision, versionName, versionCode);
+                }
+            });
             return this;
         }
 

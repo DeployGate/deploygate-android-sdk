@@ -100,13 +100,13 @@ public class DeployGate {
 
     @Deprecated
     public static void registerCallback(
-            DeployGateCallback listener,
+            final DeployGateCallback listener,
             boolean refreshImmediately
     ) {
     }
 
     @Deprecated
-    public static void unregisterCallback(DeployGateCallback listener) {
+    public static void unregisterCallback(final DeployGateCallback listener) {
     }
 
     public static boolean isInitialized() {
