@@ -32,7 +32,20 @@ public final class DeployGateSdkConfiguration {
             return this;
         }
 
+        @Deprecated
         public Builder setCallback(DeployGateCallback callback) {
+            return this;
+        }
+
+        public Builder setInitializeCallback(DeployGateInitializeCallback initializeCallback) {
+            return this;
+        }
+
+        public Builder setStatusChangeCallback(DeployGateStatusChangeCallback statusChangeCallback) {
+            return this;
+        }
+
+        public Builder setUpdateAvailableCallback(DeployGateUpdateAvailableCallback updateAvailableCallback) {
             return this;
         }
 

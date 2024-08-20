@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.deploygate.sdk.CustomAttributes;
 import com.deploygate.sdk.DeployGate;
-import com.deploygate.sdk.DeployGateCallback;
+import com.deploygate.sdk.DeployGateSdkConfiguration;
 
 import java.util.Locale;
 
@@ -27,12 +27,10 @@ public class App extends Application {
         // Note that you also need to edit your AndroidManifest.xml to activate customized initializer.
         // Refer the comment on stableReal/AndroidManifest.xml included in this sample.
 
-        DeployGate.install(this, new DeployGateCallback() {
+        DeployGateSdkConfiguration configuration = new DeployGateSdkConfiguration.Builder()
             // Please note that this callback is called iff you have removed the content provider.
-            // For those who wanna use the content provider, SDK provides DeployGate#registerCallback for your use-case.
-
-            @Override
-            public void onInitialized(boolean isServiceAvailable) {
+            // For those who wanna use the content provider, SDK provides DeployGate#registerXXXCallback for your use-case.
+            .setInitializeCallback(isServiceAvailable -> {
                 if (isServiceAvailable) {
                     Log.i(TAG, "SDK is available");
                     DeployGate.logInfo("SDK is available");
@@ -44,49 +42,39 @@ public class App extends Application {
                     Log.i(TAG, "SDK is unavailable");
                     DeployGate.logInfo("SDK is unavailable"); // this fails silently
                 }
-            }
-
-            @Override
-            public void onStatusChanged(
-                    boolean isManaged,
-                    boolean isAuthorized,
-                    String loginUsername,
-                    boolean isStopped
-            ) {
+            })
+            .setStatusChangeCallback((isManaged, isAuthorized, loginUsername, isStopped) -> {
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("isManaged", isManaged);
                 bundle.putBoolean("isAuthorized", isAuthorized);
                 bundle.putString("loginUsername", loginUsername);
                 bundle.putBoolean("isStopped", isStopped);
 
-                String message = String.format(Locale.US, "onStatusChanged(%s)", bundle.toString());
+                String message = String.format(Locale.US, "onStatusChanged(%s)", bundle);
 
                 Log.i(TAG, message);
                 DeployGate.logInfo(message);
-            }
-
-            @Override
-            public void onUpdateAvailable(
-                    int revision,
-                    String versionName,
-                    int versionCode
-            ) {
+            })
+            .setUpdateAvailableCallback((revision, versionName, versionCode) -> {
                 Bundle bundle = new Bundle();
                 bundle.putInt("revision", revision);
                 bundle.putString("versionName", versionName);
                 bundle.putInt("versionCode", versionCode);
 
-                String message = String.format(Locale.US, "onUpdateAvailable(%s)", bundle.toString());
+                String message = String.format(Locale.US, "onUpdateAvailable(%s)", bundle);
 
                 Log.i(TAG, message);
                 DeployGate.logInfo(message);
-            }
-        }, true);
+            })
+            .setEnabledOnNonDebuggableBuild(true)
+            .build();
+
+        DeployGate.install(this, configuration);
 
         // If you want to prevent the app distributed by someone else, specify your username on DeployGate
-        // as a second argument of DeployGate.install, like:
+        // with setAuthor method when creating DeployGate SdkConfiguration. like:
         //
-        // DeployGate.install(this, "YOURUSERNAME");
+        // builder.setAuthor("YOURUSERNAME");
         //
         // You can use DeployGate.isAuthorized() later to check the installation is valid or not.
     }

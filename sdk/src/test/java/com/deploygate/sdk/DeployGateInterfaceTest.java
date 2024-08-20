@@ -26,6 +26,9 @@ public class DeployGateInterfaceTest {
     Application app;
 
     DeployGateCallback callback;
+    DeployGateInitializeCallback initializeCallback;
+    DeployGateStatusChangeCallback statusChangeCallback;
+    DeployGateUpdateAvailableCallback updateAvailableCallback;
 
     @Before
     public void setUp() {
@@ -54,6 +57,24 @@ public class DeployGateInterfaceTest {
                     int versionCode
             ) {
 
+            }
+        };
+        initializeCallback = new DeployGateInitializeCallback() {
+            @Override
+            public void onInitialized(boolean isServiceAvailable) {
+                // no-op
+            }
+        };
+        statusChangeCallback = new DeployGateStatusChangeCallback() {
+            @Override
+            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+                // no-op
+            }
+        };
+        updateAvailableCallback = new DeployGateUpdateAvailableCallback() {
+            @Override
+            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+                // no-op
             }
         };
 
@@ -192,6 +213,33 @@ public class DeployGateInterfaceTest {
 
             }
         }, false);
+
+        DeployGate.registerInitializeCallback(null);
+        DeployGate.registerInitializeCallback(initializeCallback);
+        DeployGate.registerInitializeCallback(new DeployGateInitializeCallback() {
+            @Override
+            public void onInitialized(boolean isServiceAvailable) {
+                // no-op
+            }
+        });
+
+        DeployGate.registerStatusChangeCallback(null);
+        DeployGate.registerStatusChangeCallback(statusChangeCallback);
+        DeployGate.registerStatusChangeCallback(new DeployGateStatusChangeCallback() {
+            @Override
+            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+                // no-op
+            }
+        });
+
+        DeployGate.registerUpdateAvailableCallback(null);
+        DeployGate.registerUpdateAvailableCallback(updateAvailableCallback);
+        DeployGate.registerUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
+            @Override
+            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+                // no-op
+            }
+        });
     }
 
     @Test
@@ -200,7 +248,7 @@ public class DeployGateInterfaceTest {
         DeployGate.unregisterCallback(new DeployGateCallback() {
             @Override
             public void onInitialized(boolean isServiceAvailable) {
-
+                // no-op
             }
 
             @Override
@@ -210,7 +258,7 @@ public class DeployGateInterfaceTest {
                     String loginUsername,
                     boolean isStopped
             ) {
-
+                // no-op
             }
 
             @Override
@@ -219,10 +267,37 @@ public class DeployGateInterfaceTest {
                     String versionName,
                     int versionCode
             ) {
-
+                // no-op
             }
         });
         DeployGate.unregisterCallback(callback);
+
+        DeployGate.unregisterInitializeCallback(null);
+        DeployGate.unregisterInitializeCallback(new DeployGateInitializeCallback() {
+            @Override
+            public void onInitialized(boolean isServiceAvailable) {
+                // no-op
+            }
+        });
+        DeployGate.unregisterInitializeCallback(initializeCallback);
+
+        DeployGate.unregisterStatusChangeCallback(null);
+        DeployGate.unregisterStatusChangeCallback(new DeployGateStatusChangeCallback() {
+            @Override
+            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+                // no-op
+            }
+        });
+        DeployGate.unregisterStatusChangeCallback(statusChangeCallback);
+
+        DeployGate.unregisterUpdateAvailableCallback(null);
+        DeployGate.unregisterUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
+            @Override
+            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+                // no-op
+            }
+        });
+        DeployGate.unregisterUpdateAvailableCallback(updateAvailableCallback);
     }
 
     @Test

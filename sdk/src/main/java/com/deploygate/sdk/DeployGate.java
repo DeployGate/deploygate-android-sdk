@@ -24,8 +24,6 @@ import com.deploygate.service.DeployGateEvent;
 import com.deploygate.service.IDeployGateSdkService;
 import com.deploygate.service.IDeployGateSdkServiceCallback;
 
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,7 +65,9 @@ public class DeployGate {
     private final Handler mHandler;
     private final ILogcatInstructionSerializer mLogcatInstructionSerializer;
     private final CustomLogInstructionSerializer mCustomLogInstructionSerializer;
-    private final HashSet<DeployGateCallback> mCallbacks;
+    private final HashSet<DeployGateInitializeCallback> mInitializeCallbacks;
+    private final HashSet<DeployGateStatusChangeCallback> mStatusChangeCallbacks;
+    private final HashSet<DeployGateUpdateAvailableCallback> mUpdateAvailableCallbacks;
     private final HashMap<String, Bundle> mPendingEvents;
     private final String mExpectedAuthor;
     private String mAuthor;
@@ -194,8 +194,13 @@ public class DeployGate {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    for (DeployGateCallback callback : mCallbacks) {
+                    // call onInitialized on each callbacks
+                    for (DeployGateInitializeCallback callback : mInitializeCallbacks) {
                         callback.onInitialized(true);
+                    }
+
+                    // after call onInitialized, then call onStatusChanged
+                    for (DeployGateStatusChangeCallback callback : mStatusChangeCallbacks) {
                         callback.onStatusChanged(isManaged, isAuthorized, loginUsername, isStopped);
                     }
                 }
@@ -229,7 +234,7 @@ public class DeployGate {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    for (DeployGateCallback callback : mCallbacks) {
+                    for (DeployGateUpdateAvailableCallback callback : mUpdateAvailableCallbacks) {
                         callback.onUpdateAvailable(serial, versionName, versionCode);
                     }
                 }
@@ -288,10 +293,16 @@ public class DeployGate {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                for (DeployGateCallback callback : mCallbacks) {
+                // call onInitialized on each callbacks
+                for (DeployGateInitializeCallback callback : mInitializeCallbacks) {
                     callback.onInitialized(false);
+                }
+
+                // after call onInitialized, then call onStatusChanged
+                for (DeployGateStatusChangeCallback callback : mStatusChangeCallbacks) {
                     callback.onStatusChanged(false, false, null, false);
                 }
+
             }
         });
     }
@@ -314,14 +325,24 @@ public class DeployGate {
         mHandler = new Handler();
         mLogcatInstructionSerializer = mHostApp.canUseLogcat ? new LogcatInstructionSerializer(mHostApp.packageName) : ILogcatInstructionSerializer.NULL_INSTANCE;
         mCustomLogInstructionSerializer = new CustomLogInstructionSerializer(mHostApp.packageName, sdkConfiguration.customLogConfiguration);
-        mCallbacks = new HashSet<>();
+        mInitializeCallbacks = new HashSet<>();
+        mStatusChangeCallbacks = new HashSet<>();
+        mUpdateAvailableCallbacks = new HashSet<>();
         mPendingEvents = new HashMap<>();
         mExpectedAuthor = sdkConfiguration.appOwnerName;
 
         prepareBroadcastReceiver();
 
-        if (sdkConfiguration.callback != null) {
-            mCallbacks.add(sdkConfiguration.callback);
+        if (sdkConfiguration.initializeCallback != null) {
+            mInitializeCallbacks.add(sdkConfiguration.initializeCallback);
+        }
+
+        if (sdkConfiguration.statusChangeCallback != null) {
+            mStatusChangeCallbacks.add(sdkConfiguration.statusChangeCallback);
+        }
+
+        if (sdkConfiguration.updateAvailableCallback != null) {
+            mUpdateAvailableCallbacks.add(sdkConfiguration.updateAvailableCallback);
         }
 
         mInitializedLatch = new CountDownLatch(1);
@@ -783,6 +804,144 @@ public class DeployGate {
     }
 
     /**
+     * Register a callback listener about the DeployGate initialization event.
+     * Don't forget to call {@link #unregisterInitializeCallback(DeployGateInitializeCallback)}
+     * when the callback is no longer needed (e.g., on destroying an activity.)
+     * If the listener has already in the callback list, just ignored.
+     *
+     * @param callback callback listener
+     * @since 4.9.0
+     */
+    public static void registerInitializeCallback(DeployGateInitializeCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.registerInitializeCallbackInternal(callback);
+    }
+
+    private void registerInitializeCallbackInternal(DeployGateInitializeCallback callback) {
+        mInitializeCallbacks.add(callback);
+    }
+
+    /**
+     * Unregister a callback listener.
+     * If the listener was not registered, just ignored.
+     *
+     * @param callback callback listener to be removed
+     * @since 4.9.0
+     */
+    public static void unregisterInitializeCallback(DeployGateInitializeCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.unregisterInitializeCallbackInternal(callback);
+    }
+
+    private void unregisterInitializeCallbackInternal(DeployGateInitializeCallback callback) {
+        mInitializeCallbacks.remove(callback);
+    }
+
+    /**
+     * Register a callback listener about the app status on DeployGate.
+     * Don't forget to call {@link #unregisterStatusChangeCallback(DeployGateStatusChangeCallback)}
+     * when the callback is no longer needed (e.g., on destroying an activity.)
+     * If the listener has already in the callback list, just ignored.
+     *
+     * @param callback callback listener
+     * @since 4.9.0
+     */
+    public static void registerStatusChangeCallback(DeployGateStatusChangeCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.registerStatusChangeCallbackInternal(callback);
+    }
+
+    private void registerStatusChangeCallbackInternal(DeployGateStatusChangeCallback callback) {
+        mStatusChangeCallbacks.add(callback);
+    }
+
+    /**
+     * Unregister a callback listener.
+     * If the listener was not registered, just ignored.
+     *
+     * @param callback callback listener to be removed
+     * @since 4.9.0
+     */
+    public static void unregisterStatusChangeCallback(DeployGateStatusChangeCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.unregisterStatusChangeCallbackInternal(callback);
+    }
+
+    private void unregisterStatusChangeCallbackInternal(DeployGateStatusChangeCallback callback) {
+        mStatusChangeCallbacks.remove(callback);
+    }
+
+    /**
+     * Register a callback listener about the new version of the app is available.
+     * Don't forget to call {@link #unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback)}
+     * when the callback is no longer needed (e.g., on destroying an activity.)
+     * If the listener has already in the callback list, just ignored.
+     *
+     * @param callback callback listener
+     * @since 4.9.0
+     */
+    public static void registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.registerUpdateAvailableCallbackInternal(callback);
+    }
+
+    private void registerUpdateAvailableCallbackInternal(DeployGateUpdateAvailableCallback callback) {
+        mUpdateAvailableCallbacks.add(callback);
+    }
+
+    /**
+     * Unregister a callback listener.
+     * If the listener was not registered, just ignored.
+     *
+     * @param callback callback listener to be removed
+     * @since 4.9.0
+     */
+    public static void unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.unregisterUpdateAvailableCallbackInternal(callback);
+    }
+
+    private void unregisterUpdateAvailableCallbackInternal(DeployGateUpdateAvailableCallback callback) {
+        mUpdateAvailableCallbacks.remove(callback);
+    }
+
+    /**
      * Register a DeployGate event callback listener. Don't forget to call
      * {@link #unregisterCallback(DeployGateCallback)} when the callback is no
      * longer needed (e.g., on destroying an activity.) If the listener has
@@ -795,7 +954,12 @@ public class DeployGate {
      *         true.
      *
      * @since r1
+     * @deprecated since 4.9.0. Use each register method for separated callbacks instead.
+     * @see #registerInitializeCallback(DeployGateInitializeCallback)
+     * @see #registerStatusChangeCallback(DeployGateStatusChangeCallback)
+     * @see #registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback)
      */
+    @Deprecated
     public static void registerCallback(
             DeployGateCallback listener,
             boolean refreshImmediately
@@ -814,7 +978,10 @@ public class DeployGate {
             DeployGateCallback listener,
             boolean callbackImmediately
     ) {
-        mCallbacks.add(listener);
+        mInitializeCallbacks.add(listener);
+        mStatusChangeCallbacks.add(listener);
+        mUpdateAvailableCallbacks.add(listener);
+
         if (callbackImmediately) {
             refresh();
         }
@@ -828,8 +995,13 @@ public class DeployGate {
      *         callback listener to be removed
      *
      * @since r1
+     * @deprecated since 4.9.0. Use each unregister method for separated callbacks instead.
+     * @see #unregisterInitializeCallback(DeployGateInitializeCallback)
+     * @see #unregisterStatusChangeCallback(DeployGateStatusChangeCallback)
+     * @see #unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback)
      */
-    public static void unregisterCallback(DeployGateCallback listener) {
+    @Deprecated
+    public static void unregisterCallback(final DeployGateCallback listener) {
         if (sInstance == null) {
             return;
         }
@@ -837,7 +1009,13 @@ public class DeployGate {
             return;
         }
 
-        sInstance.mCallbacks.remove(listener);
+        sInstance.unregisterCallbackInternal(listener);
+    }
+
+    private void unregisterCallbackInternal(DeployGateCallback listener) {
+        mInitializeCallbacks.remove(listener);
+        mStatusChangeCallbacks.remove(listener);
+        mUpdateAvailableCallbacks.remove(listener);
     }
 
     /**
@@ -1471,5 +1649,26 @@ public class DeployGate {
         }
 
         return sSdkDeviceStates;
+    }
+
+    /**
+     * Not a public API. This is only for testing.
+     */
+    static HashSet<DeployGateInitializeCallback> getInitializeCallbacks() {
+        return sInstance != null ? sInstance.mInitializeCallbacks : null;
+    }
+
+    /**
+     * Not a public API. This is only for testing.
+     */
+    static HashSet<DeployGateStatusChangeCallback> getStatusChangeCallbacks() {
+        return sInstance != null ? sInstance.mStatusChangeCallbacks : null;
+    }
+
+    /**
+     * Not a public API. This is only for testing.
+     */
+    static HashSet<DeployGateUpdateAvailableCallback> getUpdateAvailableCallbacks() {
+        return sInstance != null ? sInstance.mUpdateAvailableCallbacks : null;
     }
 }
