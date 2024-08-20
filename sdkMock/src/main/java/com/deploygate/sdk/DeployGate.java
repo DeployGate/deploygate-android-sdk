@@ -98,12 +98,14 @@ public class DeployGate {
     public static void unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback callback) {
     }
 
+    @Deprecated
     public static void registerCallback(
             DeployGateCallback listener,
             boolean refreshImmediately
     ) {
     }
 
+    @Deprecated
     public static void unregisterCallback(DeployGateCallback listener) {
     }
 
