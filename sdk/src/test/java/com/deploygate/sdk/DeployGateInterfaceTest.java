@@ -219,7 +219,7 @@ public class DeployGateInterfaceTest {
         DeployGate.registerInitializeCallback(new DeployGateInitializeCallback() {
             @Override
             public void onInitialized(boolean isServiceAvailable) {
-
+                // no-op
             }
         });
 
@@ -228,7 +228,7 @@ public class DeployGateInterfaceTest {
         DeployGate.registerStatusChangeCallback(new DeployGateStatusChangeCallback() {
             @Override
             public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
-
+                // no-op
             }
         });
 
@@ -237,7 +237,7 @@ public class DeployGateInterfaceTest {
         DeployGate.registerUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
             @Override
             public void onUpdateAvailable(int revision, String versionName, int versionCode) {
-
+                // no-op
             }
         });
     }
@@ -248,7 +248,7 @@ public class DeployGateInterfaceTest {
         DeployGate.unregisterCallback(new DeployGateCallback() {
             @Override
             public void onInitialized(boolean isServiceAvailable) {
-
+                // no-op
             }
 
             @Override
@@ -258,7 +258,7 @@ public class DeployGateInterfaceTest {
                     String loginUsername,
                     boolean isStopped
             ) {
-
+                // no-op
             }
 
             @Override
@@ -267,7 +267,7 @@ public class DeployGateInterfaceTest {
                     String versionName,
                     int versionCode
             ) {
-
+                // no-op
             }
         });
         DeployGate.unregisterCallback(callback);
@@ -276,7 +276,7 @@ public class DeployGateInterfaceTest {
         DeployGate.unregisterInitializeCallback(new DeployGateInitializeCallback() {
             @Override
             public void onInitialized(boolean isServiceAvailable) {
-
+                // no-op
             }
         });
         DeployGate.unregisterInitializeCallback(initializeCallback);
@@ -285,7 +285,7 @@ public class DeployGateInterfaceTest {
         DeployGate.unregisterStatusChangeCallback(new DeployGateStatusChangeCallback() {
             @Override
             public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
-
+                // no-op
             }
         });
         DeployGate.unregisterStatusChangeCallback(statusChangeCallback);
@@ -294,7 +294,7 @@ public class DeployGateInterfaceTest {
         DeployGate.unregisterUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
             @Override
             public void onUpdateAvailable(int revision, String versionName, int versionCode) {
-
+                // no-op
             }
         });
         DeployGate.unregisterUpdateAvailableCallback(updateAvailableCallback);
