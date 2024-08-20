@@ -1651,14 +1651,23 @@ public class DeployGate {
         return sSdkDeviceStates;
     }
 
+    /**
+     * Not a public API. This is only for testing.
+     */
     static HashSet<DeployGateInitializeCallback> getInitializeCallbacks() {
         return sInstance != null ? sInstance.mInitializeCallbacks : null;
     }
 
+    /**
+     * Not a public API. This is only for testing.
+     */
     static HashSet<DeployGateStatusChangeCallback> getStatusChangeCallbacks() {
         return sInstance != null ? sInstance.mStatusChangeCallbacks : null;
     }
 
+    /**
+     * Not a public API. This is only for testing.
+     */
     static HashSet<DeployGateUpdateAvailableCallback> getUpdateAvailableCallbacks() {
         return sInstance != null ? sInstance.mUpdateAvailableCallbacks : null;
     }
