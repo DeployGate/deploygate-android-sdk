@@ -68,6 +68,7 @@ public class DeployGate {
     private final HashSet<DeployGateInitializeCallback> mInitializeCallbacks;
     private final HashSet<DeployGateStatusChangeCallback> mStatusChangeCallbacks;
     private final HashSet<DeployGateUpdateAvailableCallback> mUpdateAvailableCallbacks;
+    private final HashSet<DeployGateCaptureCreateCallback> mCaptureCreateCallbacks;
     private final HashMap<String, Bundle> mPendingEvents;
     private final String mExpectedAuthor;
     private String mAuthor;
@@ -328,6 +329,7 @@ public class DeployGate {
         mInitializeCallbacks = new HashSet<>();
         mStatusChangeCallbacks = new HashSet<>();
         mUpdateAvailableCallbacks = new HashSet<>();
+        mCaptureCreateCallbacks = new HashSet<>();
         mPendingEvents = new HashMap<>();
         mExpectedAuthor = sdkConfiguration.appOwnerName;
 
@@ -343,6 +345,10 @@ public class DeployGate {
 
         if (sdkConfiguration.updateAvailableCallback != null) {
             mUpdateAvailableCallbacks.add(sdkConfiguration.updateAvailableCallback);
+        }
+
+        if (sdkConfiguration.captureCreateCallback != null) {
+            mCaptureCreateCallbacks.add(sdkConfiguration.captureCreateCallback);
         }
 
         mInitializedLatch = new CountDownLatch(1);
@@ -939,6 +945,52 @@ public class DeployGate {
 
     private void unregisterUpdateAvailableCallbackInternal(DeployGateUpdateAvailableCallback callback) {
         mUpdateAvailableCallbacks.remove(callback);
+    }
+
+    /**
+     * Register a callback listener about the new capture is created.
+     * Don't forget to unregister the callback listener when it is no longer needed (e.g., on destroying an activity.)
+     * If the listener has already in the callback list, just ignored.
+     *
+     * @param callback callback listener
+     * @see #unregisterCaptureCreateCallback(DeployGateCaptureCreateCallback)
+     * @since 4.9.0
+     */
+    public static void registerCaptureCreateCallback(DeployGateCaptureCreateCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.registerCaptureCaptureCallbackInternal(callback);
+    }
+
+    private void registerCaptureCaptureCallbackInternal(DeployGateCaptureCreateCallback callback) {
+        mCaptureCreateCallbacks.add(callback);
+    }
+
+    /**
+     * Unregister a callback listener.
+     * If the listener was not registered, just ignored.
+     *
+     * @param callback callback listener to be removed
+     * @since 4.9.0
+     */
+    public static void unregisterCaptureCreateCallback(DeployGateCaptureCreateCallback callback) {
+        if (sInstance == null) {
+            return;
+        }
+        if (callback == null) {
+            return;
+        }
+
+        sInstance.unregisterCaptureCaptureCallbackInternal(callback);
+    }
+
+    private void unregisterCaptureCaptureCallbackInternal(DeployGateCaptureCreateCallback callback) {
+        mCaptureCreateCallbacks.remove(callback);
     }
 
     /**

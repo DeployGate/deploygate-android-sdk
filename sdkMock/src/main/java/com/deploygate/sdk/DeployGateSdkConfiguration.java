@@ -49,6 +49,10 @@ public final class DeployGateSdkConfiguration {
             return this;
         }
 
+        public Builder setCaptureCreateCallback(DeployGateCaptureCreateCallback captureCreateCallback) {
+            return this;
+        }
+
         public DeployGateSdkConfiguration build() {
             return new DeployGateSdkConfiguration();
         }
