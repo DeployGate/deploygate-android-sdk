@@ -24,6 +24,7 @@ public class DeployGateSdkConfigurationInterfaceTest {
     DeployGateInitializeCallback initializeCallback;
     DeployGateStatusChangeCallback statusChangeCallback;
     DeployGateUpdateAvailableCallback updateAvailableCallback;
+    DeployGateCaptureCreateCallback captureCreateCallback;
 
     @Before
     public void setUp() {
@@ -43,6 +44,30 @@ public class DeployGateSdkConfigurationInterfaceTest {
 
             @Override
             public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+                // no-op
+            }
+        };
+        initializeCallback = new DeployGateInitializeCallback() {
+            @Override
+            public void onInitialized(boolean isServiceAvailable) {
+                // no-op
+            }
+        };
+        statusChangeCallback = new DeployGateStatusChangeCallback() {
+            @Override
+            public void onStatusChanged(boolean isManaged, boolean isAuthorized, String loginUsername, boolean isStopped) {
+                // no-op
+            }
+        };
+        updateAvailableCallback = new DeployGateUpdateAvailableCallback() {
+            @Override
+            public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+                // no-op
+            }
+        };
+        captureCreateCallback = new DeployGateCaptureCreateCallback() {
+            @Override
+            public void onCaptureCreated(String captureUrl, long createdAtMillis) {
                 // no-op
             }
         };
@@ -122,6 +147,16 @@ public class DeployGateSdkConfigurationInterfaceTest {
         builder.setUpdateAvailableCallback(new DeployGateUpdateAvailableCallback() {
             @Override
             public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+                // no-op
+            }
+        });
+
+        // setCaptureCreateCallback
+        builder.setCaptureCreateCallback(null);
+        builder.setCaptureCreateCallback(captureCreateCallback);
+        builder.setCaptureCreateCallback(new DeployGateCaptureCreateCallback() {
+            @Override
+            public void onCaptureCreated(String captureUrl, long createdAtMillis) {
                 // no-op
             }
         });

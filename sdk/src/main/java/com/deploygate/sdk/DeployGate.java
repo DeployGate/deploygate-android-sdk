@@ -303,7 +303,6 @@ public class DeployGate {
                 for (DeployGateStatusChangeCallback callback : mStatusChangeCallbacks) {
                     callback.onStatusChanged(false, false, null, false);
                 }
-
             }
         });
     }
@@ -1722,5 +1721,12 @@ public class DeployGate {
      */
     static HashSet<DeployGateUpdateAvailableCallback> getUpdateAvailableCallbacks() {
         return sInstance != null ? sInstance.mUpdateAvailableCallbacks : null;
+    }
+
+    /**
+     * Not a public API. This is only for testing.
+     */
+    static HashSet<DeployGateCaptureCreateCallback> getCaptureCreateCallbacks() {
+        return sInstance != null ? sInstance.mCaptureCreateCallbacks : null;
     }
 }

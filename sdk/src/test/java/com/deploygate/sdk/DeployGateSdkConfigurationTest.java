@@ -15,6 +15,7 @@ public class DeployGateSdkConfigurationTest {
     DeployGateInitializeCallback initializeCallback;
     DeployGateStatusChangeCallback statusChangeCallback;
     DeployGateUpdateAvailableCallback updateAvailableCallback;
+    DeployGateCaptureCreateCallback captureCreateCallback;
     DeployGateCallback deployGateCallback;
 
     @Before
@@ -38,6 +39,12 @@ public class DeployGateSdkConfigurationTest {
                 // no-op
             }
         };
+        captureCreateCallback = new DeployGateCaptureCreateCallback() {
+            @Override
+            public void onCaptureCreated(String captureUrl, long createdAtMillis) {
+
+            }
+        };
         deployGateCallback = new DeployGateCallback() {
             @Override
             public void onInitialized(boolean isServiceAvailable) {
@@ -59,7 +66,6 @@ public class DeployGateSdkConfigurationTest {
 
     @Test
     public void builder() {
-
         DeployGateSdkConfiguration configuration = new DeployGateSdkConfiguration.Builder()
                 .setAppOwnerName("owner")
                 .setCaptureEnabled(true)
@@ -70,6 +76,7 @@ public class DeployGateSdkConfigurationTest {
                 .setInitializeCallback(initializeCallback)
                 .setStatusChangeCallback(statusChangeCallback)
                 .setUpdateAvailableCallback(updateAvailableCallback)
+                .setCaptureCreateCallback(captureCreateCallback)
                 .build();
 
         Truth.assertThat(configuration.appOwnerName).isEqualTo("owner");
@@ -81,6 +88,7 @@ public class DeployGateSdkConfigurationTest {
         Truth.assertThat(configuration.initializeCallback).isEqualTo(initializeCallback);
         Truth.assertThat(configuration.statusChangeCallback).isEqualTo(statusChangeCallback);
         Truth.assertThat(configuration.updateAvailableCallback).isEqualTo(updateAvailableCallback);
+        Truth.assertThat(configuration.captureCreateCallback).isEqualTo(captureCreateCallback);
     }
 
     @Test
@@ -100,11 +108,13 @@ public class DeployGateSdkConfigurationTest {
                 .setInitializeCallback(initializeCallback)
                 .setStatusChangeCallback(statusChangeCallback)
                 .setUpdateAvailableCallback(updateAvailableCallback)
+                .setCaptureCreateCallback(captureCreateCallback)
                 .build();
 
         Truth.assertThat(configurationWithFineGrainedCallbacks.initializeCallback).isEqualTo(initializeCallback);
         Truth.assertThat(configurationWithFineGrainedCallbacks.statusChangeCallback).isEqualTo(statusChangeCallback);
         Truth.assertThat(configurationWithFineGrainedCallbacks.updateAvailableCallback).isEqualTo(updateAvailableCallback);
+        Truth.assertThat(configurationWithFineGrainedCallbacks.captureCreateCallback).isEqualTo(captureCreateCallback);
     }
 
     @Test

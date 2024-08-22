@@ -27,6 +27,7 @@ public class DeployGateTest {
     DeployGateInitializeCallback initializeCallback;
     DeployGateStatusChangeCallback statusChangeCallback;
     DeployGateUpdateAvailableCallback updateAvailableCallback;
+    DeployGateCaptureCreateCallback captureCreateCallback;
 
     @Before
     public void setUp() {
@@ -66,6 +67,12 @@ public class DeployGateTest {
                 // no-op
             }
         };
+        captureCreateCallback = new DeployGateCaptureCreateCallback() {
+            @Override
+            public void onCaptureCreated(String captureUrl, long createdAtMillis) {
+                // no-op
+            }
+        };
 
         DeployGate.install(app, configuration);
     }
@@ -95,14 +102,22 @@ public class DeployGateTest {
                 // no-op
             }
         };
+        DeployGateCaptureCreateCallback anotherCaptureCreateCallback = new DeployGateCaptureCreateCallback() {
+            @Override
+            public void onCaptureCreated(String captureUrl, long createdAtMillis) {
+                // no-op
+            }
+        };
 
         Truth.assertThat(DeployGate.getInitializeCallbacks().size()).isEqualTo(0);
         Truth.assertThat(DeployGate.getStatusChangeCallbacks().size()).isEqualTo(0);
         Truth.assertThat(DeployGate.getUpdateAvailableCallbacks().size()).isEqualTo(0);
+        Truth.assertThat(DeployGate.getCaptureCreateCallbacks().size()).isEqualTo(0);
 
         DeployGate.registerInitializeCallback(initializeCallback);
         DeployGate.registerStatusChangeCallback(statusChangeCallback);
         DeployGate.registerUpdateAvailableCallback(updateAvailableCallback);
+        DeployGate.registerCaptureCreateCallback(captureCreateCallback);
 
         Truth.assertThat(DeployGate.getInitializeCallbacks().size()).isEqualTo(1);
         Truth.assertThat(DeployGate.getInitializeCallbacks().contains(initializeCallback)).isTrue();
@@ -113,41 +128,52 @@ public class DeployGateTest {
         Truth.assertThat(DeployGate.getUpdateAvailableCallbacks().size()).isEqualTo(1);
         Truth.assertThat(DeployGate.getUpdateAvailableCallbacks().contains(updateAvailableCallback)).isTrue();
         Truth.assertThat(DeployGate.getUpdateAvailableCallbacks().contains(anotherUpdateAvailableCallback)).isFalse();
+        Truth.assertThat(DeployGate.getCaptureCreateCallbacks().size()).isEqualTo(1);
+        Truth.assertThat(DeployGate.getCaptureCreateCallbacks().contains(captureCreateCallback)).isTrue();
+        Truth.assertThat(DeployGate.getCaptureCreateCallbacks().contains(anotherCaptureCreateCallback)).isFalse();
 
         // Each callback already registered before, so DeployGate maybe ignore this operation.
         DeployGate.registerInitializeCallback(initializeCallback);
         DeployGate.registerStatusChangeCallback(statusChangeCallback);
         DeployGate.registerUpdateAvailableCallback(updateAvailableCallback);
+        DeployGate.registerCaptureCreateCallback(captureCreateCallback);
 
         Truth.assertThat(DeployGate.getInitializeCallbacks().size()).isEqualTo(1);
         Truth.assertThat(DeployGate.getStatusChangeCallbacks().size()).isEqualTo(1);
         Truth.assertThat(DeployGate.getUpdateAvailableCallbacks().size()).isEqualTo(1);
+        Truth.assertThat(DeployGate.getCaptureCreateCallbacks().size()).isEqualTo(1);
 
         // register another callbacks
         DeployGate.registerInitializeCallback(anotherInitializeCallback);
         DeployGate.registerStatusChangeCallback(anotherStatusChangeCallback);
         DeployGate.registerUpdateAvailableCallback(anotherUpdateAvailableCallback);
+        DeployGate.registerCaptureCreateCallback(anotherCaptureCreateCallback);
 
         Truth.assertThat(DeployGate.getInitializeCallbacks().size()).isEqualTo(2);
         Truth.assertThat(DeployGate.getStatusChangeCallbacks().size()).isEqualTo(2);
         Truth.assertThat(DeployGate.getUpdateAvailableCallbacks().size()).isEqualTo(2);
+        Truth.assertThat(DeployGate.getCaptureCreateCallbacks().size()).isEqualTo(2);
 
         DeployGate.unregisterInitializeCallback(initializeCallback);
         DeployGate.unregisterStatusChangeCallback(statusChangeCallback);
         DeployGate.unregisterUpdateAvailableCallback(updateAvailableCallback);
+        DeployGate.unregisterCaptureCreateCallback(captureCreateCallback);
 
         Truth.assertThat(DeployGate.getInitializeCallbacks().size()).isEqualTo(1);
         Truth.assertThat(DeployGate.getStatusChangeCallbacks().size()).isEqualTo(1);
         Truth.assertThat(DeployGate.getUpdateAvailableCallbacks().size()).isEqualTo(1);
+        Truth.assertThat(DeployGate.getCaptureCreateCallbacks().size()).isEqualTo(1);
 
         // Each callback already unregistered before, so DeployGate maybe ignore this operation.
         DeployGate.unregisterInitializeCallback(initializeCallback);
         DeployGate.unregisterStatusChangeCallback(statusChangeCallback);
         DeployGate.unregisterUpdateAvailableCallback(updateAvailableCallback);
+        DeployGate.unregisterCaptureCreateCallback(captureCreateCallback);
 
         Truth.assertThat(DeployGate.getInitializeCallbacks().size()).isEqualTo(1);
         Truth.assertThat(DeployGate.getStatusChangeCallbacks().size()).isEqualTo(1);
         Truth.assertThat(DeployGate.getUpdateAvailableCallbacks().size()).isEqualTo(1);
+        Truth.assertThat(DeployGate.getCaptureCreateCallbacks().size()).isEqualTo(1);
     }
 
     @Test
