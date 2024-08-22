@@ -66,6 +66,11 @@ public class App extends Application {
                 Log.i(TAG, message);
                 DeployGate.logInfo(message);
             })
+            .setCaptureCreateCallback((captureUrl, createdAtMillis) -> {
+                String message = String.format(Locale.US, "onCaptureCreated(%s)", captureUrl);
+                Log.i(TAG, message);
+                DeployGate.logInfo(message);
+            })
             .setEnabledOnNonDebuggableBuild(true)
             .build();
 

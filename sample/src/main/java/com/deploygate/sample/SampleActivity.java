@@ -16,11 +16,12 @@ import android.widget.Toast;
 
 import com.deploygate.sdk.CustomAttributes;
 import com.deploygate.sdk.DeployGate;
+import com.deploygate.sdk.DeployGateCaptureCreateCallback;
 import com.deploygate.sdk.DeployGateInitializeCallback;
 import com.deploygate.sdk.DeployGateStatusChangeCallback;
 import com.deploygate.sdk.DeployGateUpdateAvailableCallback;
 
-public class SampleActivity extends Activity implements DeployGateInitializeCallback, DeployGateStatusChangeCallback, DeployGateUpdateAvailableCallback {
+public class SampleActivity extends Activity implements DeployGateInitializeCallback, DeployGateStatusChangeCallback, DeployGateUpdateAvailableCallback, DeployGateCaptureCreateCallback {
 
     private static final String TAG = "SampleActivity";
 
@@ -74,6 +75,7 @@ public class SampleActivity extends Activity implements DeployGateInitializeCall
         DeployGate.registerInitializeCallback(this);
         DeployGate.registerStatusChangeCallback(this);
         DeployGate.registerUpdateAvailableCallback(this);
+        DeployGate.registerCaptureCreateCallback(this);
 
         // finally, call refresh() method if you want to check the status immediately
         DeployGate.refresh();
@@ -87,6 +89,7 @@ public class SampleActivity extends Activity implements DeployGateInitializeCall
         DeployGate.unregisterInitializeCallback(this);
         DeployGate.unregisterStatusChangeCallback(this);
         DeployGate.unregisterUpdateAvailableCallback(this);
+        DeployGate.unregisterCaptureCreateCallback(this);
     }
 
 
@@ -244,5 +247,11 @@ public class SampleActivity extends Activity implements DeployGateInitializeCall
 
         mTitleText.setText(getString(R.string.update_available, serial, versionName, versionCode, message));
         mUpdateButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onCaptureCreated(String captureUrl, long createdAtMillis) {
+        Log.d(TAG, "Capture created: url=" + captureUrl + ", created_at=" + createdAtMillis);
+        Toast.makeText(this, "onCaptureCreated: " + captureUrl, Toast.LENGTH_LONG).show();
     }
 }
