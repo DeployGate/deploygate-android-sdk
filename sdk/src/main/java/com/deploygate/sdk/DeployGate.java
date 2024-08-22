@@ -165,6 +165,28 @@ public class DeployGate {
                 } catch (Throwable t) {
                     Logger.w(t, "failed to report device states");
                 }
+            } else if(DeployGateEvent.ACTION_CAPTURE_CREATED.equals(action)) {
+                final String captureUrl = extras.getString(DeployGateEvent.EXTRA_CAPTURE_URL);
+                final long captureCreatedAt = extras.getLong(DeployGateEvent.EXTRA_CAPTURE_CREATED_AT, -1);
+
+                if (TextUtils.isEmpty(captureUrl)) {
+                    Logger.w("Capture ID is missing in the extra");
+                    return;
+                }
+
+                if (captureCreatedAt < 0) {
+                    Logger.w("Capture created at is missing in the extra");
+                    return;
+                }
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (DeployGateCaptureCreateCallback callback : mCaptureCreateCallbacks) {
+                            callback.onCaptureCreated(captureUrl, captureCreatedAt);
+                        }
+                    }
+                });
             } else {
                 Logger.w("%s is not supported by this sdk version", action);
             }
