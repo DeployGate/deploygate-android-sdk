@@ -251,7 +251,9 @@ public class SampleActivity extends Activity implements DeployGateInitializeCall
 
     @Override
     public void onCaptureCreated(String captureUrl, long createdAtMillis) {
-        Log.d(TAG, "Capture created: url=" + captureUrl + ", created_at=" + createdAtMillis);
-        Toast.makeText(this, "onCaptureCreated: " + captureUrl, Toast.LENGTH_LONG).show();
+        // will be called when the capture is created
+        String message = "onCaptureCreated: url=" + captureUrl + ", created_at=" + createdAtMillis;
+        Log.d(TAG, message);
+        Toast.makeText(this, "onCaptureCreated called", Toast.LENGTH_LONG).show();
     }
 }
