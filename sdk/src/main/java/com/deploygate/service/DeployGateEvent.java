@@ -171,4 +171,9 @@ public interface DeployGateEvent {
         int BACKGROUND = 0;
         int FOREGROUND = 1;
     }
+
+    /**
+     * Not a public value. This is only for internal.
+     */
+    static final Long DEFAULT_EXTRA_CAPTURE_CREATE_AT = -1L;
 }
