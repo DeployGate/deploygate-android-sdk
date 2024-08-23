@@ -2,9 +2,9 @@ package com.deploygate.sdk;
 
 /**
  * A callback interface to receive the capture creation event.
- * 
+ *
  * @since 4.9.0
- * @see DeployGate#registerCaptureCreateCallback(DeployGateCaptureCreateCallback) 
+ * @see DeployGate#registerCaptureCreateCallback(DeployGateCaptureCreateCallback)
  */
 public interface DeployGateCaptureCreateCallback {
     /**

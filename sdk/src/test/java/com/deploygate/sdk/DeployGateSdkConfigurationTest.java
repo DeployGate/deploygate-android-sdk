@@ -42,7 +42,7 @@ public class DeployGateSdkConfigurationTest {
         captureCreateCallback = new DeployGateCaptureCreateCallback() {
             @Override
             public void onCaptureCreated(String captureUrl, long createdAtMillis) {
-
+                // no-op
             }
         };
         deployGateCallback = new DeployGateCallback() {
