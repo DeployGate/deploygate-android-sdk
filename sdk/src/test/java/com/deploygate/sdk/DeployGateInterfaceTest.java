@@ -29,6 +29,7 @@ public class DeployGateInterfaceTest {
     DeployGateInitializeCallback initializeCallback;
     DeployGateStatusChangeCallback statusChangeCallback;
     DeployGateUpdateAvailableCallback updateAvailableCallback;
+    DeployGateCaptureCreateCallback captureCreateCallback;
 
     @Before
     public void setUp() {
@@ -74,6 +75,12 @@ public class DeployGateInterfaceTest {
         updateAvailableCallback = new DeployGateUpdateAvailableCallback() {
             @Override
             public void onUpdateAvailable(int revision, String versionName, int versionCode) {
+                // no-op
+            }
+        };
+        captureCreateCallback = new DeployGateCaptureCreateCallback() {
+            @Override
+            public void onCaptureCreated(String captureUrl, long createdAtMillis) {
                 // no-op
             }
         };
@@ -240,6 +247,15 @@ public class DeployGateInterfaceTest {
                 // no-op
             }
         });
+
+        DeployGate.registerCaptureCreateCallback(null);
+        DeployGate.registerCaptureCreateCallback(captureCreateCallback);
+        DeployGate.registerCaptureCreateCallback(new DeployGateCaptureCreateCallback() {
+            @Override
+            public void onCaptureCreated(String captureUrl, long createdAtMillis) {
+                // no-op
+            }
+        });
     }
 
     @Test
@@ -298,6 +314,15 @@ public class DeployGateInterfaceTest {
             }
         });
         DeployGate.unregisterUpdateAvailableCallback(updateAvailableCallback);
+
+        DeployGate.unregisterCaptureCreateCallback(null);
+        DeployGate.unregisterCaptureCreateCallback(new DeployGateCaptureCreateCallback() {
+            @Override
+            public void onCaptureCreated(String captureUrl, long createdAtMillis) {
+                // no-op
+            }
+        });
+        DeployGate.unregisterCaptureCreateCallback(captureCreateCallback);
     }
 
     @Test

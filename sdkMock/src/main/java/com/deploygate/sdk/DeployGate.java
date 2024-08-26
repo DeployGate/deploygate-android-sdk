@@ -89,6 +89,12 @@ public class DeployGate {
     public static void unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback callback) {
     }
 
+    public static void registerCaptureCreateCallback(DeployGateCaptureCreateCallback callback) {
+    }
+
+    public static void unregisterCaptureCreateCallback(DeployGateCaptureCreateCallback callback) {
+    }
+
     @Deprecated
     public static void registerCallback(
             DeployGateCallback listener,

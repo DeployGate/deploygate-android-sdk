@@ -33,6 +33,11 @@ public interface DeployGateEvent {
      */
     public static final String ACTION_COLLECT_DEVICE_STATES = "a.collect-device-states";
 
+    /**
+     * @since 4.9.0
+     */
+    public static final String ACTION_CAPTURE_CREATED = "a.capture-created";
+
     public static final String EXTRA_AUTHOR = "author";
     public static final String EXTRA_EXPECTED_AUTHOR = "expectedAuthor";
 
@@ -115,6 +120,16 @@ public interface DeployGateEvent {
      * the id of the capture.
      */
     public static final String EXTRA_CAPTURE_ID = "e.capture-id";
+
+    /**
+     * the url of the capture.
+     */
+    public static final String EXTRA_CAPTURE_URL = "e.capture-url";
+
+    /**
+     * the created time of the capture.
+     */
+    public static final String EXTRA_CAPTURE_CREATED_AT = "e.capture-created-at";
 
     /**
      * A event type for the app goes to foreground/background.

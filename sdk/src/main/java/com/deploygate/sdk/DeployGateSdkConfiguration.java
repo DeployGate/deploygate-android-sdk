@@ -15,6 +15,7 @@ public final class DeployGateSdkConfiguration {
     final DeployGateInitializeCallback initializeCallback;
     final DeployGateStatusChangeCallback statusChangeCallback;
     final DeployGateUpdateAvailableCallback updateAvailableCallback;
+    final DeployGateCaptureCreateCallback captureCreateCallback;
 
     final boolean isCaptureEnabled;
 
@@ -30,7 +31,8 @@ public final class DeployGateSdkConfiguration {
                 builder.isCaptureEnabled,
                 builder.initializeCallback,
                 builder.statusChangeCallback,
-                builder.updateAvailableCallback
+                builder.updateAvailableCallback,
+                builder.captureCreateCallback
         );
     }
 
@@ -43,7 +45,8 @@ public final class DeployGateSdkConfiguration {
             boolean isCaptureEnabled,
             DeployGateInitializeCallback initializeCallback,
             DeployGateStatusChangeCallback statusChangeCallback,
-            DeployGateUpdateAvailableCallback updateAvailableCallback
+            DeployGateUpdateAvailableCallback updateAvailableCallback,
+            DeployGateCaptureCreateCallback captureCallback
     ) {
         this.customLogConfiguration = customLogConfiguration;
         this.isDisabled = isDisabled;
@@ -54,6 +57,7 @@ public final class DeployGateSdkConfiguration {
         this.initializeCallback = initializeCallback;
         this.statusChangeCallback = statusChangeCallback;
         this.updateAvailableCallback = updateAvailableCallback;
+        this.captureCreateCallback = captureCallback;
     }
 
     public static final class Builder {
@@ -71,6 +75,7 @@ public final class DeployGateSdkConfiguration {
         private DeployGateInitializeCallback initializeCallback = null;
         private DeployGateStatusChangeCallback statusChangeCallback = null;
         private DeployGateUpdateAvailableCallback updateAvailableCallback = null;
+        private DeployGateCaptureCreateCallback captureCreateCallback = null;
 
         public Builder() {
         }
@@ -181,6 +186,16 @@ public final class DeployGateSdkConfiguration {
 
         public Builder setUpdateAvailableCallback(DeployGateUpdateAvailableCallback updateAvailableCallback) {
             this.updateAvailableCallback = updateAvailableCallback;
+            return this;
+        }
+
+        /**
+         *
+         * @param captureCallback Set an instance of callback for the capture creation event.
+         * @return self
+         */
+        public Builder setCaptureCreateCallback(DeployGateCaptureCreateCallback captureCallback) {
+            this.captureCreateCallback = captureCallback;
             return this;
         }
 
