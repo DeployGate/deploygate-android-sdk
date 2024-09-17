@@ -55,7 +55,7 @@ public class DeployGate {
     private static final Object sLock = new Object();
     private static CustomAttributes sBuildEnvironment;
     private static CustomAttributes sRuntimeExtra;
-    private static CustomAttributes sSdkDeviceStates;
+    private static SdkDeviceStatesCollector sSdkDeviceStatesCollector;
 
     private static DeployGate sInstance;
 
@@ -152,7 +152,7 @@ public class DeployGate {
                     cv.put(DeployGateEvent.ATTRIBUTE_KEY_RUNTIME_EXTRAS, runtimeExtraJSON);
                 }
 
-                String sdkDeviceStatusJSON = getSdkDeviceStates().getJSONString();
+                String sdkDeviceStatusJSON = getSdkDeviceStatesCollector().getJSONString();
                 if (!sdkDeviceStatusJSON.equals("{}")) {
                     cv.put(DeployGateEvent.ATTRIBUTE_KEY_SDK_DEVICE_STATES, sdkDeviceStatusJSON);
                 }
@@ -375,6 +375,8 @@ public class DeployGate {
         mInitializedLatch = new CountDownLatch(1);
         ((Application) applicationContext).registerActivityLifecycleCallbacks(new VisibilityLifecycleCallbacks(mOnVisibilityChangeListener));
         initService(true);
+
+        getSdkDeviceStatesCollector().collectLocale();
     }
 
     private boolean initService(boolean isBoot) {
@@ -1709,19 +1711,19 @@ public class DeployGate {
         return sRuntimeExtra;
     }
 
-    private static CustomAttributes getSdkDeviceStates() {
-        if (sSdkDeviceStates != null) {
-            return sSdkDeviceStates;
+    private static SdkDeviceStatesCollector getSdkDeviceStatesCollector() {
+        if (sSdkDeviceStatesCollector != null) {
+            return sSdkDeviceStatesCollector;
         }
 
         synchronized (sLock) {
-            if (sSdkDeviceStates != null) {
-                return sSdkDeviceStates;
+            if (sSdkDeviceStatesCollector != null) {
+                return sSdkDeviceStatesCollector;
             }
-            sSdkDeviceStates = new CustomAttributes();
+            sSdkDeviceStatesCollector = new SdkDeviceStatesCollector();
         }
 
-        return sSdkDeviceStates;
+        return sSdkDeviceStatesCollector;
     }
 
     /**
