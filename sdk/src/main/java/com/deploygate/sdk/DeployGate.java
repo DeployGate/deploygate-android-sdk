@@ -273,6 +273,8 @@ public class DeployGate {
                 long elapsedRealtime,
                 TimeUnit timeUnit
         ) {
+            getSdkDeviceStatesCollector().collectLocale();
+
             Bundle extras = new Bundle();
             extras.putLong(DeployGateEvent.EXTRA_VISIBILITY_EVENT_ELAPSED_REAL_TIME_IN_NANOS, timeUnit.toNanos(elapsedRealtime));
             extras.putInt(DeployGateEvent.EXTRA_VISIBILITY_EVENT_TYPE, DeployGateEvent.VisibilityType.FOREGROUND);
@@ -375,8 +377,6 @@ public class DeployGate {
         mInitializedLatch = new CountDownLatch(1);
         ((Application) applicationContext).registerActivityLifecycleCallbacks(new VisibilityLifecycleCallbacks(mOnVisibilityChangeListener));
         initService(true);
-
-        getSdkDeviceStatesCollector().collectLocale();
     }
 
     private boolean initService(boolean isBoot) {
