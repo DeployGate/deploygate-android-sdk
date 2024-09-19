@@ -11,10 +11,18 @@ import java.util.Locale;
 
 final class SdkDeviceStatesCollector {
 
-    private final JSONObject states = new JSONObject();
+    private final Object mLock;
+    private final JSONObject states;
+
+    SdkDeviceStatesCollector() {
+        mLock = new Object();
+        states = new JSONObject();
+    }
 
     public String getJSONString() {
-        return states.toString();
+        synchronized (mLock) {
+            return states.toString();
+        }
     }
 
     public void collectLocale() {
@@ -43,10 +51,13 @@ final class SdkDeviceStatesCollector {
 
     private void putState(String fqcn, String paramName, Object data) {
         String key = String.format("%s$%s", fqcn, paramName);
-        try {
-            states.put(key, data);
-        } catch (JSONException e) {
-            Logger.w(e, "Failed to put info: key=%s, value=%s", key, data);
+
+        synchronized (mLock) {
+            try {
+                states.put(key, data);
+            } catch (JSONException e) {
+                Logger.w(e, "Failed to put info: key=%s, value=%s", key, data);
+            }
         }
     }
 }
