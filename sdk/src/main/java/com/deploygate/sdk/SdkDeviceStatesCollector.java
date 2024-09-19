@@ -52,12 +52,12 @@ final class SdkDeviceStatesCollector {
     private void putState(String fqcn, String paramName, Object data) {
         String key = String.format("%s$%s", fqcn, paramName);
 
-        synchronized (mLock) {
-            try {
+        try {
+            synchronized (mLock) {
                 states.put(key, data);
-            } catch (JSONException e) {
-                Logger.w(e, "Failed to put info: key=%s, value=%s", key, data);
             }
+        } catch (JSONException e) {
+            Logger.w(e, "Failed to put info: key=%s, value=%s", key, data);
         }
     }
 }
