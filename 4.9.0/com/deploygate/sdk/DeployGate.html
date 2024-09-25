@@ -1,0 +1,1684 @@
+<!DOCTYPE HTML>
+<!-- NewPage -->
+<html lang="en"><head>
+    <title>DeployGate 4.9.0 API </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="dc.created" content="2020-03-25">
+    <link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+    <link rel="stylesheet" type="text/css" href="../../../dokka-javadoc-stylesheet.css" title="Style">
+    <link rel="stylesheet" type="text/css" href="../../../jquery/jquery-ui.css" title="Style">
+    <script type="text/javascript" src="../../../jquery/jquery-3.3.1.js"></script>
+    <script type="text/javascript" src="../../../jquery/jquery-migrate-3.0.1.js"></script>
+    <script type="text/javascript" src="../../../jquery/jquery-ui.js"></script>
+
+    <script type="text/javascript" src="../../../search.js"></script>
+    <script async type="text/javascript" src="../../../module-search-index.js"></script>
+    <script async type="text/javascript" src="../../../package-search-index.js"></script>
+    <script async type="text/javascript" src="../../../type-search-index.js"></script>
+    <script async type="text/javascript" src="../../../member-search-index.js"></script>
+    <script async type="text/javascript" src="../../../tag-search-index.js"></script>
+</head><body>
+<script type="text/javascript">
+var pathtoroot = "../../../";
+</script>
+<noscript>
+    <div>JavaScript is disabled on your browser.</div>
+</noscript><header role="banner">
+    <nav role="navigation">
+        <div class="fixedNav">
+            <!-- ========= START OF TOP NAVBAR ======= -->
+            <div class="topNav"><a id="navbar.top">
+                <!--   -->
+            </a>
+                <div class="skipNav"><a href="#skip.navbar.top" title="Skip navigation links">Skip navigation links</a>
+                </div>
+                <a id="navbar.top.firstrow">
+                    <!--   -->
+                </a>
+                <ul class="navList" title="Navigation">
+    <li><a href="../../../index.html">Overview</a></li>
+    
+    <li><a href="package-summary.html">Package</a></li>
+    
+    <li class="navBarCell1Rev">Class</li>
+    
+    <li><a href="package-tree.html">Tree</a></li>
+    
+    <li><a href="../../../deprecated.html">Deprecated</a></li>
+    <li><a href="../../../index-files/index-1.html">Index</a></li>
+    <li>Help</li>
+</ul></div>
+            <div class="subNav">
+<ul class="navList" id="allclasses_navbar_top" style="display: block;">
+    <li><a href="../../../allclasses.html">All&nbsp;Classes</a></li>
+</ul>
+
+<ul class="navListSearch">
+<li><label for="search">SEARCH:</label>
+<input type="text" id="search" value="search" class="ui-autocomplete-input" autocomplete="off" placeholder="Search">
+<input type="reset" id="reset" value="reset">
+</li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+</div>
+<a id="skip.navbar.top">
+<!--   -->
+</a></div><!-- ========= END OF TOP NAVBAR ========= -->
+        </div>
+        <div class="navPadding">&nbsp;</div>
+        <script type="text/javascript"><!--
+        $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
+        //-->
+        </script>
+    </nav>
+</header>
+
+<main role="main">
+    <div class="header">
+        <div class="subTitle"><span class="packageLabelInType">Package</span>&nbsp;<a href="package-summary.html"></a></div>
+        <h2 title="Class DeployGate" class="title">Class DeployGate</h2>
+    </div>
+    <div class="contentContainer">
+        <!-- <ul class="inheritance">
+            <li>java.lang.Object</li>
+            <li>
+                <ul class="inheritance">
+                    <li>adaptation.Adaptation</li>
+                </ul>
+            </li>
+        </ul> TODO inheritance tree -->
+        <div class="description">
+            <ul class="blockList">
+                <li class="blockList">
+                    
+                    <hr>
+                    <pre class="wrap-overflow">
+
+public class <span class="typeNameLabel"><a href=DeployGate.html>DeployGate</a></span>
+
+                    </pre>
+                    <div class="block"><p>This is DeployGate SDK library. Import this library to the application package and call <a href=DeployGate.html#install(Application)>install</a> on the onCreate() of application class to enable crash reporting and application launch notification. </p><p>In order to get working Remote LogCat feature, you also have to add <code>&lt;uses-permission android:name="android.permission.READ_LOGS" /&gt;</code>in AndroidManifest.xml of your application. </p></div>
+                </li>
+            </ul>
+        </div>
+        <div class="summary">
+            <ul class="blockList">
+                <li class="blockList">
+                <!-- ======== NESTED CLASS SUMMARY ======== -->
+                    
+                    <!-- =========== FIELD SUMMARY =========== -->
+                    
+                    <!-- ======== CONSTRUCTOR SUMMARY ======== -->
+                    
+                    <!-- =========== ENUM CONSTANT SUMMARY =========== -->
+                    
+                    <!-- ========== METHOD SUMMARY =========== -->
+                    
+                    <section role="region">
+                        <ul class="blockList">
+                            <li class="blockList"><a id="method.summary">
+                                <!--   -->
+                            </a>
+                                <h3>Method Summary</h3>
+                                <div class="memberSummary">
+                                    <div role="tablist" aria-orientation="horizontal">
+                                        <button role="tab" aria-selected="true" aria-controls="memberSummary_tabpanel" tabindex="0" onkeydown="switchTab(event)" id="t0" class="activeTableTab">All Methods</button>
+                                        <!-- TODO: Instance and Concrete Methods #1118 -->
+                                    </div>
+                                    <div id="memberSummary_tabpanel" role="tabpanel">
+                                    <table aria-labelledby="t0">
+                                        <tr>
+                                            <th class="colFirst" scope="col">Modifier and Type</th>
+                                            <th class="colSecond" scope="col">Method</th>
+                                            <th class="colLast" scope="col">Description</th>
+                                        </tr>
+                                        
+                                        <tr id="i0" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Context,DeployGateSdkConfiguration)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/content/Context.html>Context</a> context, <a href=DeployGateSdkConfiguration.html>DeployGateSdkConfiguration</a> sdkConfiguration) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance.</td>
+                                        </tr>
+                                        
+                                        <tr id="i1" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Application)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance.</td>
+                                        </tr>
+                                        
+                                        <tr id="i2" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Application,String)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> author) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance.</td>
+                                        </tr>
+                                        
+                                        <tr id="i3" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Application,DeployGateCallback)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=DeployGateCallback.html>DeployGateCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance and register a callbacklistener.</td>
+                                        </tr>
+                                        
+                                        <tr id="i4" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Application,boolean)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, boolean forceApplyOnReleaseBuild) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance and register a callbacklistener.</td>
+                                        </tr>
+                                        
+                                        <tr id="i5" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Application,String,DeployGateCallback)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> author, <a href=DeployGateCallback.html>DeployGateCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance and register a callbacklistener.</td>
+                                        </tr>
+                                        
+                                        <tr id="i6" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Application,DeployGateCallback,boolean)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=DeployGateCallback.html>DeployGateCallback</a> callback, boolean forceApplyOnReleaseBuild) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance and register a callbacklistener.</td>
+                                        </tr>
+                                        
+                                        <tr id="i7" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Application,String,DeployGateCallback,boolean)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> author, <a href=DeployGateCallback.html>DeployGateCallback</a> callback, boolean forceApplyOnReleaseBuild) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance and register a callbacklistener.</td>
+                                        </tr>
+                                        
+                                        <tr id="i8" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#install(Application,String,DeployGateCallback,boolean,CustomLogConfiguration)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> author, <a href=DeployGateCallback.html>DeployGateCallback</a> callback, boolean forceApplyOnReleaseBuild, <a href=CustomLogConfiguration.html>CustomLogConfiguration</a> customLogConfiguration) </code>
+                                            </th>
+                                            <td class="colLast">Install DeployGate on your application instance and register a callbacklistener.</td>
+                                        </tr>
+                                        
+                                        <tr id="i9" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#refresh()>refresh</a>() </code>
+                                            </th>
+                                            <td class="colLast">Request refreshing cached session values (e.g., isAuthorized, etc.) tothe DeployGate service.</td>
+                                        </tr>
+                                        
+                                        <tr id="i10" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#registerInitializeCallback(DeployGateInitializeCallback)>registerInitializeCallback</a>(<a href=DeployGateInitializeCallback.html>DeployGateInitializeCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Register a callback listener about the DeployGate initialization event.</td>
+                                        </tr>
+                                        
+                                        <tr id="i11" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#unregisterInitializeCallback(DeployGateInitializeCallback)>unregisterInitializeCallback</a>(<a href=DeployGateInitializeCallback.html>DeployGateInitializeCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Unregister a callback listener.If the listener was not registered, just ignored.</td>
+                                        </tr>
+                                        
+                                        <tr id="i12" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#registerStatusChangeCallback(DeployGateStatusChangeCallback)>registerStatusChangeCallback</a>(<a href=DeployGateStatusChangeCallback.html>DeployGateStatusChangeCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Register a callback listener about the app status on DeployGate.</td>
+                                        </tr>
+                                        
+                                        <tr id="i13" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#unregisterStatusChangeCallback(DeployGateStatusChangeCallback)>unregisterStatusChangeCallback</a>(<a href=DeployGateStatusChangeCallback.html>DeployGateStatusChangeCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Unregister a callback listener.If the listener was not registered, just ignored.</td>
+                                        </tr>
+                                        
+                                        <tr id="i14" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback)>registerUpdateAvailableCallback</a>(<a href=DeployGateUpdateAvailableCallback.html>DeployGateUpdateAvailableCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Register a callback listener about the new version of the app is available.</td>
+                                        </tr>
+                                        
+                                        <tr id="i15" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback)>unregisterUpdateAvailableCallback</a>(<a href=DeployGateUpdateAvailableCallback.html>DeployGateUpdateAvailableCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Unregister a callback listener.If the listener was not registered, just ignored.</td>
+                                        </tr>
+                                        
+                                        <tr id="i16" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#registerCaptureCreateCallback(DeployGateCaptureCreateCallback)>registerCaptureCreateCallback</a>(<a href=DeployGateCaptureCreateCallback.html>DeployGateCaptureCreateCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Register a callback listener about the new capture is created.Don't forget to unregister the callback listener when it is no longer needed (e.g., on destroying an activity.)If the listener has already in the callback list, just ignored.</td>
+                                        </tr>
+                                        
+                                        <tr id="i17" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#unregisterCaptureCreateCallback(DeployGateCaptureCreateCallback)>unregisterCaptureCreateCallback</a>(<a href=DeployGateCaptureCreateCallback.html>DeployGateCaptureCreateCallback</a> callback) </code>
+                                            </th>
+                                            <td class="colLast">Unregister a callback listener.If the listener was not registered, just ignored.</td>
+                                        </tr>
+                                        
+                                        <tr id="i18" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#registerCallback(DeployGateCallback,boolean)>registerCallback</a>(<a href=DeployGateCallback.html>DeployGateCallback</a> listener, boolean refreshImmediately) </code>
+                                            </th>
+                                            <td class="colLast">Register a DeployGate event callback listener.</td>
+                                        </tr>
+                                        
+                                        <tr id="i19" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#unregisterCallback(DeployGateCallback)>unregisterCallback</a>(<a href=DeployGateCallback.html>DeployGateCallback</a> listener) </code>
+                                            </th>
+                                            <td class="colLast">Unregister a callback listener.</td>
+                                        </tr>
+                                        
+                                        <tr id="i20" class="altColor">
+                                            <td class="colFirst"><code>static boolean</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#isInitialized()>isInitialized</a>() </code>
+                                            </th>
+                                            <td class="colLast">Get whether SDK is completed its intialization process and ready after <a href=DeployGate.html#install(Application)>install</a>.</td>
+                                        </tr>
+                                        
+                                        <tr id="i21" class="rowColor">
+                                            <td class="colFirst"><code>static boolean</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#isDeployGateAvaliable()>isDeployGateAvaliable</a>() </code>
+                                            </th>
+                                            <td class="colLast">Get whether DeployGate client service is available on this device.</td>
+                                        </tr>
+                                        
+                                        <tr id="i22" class="altColor">
+                                            <td class="colFirst"><code>static boolean</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#isManaged()>isManaged</a>() </code>
+                                            </th>
+                                            <td class="colLast">Get whether this application and its package is known and managed underthe DeployGate.</td>
+                                        </tr>
+                                        
+                                        <tr id="i23" class="rowColor">
+                                            <td class="colFirst"><code>static boolean</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#isAuthorized()>isAuthorized</a>() </code>
+                                            </th>
+                                            <td class="colLast">Get whether current DeployGate user has this application in his/heravailable list.</td>
+                                        </tr>
+                                        
+                                        <tr id="i24" class="altColor">
+                                            <td class="colFirst"><code>static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getLoginUsername()>getLoginUsername</a>() </code>
+                                            </th>
+                                            <td class="colLast">Get current DeployGate username.</td>
+                                        </tr>
+                                        
+                                        <tr id="i25" class="rowColor">
+                                            <td class="colFirst"><code>static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getAuthorUsername()>getAuthorUsername</a>() </code>
+                                            </th>
+                                            <td class="colLast">Get current app's author (e.g., User or Organzation) name on DeployGate.</td>
+                                        </tr>
+                                        
+                                        <tr id="i26" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#logError(String)>logError</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message) </code>
+                                            </th>
+                                            <td class="colLast">Record ERROR level event on DeployGate.</td>
+                                        </tr>
+                                        
+                                        <tr id="i27" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#logWarn(String)>logWarn</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message) </code>
+                                            </th>
+                                            <td class="colLast">Record WARN level event on DeployGate.</td>
+                                        </tr>
+                                        
+                                        <tr id="i28" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#logDebug(String)>logDebug</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message) </code>
+                                            </th>
+                                            <td class="colLast">Record DEBUG level event on DeployGate.</td>
+                                        </tr>
+                                        
+                                        <tr id="i29" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#logInfo(String)>logInfo</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message) </code>
+                                            </th>
+                                            <td class="colLast">Record INFO level event on DeployGate.</td>
+                                        </tr>
+                                        
+                                        <tr id="i30" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#logVerbose(String)>logVerbose</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message) </code>
+                                            </th>
+                                            <td class="colLast">Record VERBOSE level event on DeployGate.</td>
+                                        </tr>
+                                        
+                                        <tr id="i31" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#requestLogCat()>requestLogCat</a>() </code>
+                                            </th>
+                                            <td class="colLast">Capture current LogCat and send it.</td>
+                                        </tr>
+                                        
+                                        <tr id="i32" class="altColor">
+                                            <td class="colFirst"><code>static int</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getCurrentRevision()>getCurrentRevision</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns the revision of the app on DeployGate.The revision number is automatically incremented integer value every time you upload a build to DeployGate,so you can identify the build explicitly.</td>
+                                        </tr>
+                                        
+                                        <tr id="i33" class="rowColor">
+                                            <td class="colFirst"><code>static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getDistributionUrl()>getDistributionUrl</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns the URL of the distribution if the app was installed through Distribution Page.</td>
+                                        </tr>
+                                        
+                                        <tr id="i34" class="altColor">
+                                            <td class="colFirst"><code>static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getDistributionId()>getDistributionId</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns the ID (40 digits hex string appears in URL) of the distribution if the app was installed through Distribution Page.</td>
+                                        </tr>
+                                        
+                                        <tr id="i35" class="rowColor">
+                                            <td class="colFirst"><code>static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getDistributionTitle()>getDistributionTitle</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns the title of the distribution if the app was installed through Distribution Page.</td>
+                                        </tr>
+                                        
+                                        <tr id="i36" class="altColor">
+                                            <td class="colFirst"><code>static int</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getDeployGateVersionCode()>getDeployGateVersionCode</a>() </code>
+                                            </th>
+                                            <td class="colLast">Use <a href=DeployGate.html#getDeployGateLongVersionCode()>getDeployGateLongVersionCode</a></td>
+                                        </tr>
+                                        
+                                        <tr id="i37" class="rowColor">
+                                            <td class="colFirst"><code>static long</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getDeployGateLongVersionCode()>getDeployGateLongVersionCode</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns android:versionCode of DeployGate app.</td>
+                                        </tr>
+                                        
+                                        <tr id="i38" class="altColor">
+                                            <td class="colFirst"><code>static boolean</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#hasUpdate()>hasUpdate</a>() </code>
+                                            </th>
+                                            <td class="colLast">Check whether there's update of the app.</td>
+                                        </tr>
+                                        
+                                        <tr id="i39" class="rowColor">
+                                            <td class="colFirst"><code>static int</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getUpdateRevision()>getUpdateRevision</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns the revision number of the update.</td>
+                                        </tr>
+                                        
+                                        <tr id="i40" class="altColor">
+                                            <td class="colFirst"><code>static int</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getUpdateVersionCode()>getUpdateVersionCode</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns the android:versionCode of the update.</td>
+                                        </tr>
+                                        
+                                        <tr id="i41" class="rowColor">
+                                            <td class="colFirst"><code>static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getUpdateVersionName()>getUpdateVersionName</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns the android:versionName of the update.</td>
+                                        </tr>
+                                        
+                                        <tr id="i42" class="altColor">
+                                            <td class="colFirst"><code>static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getUpdateMessage()>getUpdateMessage</a>() </code>
+                                            </th>
+                                            <td class="colLast">Returns the message attached to the build.If the app was installed via Distribution Page (i.e.</td>
+                                        </tr>
+                                        
+                                        <tr id="i43" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#installUpdate()>installUpdate</a>() </code>
+                                            </th>
+                                            <td class="colLast">Start the installation of the latest version of the app if available.</td>
+                                        </tr>
+                                        
+                                        <tr id="i44" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#openComments()>openComments</a>() </code>
+                                            </th>
+                                            <td class="colLast">Open comments screen for the distribution of the app installed.No effect if the app was installed via Distribution Page (i.e.</td>
+                                        </tr>
+                                        
+                                        <tr id="i45" class="rowColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#composeComment()>composeComment</a>() </code>
+                                            </th>
+                                            <td class="colLast">Open comment composer screen for the distribution of the app installed.No effect if the app was installed via Distribution Page (i.e.</td>
+                                        </tr>
+                                        
+                                        <tr id="i46" class="altColor">
+                                            <td class="colFirst"><code>static void</code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#composeComment(String)>composeComment</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> defaultComment) </code>
+                                            </th>
+                                            <td class="colLast">Open comment composer screen for the distribution of the app installed with pre filled string.No effect if the app was installed via Distribution Page (i.e.</td>
+                                        </tr>
+                                        
+                                        <tr id="i47" class="rowColor">
+                                            <td class="colFirst"><code>static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getDistributionUserName()>getDistributionUserName</a>() </code>
+                                            </th>
+                                            <td class="colLast">Get current user's name on Distribution Page.</td>
+                                        </tr>
+                                        
+                                        <tr id="i48" class="altColor">
+                                            <td class="colFirst"><code>static <a href=CustomAttributes.html>CustomAttributes</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getBuildEnvironment()>getBuildEnvironment</a>() </code>
+                                            </th>
+                                            <td class="colLast"></td>
+                                        </tr>
+                                        
+                                        <tr id="i49" class="rowColor">
+                                            <td class="colFirst"><code>static <a href=CustomAttributes.html>CustomAttributes</a></code>
+                                            </td>
+                                            <th class="colSecond" scope="row"><code><a href=DeployGate.html#getRuntimeExtra()>getRuntimeExtra</a>() </code>
+                                            </th>
+                                            <td class="colLast"></td>
+                                        </tr>
+                                        
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <ul class="blockList">
+                                
+                                    <li class="blockList"><a id="methods.inherited.from.class.java.lang.Object">
+                                        <!--   -->
+                                    </a>
+                                        <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+                                        <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString,
+                                            wait, wait, wait</code></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </section>
+                    
+                </li>
+            </ul>
+        </div>
+        <div class="details">
+            <ul class="blockList">
+                <li class="blockList">
+                    <!-- ========= CONSTRUCTOR DETAIL ======== -->
+                    
+                    <!-- ============ METHOD DETAIL ========== -->
+                    
+                    <section role="region">
+                        <ul class="blockList">
+                            <li class="blockList"><a id="method.detail">
+                                <!--   -->
+                            </a>
+                                <h3>Method Detail</h3>
+                                
+                                <a id="install(Context,DeployGateSdkConfiguration)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Context,DeployGateSdkConfiguration)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/content/Context.html>Context</a> context, <a href=DeployGateSdkConfiguration.html>DeployGateSdkConfiguration</a> sdkConfiguration)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance. Call this method insideof your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a>, in ContentProvider or AndroidX Startup Initializer only once.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>context</code> - Your application's Context.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>sdkConfiguration</code> - sdk configuration <a href=DeployGateSdkConfiguration.html>DeployGateSdkConfiguration</a></dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="install(Application)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Application)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance. Call this method insideof your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a> once.</p><p>On a release build, which has <code>android:isDebuggable</code> set false onAndroidManifest.xml, this function will do nothing. If you want to enableDeployGate on a release build, consider using <a href=DeployGate.html#install(Application,String,DeployGateCallback,boolean)>install</a> instead.</p><p>Note: To make <a href=DeployGate.html#isAuthorized()>isAuthorized</a> more effective, you shouldcall <a href=DeployGate.html#install(Application,String)>install</a> instead and specify authorIdexplicitly to ensure the authority of this app to prevent casualredistribution via DeployGate.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>app</code> - Application instance, typically just pass this.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="install(Application,String)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Application,String)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> author)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance. Call this method insideof your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a> once.</p><p>On a release build, which has <code>android:isDebuggable</code> set false onAndroidManifest.xml, this function will do nothing. If you want to enableDeployGate on a release build, consider using <a href=DeployGate.html#install(Application,String,DeployGateCallback,boolean)>install</a> instead.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>app</code> - Application instance, typically just pass this.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>author</code> - author username of this app.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="install(Application,DeployGateCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Application,DeployGateCallback)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=DeployGateCallback.html>DeployGateCallback</a> callback)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance and register a callbacklistener. Call this method inside of your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a> once.</p><p>On a release build, which has <code>android:isDebuggable</code> set false onAndroidManifest.xml, this function will do nothing. If you want to enableDeployGate on a release build, consider using <a href=DeployGate.html#install(Application,String,DeployGateCallback,boolean)>install</a> instead.</p><p>Note: To make <a href=DeployGate.html#isAuthorized()>isAuthorized</a> more effective, you shouldcall <a href=DeployGate.html#install(Application,String)>install</a> instead and specify authorIdexplicitly to ensure the authority of this app to prevent casualredistribution via DeployGate.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>app</code> - Application instance, typically just pass this.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>callback</code> - Callback interface to listen events.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="install(Application,boolean)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Application,boolean)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, boolean forceApplyOnReleaseBuild)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance and register a callbacklistener. Call this method inside of your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a> once.</p><p>Note: To make <a href=DeployGate.html#isAuthorized()>isAuthorized</a> more effective, you shouldcall <a href=DeployGate.html#install(Application,String)>install</a> instead and specify authorIdexplicitly to ensure the authority of this app to prevent casualredistribution via DeployGate.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>app</code> - Application instance, typically just pass this.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>forceApplyOnReleaseBuild</code> - if you want to keep DeployGate alive onthe release build, set this true.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="install(Application,String,DeployGateCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Application,String,DeployGateCallback)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> author, <a href=DeployGateCallback.html>DeployGateCallback</a> callback)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance and register a callbacklistener. Call this method inside of your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a> once.</p><p>On a release build, which has <code>android:isDebuggable</code> set false onAndroidManifest.xml, this function will do nothing. If you want to enableDeployGate on a release build, consider using <a href=DeployGate.html#install(Application,String,DeployGateCallback,boolean)>install</a> instead.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>app</code> - Application instance, typically just pass this.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>author</code> - author username of this app.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>callback</code> - Callback interface to listen events.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="install(Application,DeployGateCallback,boolean)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Application,DeployGateCallback,boolean)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=DeployGateCallback.html>DeployGateCallback</a> callback, boolean forceApplyOnReleaseBuild)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance and register a callbacklistener. Call this method inside of your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a> once.</p><p>Note: To make <a href=DeployGate.html#isAuthorized()>isAuthorized</a> more effective, you shouldcall <a href=DeployGate.html#install(Application,String)>install</a> instead and specify authorIdexplicitly to ensure the authority of this app to prevent casualredistribution via DeployGate.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>app</code> - Application instance, typically just pass this.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>callback</code> - Callback interface to listen events.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>forceApplyOnReleaseBuild</code> - if you want to keep DeployGate alive onthe release build, set this true.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="install(Application,String,DeployGateCallback,boolean)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Application,String,DeployGateCallback,boolean)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> author, <a href=DeployGateCallback.html>DeployGateCallback</a> callback, boolean forceApplyOnReleaseBuild)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance and register a callbacklistener. Call this method inside of your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a> once.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>app</code> - Application instance, typically just pass this.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>author</code> - author username of this app.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>callback</code> - Callback interface to listen events.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>forceApplyOnReleaseBuild</code> - if you want to keep DeployGate alive onthe release build, set this true.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="install(Application,String,DeployGateCallback,boolean,CustomLogConfiguration)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>install</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#install(Application,String,DeployGateCallback,boolean,CustomLogConfiguration)>install</a>(<a href=https://developer.android.com/reference/kotlin/android/app/Application.html>Application</a> app, <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> author, <a href=DeployGateCallback.html>DeployGateCallback</a> callback, boolean forceApplyOnReleaseBuild, <a href=CustomLogConfiguration.html>CustomLogConfiguration</a> customLogConfiguration)</pre>
+                                        <div class="block"><p>Install DeployGate on your application instance and register a callbacklistener. Call this method inside of your <a href=https://developer.android.com/reference/kotlin/android/app/Application.html#oncreate>onCreate</a> once.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>app</code> - Application instance, typically just pass this.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>author</code> - author username of this app.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>callback</code> - Callback interface to listen events.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>forceApplyOnReleaseBuild</code> - if you want to keep DeployGate alive onthe release build, set this true.</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>customLogConfiguration</code> - set a configuration for custom logging</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="refresh()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>refresh</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#refresh()>refresh</a>()</pre>
+                                        <div class="block"><p>Request refreshing cached session values (e.g., isAuthorized, etc.) tothe DeployGate service. Nothing happens if this called before <a href=DeployGate.html#install(Application)>install</a> or when refreshing is already in progress.Note that after calling this, <a href=DeployGate.html#isInitialized()>isInitialized</a> will changed tofalse immediately and any call to <code>is*()</code> will be blocked untilrefreshing get finished.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="registerInitializeCallback(DeployGateInitializeCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>registerInitializeCallback</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#registerInitializeCallback(DeployGateInitializeCallback)>registerInitializeCallback</a>(<a href=DeployGateInitializeCallback.html>DeployGateInitializeCallback</a> callback)</pre>
+                                        <div class="block"><p>Register a callback listener about the DeployGate initialization event.Don't forget to call <a href=DeployGate.html#unregisterInitializeCallback(DeployGateInitializeCallback)>unregisterInitializeCallback</a> when the callback is no longer needed (e.g., on destroying an activity.)If the listener has already in the callback list, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>callback</code> - callback listener</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="unregisterInitializeCallback(DeployGateInitializeCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>unregisterInitializeCallback</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#unregisterInitializeCallback(DeployGateInitializeCallback)>unregisterInitializeCallback</a>(<a href=DeployGateInitializeCallback.html>DeployGateInitializeCallback</a> callback)</pre>
+                                        <div class="block"><p>Unregister a callback listener.If the listener was not registered, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>callback</code> - callback listener to be removed</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="registerStatusChangeCallback(DeployGateStatusChangeCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>registerStatusChangeCallback</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#registerStatusChangeCallback(DeployGateStatusChangeCallback)>registerStatusChangeCallback</a>(<a href=DeployGateStatusChangeCallback.html>DeployGateStatusChangeCallback</a> callback)</pre>
+                                        <div class="block"><p>Register a callback listener about the app status on DeployGate.Don't forget to call <a href=DeployGate.html#unregisterStatusChangeCallback(DeployGateStatusChangeCallback)>unregisterStatusChangeCallback</a> when the callback is no longer needed (e.g., on destroying an activity.)If the listener has already in the callback list, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>callback</code> - callback listener</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="unregisterStatusChangeCallback(DeployGateStatusChangeCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>unregisterStatusChangeCallback</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#unregisterStatusChangeCallback(DeployGateStatusChangeCallback)>unregisterStatusChangeCallback</a>(<a href=DeployGateStatusChangeCallback.html>DeployGateStatusChangeCallback</a> callback)</pre>
+                                        <div class="block"><p>Unregister a callback listener.If the listener was not registered, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>callback</code> - callback listener to be removed</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>registerUpdateAvailableCallback</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#registerUpdateAvailableCallback(DeployGateUpdateAvailableCallback)>registerUpdateAvailableCallback</a>(<a href=DeployGateUpdateAvailableCallback.html>DeployGateUpdateAvailableCallback</a> callback)</pre>
+                                        <div class="block"><p>Register a callback listener about the new version of the app is available.Don't forget to call <a href=DeployGate.html#unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback)>unregisterUpdateAvailableCallback</a> when the callback is no longer needed (e.g., on destroying an activity.)If the listener has already in the callback list, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>callback</code> - callback listener</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>unregisterUpdateAvailableCallback</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#unregisterUpdateAvailableCallback(DeployGateUpdateAvailableCallback)>unregisterUpdateAvailableCallback</a>(<a href=DeployGateUpdateAvailableCallback.html>DeployGateUpdateAvailableCallback</a> callback)</pre>
+                                        <div class="block"><p>Unregister a callback listener.If the listener was not registered, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>callback</code> - callback listener to be removed</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="registerCaptureCreateCallback(DeployGateCaptureCreateCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>registerCaptureCreateCallback</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#registerCaptureCreateCallback(DeployGateCaptureCreateCallback)>registerCaptureCreateCallback</a>(<a href=DeployGateCaptureCreateCallback.html>DeployGateCaptureCreateCallback</a> callback)</pre>
+                                        <div class="block"><p>Register a callback listener about the new capture is created.Don't forget to unregister the callback listener when it is no longer needed (e.g., on destroying an activity.)If the listener has already in the callback list, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>callback</code> - callback listener</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="unregisterCaptureCreateCallback(DeployGateCaptureCreateCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>unregisterCaptureCreateCallback</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#unregisterCaptureCreateCallback(DeployGateCaptureCreateCallback)>unregisterCaptureCreateCallback</a>(<a href=DeployGateCaptureCreateCallback.html>DeployGateCaptureCreateCallback</a> callback)</pre>
+                                        <div class="block"><p>Unregister a callback listener.If the listener was not registered, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>callback</code> - callback listener to be removed</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="registerCallback(DeployGateCallback,boolean)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>registerCallback</h4>
+                                        <pre class="methodSignature">@<a href=https://developer.android.com/reference/kotlin/java/lang/Deprecated.html>Deprecated</a>() static void <a href=DeployGate.html#registerCallback(DeployGateCallback,boolean)>registerCallback</a>(<a href=DeployGateCallback.html>DeployGateCallback</a> listener, boolean refreshImmediately)</pre>
+                                        <div class="block"><p>Register a DeployGate event callback listener. Don't forget to call <a href=DeployGate.html#unregisterCallback(DeployGateCallback)>unregisterCallback</a> when the callback is nolonger needed (e.g., on destroying an activity.) If the listener hasalready in the callback list, just ignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>listener</code> - callback listener</dd>
+                                            
+                                            
+                                            
+                                            <dd><code>refreshImmediately</code> - if you want to receive current states, set thistrue.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="unregisterCallback(DeployGateCallback)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>unregisterCallback</h4>
+                                        <pre class="methodSignature">@<a href=https://developer.android.com/reference/kotlin/java/lang/Deprecated.html>Deprecated</a>() static void <a href=DeployGate.html#unregisterCallback(DeployGateCallback)>unregisterCallback</a>(<a href=DeployGateCallback.html>DeployGateCallback</a> listener)</pre>
+                                        <div class="block"><p>Unregister a callback listener. If the listener was not registered, justignored.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>listener</code> - callback listener to be removed</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="isInitialized()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>isInitialized</h4>
+                                        <pre class="methodSignature"> static boolean <a href=DeployGate.html#isInitialized()>isInitialized</a>()</pre>
+                                        <div class="block"><p>Get whether SDK is completed its intialization process and ready after <a href=DeployGate.html#install(Application)>install</a>. This call will never blocked.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="isDeployGateAvaliable()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>isDeployGateAvaliable</h4>
+                                        <pre class="methodSignature"> static boolean <a href=DeployGate.html#isDeployGateAvaliable()>isDeployGateAvaliable</a>()</pre>
+                                        <div class="block"><p>Get whether DeployGate client service is available on this device.</p><p>Note this function will block until SDK get ready after <a href=DeployGate.html#install(Application)>install</a> called. So if you want to call thisfunction from the main thread, you should confirm that <a href=DeployGate.html#isInitialized()>isInitialized</a> is true before calling this. (Or consider using <a href=DeployGateInitializeCallback.html#onInitialized(boolean)>onInitialized</a> callback.)</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="isManaged()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>isManaged</h4>
+                                        <pre class="methodSignature"> static boolean <a href=DeployGate.html#isManaged()>isManaged</a>()</pre>
+                                        <div class="block"><p>Get whether this application and its package is known and managed underthe DeployGate.</p><p>Note this function will block until SDK get ready after <a href=DeployGate.html#install(Application)>install</a> called. So if you want to call thisfunction from the main thread, you should confirm that <a href=DeployGate.html#isInitialized()>isInitialized</a> is true before calling this. (Or consider using <a href=DeployGateInitializeCallback.html#onInitialized(boolean)>onInitialized</a> callback.)</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="isAuthorized()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>isAuthorized</h4>
+                                        <pre class="methodSignature"> static boolean <a href=DeployGate.html#isAuthorized()>isAuthorized</a>()</pre>
+                                        <div class="block"><p>Get whether current DeployGate user has this application in his/heravailable list. You may want to check this value on initializationprocess of the main activity if you want to limit user of thisapplication to only who you explicitly allowed.</p><p>Note this function will block until SDK get ready after <a href=DeployGate.html#install(Application)>install</a> called. So if you want to call thisfunction from the main thread, you should confirm that <a href=DeployGate.html#isInitialized()>isInitialized</a> is true before calling this. (Or consider using <a href=DeployGateInitializeCallback.html#onInitialized(boolean)>onInitialized</a> callback.)</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getLoginUsername()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getLoginUsername</h4>
+                                        <pre class="methodSignature"> static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> <a href=DeployGate.html#getLoginUsername()>getLoginUsername</a>()</pre>
+                                        <div class="block"><p>Get current DeployGate username. This function only available when <a href=DeployGate.html#isAuthorized()>isAuthorized</a> is true.</p><p>Note this function will block until SDK get ready after <a href=DeployGate.html#install(Application)>install</a> called. So if you want to call thisfunction from the main thread, you should confirm that <a href=DeployGate.html#isInitialized()>isInitialized</a> is true before calling this. (Or consider using <a href=DeployGateInitializeCallback.html#onInitialized(boolean)>onInitialized</a> callback.)</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getAuthorUsername()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getAuthorUsername</h4>
+                                        <pre class="methodSignature"> static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> <a href=DeployGate.html#getAuthorUsername()>getAuthorUsername</a>()</pre>
+                                        <div class="block"><p>Get current app's author (e.g., User or Organzation) name on DeployGate. Youmay use this value to check the app was distributed by yourself orsomeone else.</p><p>Tip: If you want to prevent distributing your app by someone elseon the DeployGate, consider using <a href=DeployGate.html#install(Application,String)>install</a>.</p><p>Note this function will block until SDK get ready after <a href=DeployGate.html#install(Application)>install</a> called. So if you want to call thisfunction from the main thread, you should confirm that <a href=DeployGate.html#isInitialized()>isInitialized</a> is true before calling this. (Or consider using <a href=DeployGateInitializeCallback.html#onInitialized(boolean)>onInitialized</a> callback.)</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="logError(String)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>logError</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#logError(String)>logError</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message)</pre>
+                                        <div class="block"><p>Record ERROR level event on DeployGate. Log message will immediately sendto the server so you may see it on your dashboard. Nothing happen whenDeployGate is not available, i.e. <a href=DeployGate.html#isAuthorized()>isAuthorized</a> is not true.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>message</code> - Message body to be send.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="logWarn(String)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>logWarn</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#logWarn(String)>logWarn</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message)</pre>
+                                        <div class="block"><p>Record WARN level event on DeployGate. Log message will immediately sendto the server so you may see it on your dashboard. Nothing happen whenDeployGate is not available, i.e. <a href=DeployGate.html#isAuthorized()>isAuthorized</a> is not true.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>message</code> - Message body to be send.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="logDebug(String)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>logDebug</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#logDebug(String)>logDebug</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message)</pre>
+                                        <div class="block"><p>Record DEBUG level event on DeployGate. Log message will immediately sendto the server so you may see it on your dashboard. Nothing happen whenDeployGate is not available, i.e. <a href=DeployGate.html#isAuthorized()>isAuthorized</a> is not true.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>message</code> - Message body to be send.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="logInfo(String)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>logInfo</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#logInfo(String)>logInfo</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message)</pre>
+                                        <div class="block"><p>Record INFO level event on DeployGate. Log message will immediately sendto the server so you may see it on your dashboard. Nothing happen whenDeployGate is not available, i.e. <a href=DeployGate.html#isAuthorized()>isAuthorized</a> is not true.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>message</code> - Message body to be send.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="logVerbose(String)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>logVerbose</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#logVerbose(String)>logVerbose</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> message)</pre>
+                                        <div class="block"><p>Record VERBOSE level event on DeployGate. Log message will immediatelysend to the server so you may see it on your dashboard. Nothing happenwhen DeployGate is not available, i.e. <a href=DeployGate.html#isAuthorized()>isAuthorized</a> is nottrue.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>message</code> - Message body to be send.</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="requestLogCat()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>requestLogCat</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#requestLogCat()>requestLogCat</a>()</pre>
+                                        <div class="block"><p>Capture current LogCat and send it. This call will work asynchronously.Capturing LogCat requires <code>android.permission.READ_LOGS</code> isdeclared on your app AndroidManifest.xml, or your app is running onAndroid 4.1 or higher. If LogCat is not available, this function simplydoes nothing.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getCurrentRevision()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getCurrentRevision</h4>
+                                        <pre class="methodSignature"> static int <a href=DeployGate.html#getCurrentRevision()>getCurrentRevision</a>()</pre>
+                                        <div class="block"><p>Returns the revision of the app on DeployGate.The revision number is automatically incremented integer value every time you upload a build to DeployGate,so you can identify the build explicitly.</p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns 0.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getDistributionUrl()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getDistributionUrl</h4>
+                                        <pre class="methodSignature"> static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> <a href=DeployGate.html#getDistributionUrl()>getDistributionUrl</a>()</pre>
+                                        <div class="block"><p>Returns the URL of the distribution if the app was installed through Distribution Page.</p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getDistributionId()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getDistributionId</h4>
+                                        <pre class="methodSignature"> static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> <a href=DeployGate.html#getDistributionId()>getDistributionId</a>()</pre>
+                                        <div class="block"><p>Returns the ID (40 digits hex string appears in URL) of the distribution if the app was installed through Distribution Page.</p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getDistributionTitle()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getDistributionTitle</h4>
+                                        <pre class="methodSignature"> static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> <a href=DeployGate.html#getDistributionTitle()>getDistributionTitle</a>()</pre>
+                                        <div class="block"><p>Returns the title of the distribution if the app was installed through Distribution Page.</p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getDeployGateVersionCode()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getDeployGateVersionCode</h4>
+                                        <pre class="methodSignature">@<a href=https://developer.android.com/reference/kotlin/java/lang/Deprecated.html>Deprecated</a>() static int <a href=DeployGate.html#getDeployGateVersionCode()>getDeployGateVersionCode</a>()</pre>
+                                        <div class="block"><p>Use <a href=DeployGate.html#getDeployGateLongVersionCode()>getDeployGateLongVersionCode</a></p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getDeployGateLongVersionCode()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getDeployGateLongVersionCode</h4>
+                                        <pre class="methodSignature"> static long <a href=DeployGate.html#getDeployGateLongVersionCode()>getDeployGateLongVersionCode</a>()</pre>
+                                        <div class="block"><p>Returns android:versionCode of DeployGate app.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="hasUpdate()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>hasUpdate</h4>
+                                        <pre class="methodSignature"> static boolean <a href=DeployGate.html#hasUpdate()>hasUpdate</a>()</pre>
+                                        <div class="block"><p>Check whether there's update of the app.You can get detailed information via <a href=DeployGate.html#getUpdateRevision()>getUpdateRevision</a>, <a href=DeployGate.html#getUpdateVersionCode()>getUpdateVersionCode</a>, <a href=DeployGate.html#getUpdateVersionName()>getUpdateVersionName</a>, and <a href=DeployGate.html#getUpdateMessage()>getUpdateMessage</a>.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getUpdateRevision()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getUpdateRevision</h4>
+                                        <pre class="methodSignature"> static int <a href=DeployGate.html#getUpdateRevision()>getUpdateRevision</a>()</pre>
+                                        <div class="block"><p>Returns the revision number of the update. The value is only valid when <a href=DeployGate.html#hasUpdate()>hasUpdate</a> is true.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getUpdateVersionCode()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getUpdateVersionCode</h4>
+                                        <pre class="methodSignature"> static int <a href=DeployGate.html#getUpdateVersionCode()>getUpdateVersionCode</a>()</pre>
+                                        <div class="block"><p>Returns the android:versionCode of the update. The value is only valid when <a href=DeployGate.html#hasUpdate()>hasUpdate</a> is true.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getUpdateVersionName()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getUpdateVersionName</h4>
+                                        <pre class="methodSignature"> static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> <a href=DeployGate.html#getUpdateVersionName()>getUpdateVersionName</a>()</pre>
+                                        <div class="block"><p>Returns the android:versionName of the update. The value is only valid when <a href=DeployGate.html#hasUpdate()>hasUpdate</a> is true.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getUpdateMessage()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getUpdateMessage</h4>
+                                        <pre class="methodSignature"> static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> <a href=DeployGate.html#getUpdateMessage()>getUpdateMessage</a>()</pre>
+                                        <div class="block"><p>Returns the message attached to the build.If the app was installed via Distribution Page (i.e. <a href=DeployGate.html#getDistributionUrl()>is not null,</a> this method returns Release Note that was entered when you published a new version on the page.Otherwise this method returns the message that was entered when you upload a new build to DeployGate.</p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function always returns null.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="installUpdate()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>installUpdate</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#installUpdate()>installUpdate</a>()</pre>
+                                        <div class="block"><p>Start the installation of the latest version of the app if available. No effects if there's no update.</p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="openComments()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>openComments</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#openComments()>openComments</a>()</pre>
+                                        <div class="block"><p>Open comments screen for the distribution of the app installed.No effect if the app was installed via Distribution Page (i.e. <a href=DeployGate.html#getDistributionUrl()>is null.</a></p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="composeComment()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>composeComment</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#composeComment()>composeComment</a>()</pre>
+                                        <div class="block"><p>Open comment composer screen for the distribution of the app installed.No effect if the app was installed via Distribution Page (i.e. <a href=DeployGate.html#getDistributionUrl()>is null.</a></p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="composeComment(String)">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>composeComment</h4>
+                                        <pre class="methodSignature"> static void <a href=DeployGate.html#composeComment(String)>composeComment</a>(<a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> defaultComment)</pre>
+                                        <div class="block"><p>Open comment composer screen for the distribution of the app installed with pre filled string.No effect if the app was installed via Distribution Page (i.e. <a href=DeployGate.html#getDistributionUrl()>is null.</a></p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function produces no effect.</p></div>
+                                        
+                                        <dl>
+                                            <dt><span class="paramLabel">Parameters:</span></dt>
+                                            
+                                            
+                                            <dd><code>defaultComment</code> - Default comment set to the editor</dd>
+                                            
+                                            
+                                        </dl>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getDistributionUserName()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getDistributionUserName</h4>
+                                        <pre class="methodSignature"> static <a href=https://developer.android.com/reference/kotlin/java/lang/String.html>String</a> <a href=DeployGate.html#getDistributionUserName()>getDistributionUserName</a>()</pre>
+                                        <div class="block"><p>Get current user's name on Distribution Page. Default name is randomly generated string (like "[abcd1234]").</p><p>Requires DeployGate v1.7.0 or higher installed, otherwise this function returns null.</p></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getBuildEnvironment()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockList"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getBuildEnvironment</h4>
+                                        <pre class="methodSignature"> static <a href=CustomAttributes.html>CustomAttributes</a> <a href=DeployGate.html#getBuildEnvironment()>getBuildEnvironment</a>()</pre>
+                                        <div class="block"></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                                <a id="getRuntimeExtra()">
+                                    <!--   -->
+                                </a>
+                                <ul class=
+                                              "blockListLast"
+                                          >
+                                    <li class="blockList">
+                                        <h4>getRuntimeExtra</h4>
+                                        <pre class="methodSignature"> static <a href=CustomAttributes.html>CustomAttributes</a> <a href=DeployGate.html#getRuntimeExtra()>getRuntimeExtra</a>()</pre>
+                                        <div class="block"></div>
+                                        
+                                        <!-- TODO missing return annotation -->
+                                    </li>
+                                </ul>
+                                
+                            </li>
+                        </ul>
+                    </section>
+                    
+                </li>
+            </ul>
+        </div>
+    </div>
+</main>
+<footer role="contentinfo">
+    <nav role="navigation">
+        <!-- ======= START OF BOTTOM NAVBAR ====== -->
+        <div class="bottomNav"><a id="navbar.bottom">
+            <!--   -->
+        </a>
+            <div class="skipNav"><a href="#skip.navbar.bottom" title="Skip navigation links">Skip navigation links</a>
+            </div>
+            <a id="navbar.bottom.firstrow">
+                <!--   -->
+            </a>
+            <ul class="navList" title="Navigation">
+    <li><a href="../../../index.html">Overview</a></li>
+    
+    <li><a href="package-summary.html">Package</a></li>
+    
+    <li class="navBarCell1Rev">Class</li>
+    
+    <li><a href="package-tree.html">Tree</a></li>
+    
+    <li><a href="../../../deprecated.html">Deprecated</a></li>
+    <li><a href="../../../index-files/index-1.html">Index</a></li>
+    <li>Help</li>
+</ul></div>
+        <a id="skip.navbar.bottom">
+            <!--   -->
+        </a>
+        <div class="subNav">
+<ul class="navList" id="allclasses_navbar_top" style="display: block;">
+    <li><a href="../../../allclasses.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+</div>
+<a id="skip.navbar.top">
+<!--   -->
+</a></div><!-- ======== END OF BOTTOM NAVBAR ======= -->
+    </nav>
+</footer><ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content" id="ui-id-1" tabindex="0"
+    style="display: none;"></ul>
+<span role="status" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></span>
+</body>
+</html>
