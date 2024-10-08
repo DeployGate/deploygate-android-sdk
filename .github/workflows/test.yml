@@ -17,13 +17,14 @@ jobs:
     env:
       GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=2g -Dkotlin.daemon.jvm.options=-Xmx1536m"
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17.x'
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
+      - uses: gradle/actions/setup-gradle@v3
       - name: Check sdk publications
         run: ./scripts/verify-publications.bash sdk
       - name: Check sdk-mock publications
@@ -47,13 +48,14 @@ jobs:
     if: >
       github.event_name != 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17.x'
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
+      - uses: gradle/actions/setup-gradle@v3
       - run: ./gradlew sample:bundleDevrealDebug sample:bundleDevrealRelease sample:bundleDevmockDebug sample:bundleDevmockRelease
       - name: upload aab files
         run: |
@@ -82,13 +84,14 @@ jobs:
     if: >
       github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17.x'
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
+      - uses: gradle/actions/setup-gradle@v3
       - run: ./gradlew sample:bundleStablerealDistribute sample:bundleStablemockDistribute
       - name: upload aab files
         run: |
