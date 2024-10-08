@@ -24,6 +24,7 @@ jobs:
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
+      - uses: gradle/actions/setup-gradle@v3
       - name: Check sdk publications
         run: ./scripts/verify-publications.bash sdk
       - name: Check sdk-mock publications
@@ -54,6 +55,7 @@ jobs:
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
+      - uses: gradle/actions/setup-gradle@v3
       - run: ./gradlew sample:bundleDevrealDebug sample:bundleDevrealRelease sample:bundleDevmockDebug sample:bundleDevmockRelease
       - name: upload aab files
         run: |
@@ -89,6 +91,7 @@ jobs:
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
+      - uses: gradle/actions/setup-gradle@v3
       - run: ./gradlew sample:bundleStablerealDistribute sample:bundleStablemockDistribute
       - name: upload aab files
         run: |

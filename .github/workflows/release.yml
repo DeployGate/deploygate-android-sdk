@@ -21,6 +21,7 @@ jobs:
           java-package: jdk
           distribution: 'temurin'
           cache: 'gradle'
+      - uses: gradle/actions/setup-gradle@v3
       - run: RELEASE_VERSION="${GITHUB_REF#refs/tags/}" ./gradlew verifyReleaseVersion
       - name: Set up gradle.properties for sigining and nexus
         # Add timeout setting due to https://github.com/DeployGate/gradle-deploygate-plugin/runs/2523846388
