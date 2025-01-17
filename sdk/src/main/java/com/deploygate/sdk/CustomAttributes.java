@@ -15,7 +15,7 @@ public final class CustomAttributes {
 
   private static final String TAG = "CustomAttributes";
 
-  private static final int MAX_ATTRIBUTES_SIZE = 8;
+  private static final int MAX_ATTRIBUTES_SIZE = 64;
   private static final Pattern VALID_KEY_PATTERN = Pattern.compile("^[a-z][_a-z0-9]{2,31}$");
   private static final int MAX_VALUE_LENGTH = 64;
 

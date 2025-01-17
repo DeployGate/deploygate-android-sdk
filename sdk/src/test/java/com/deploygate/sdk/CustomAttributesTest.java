@@ -57,7 +57,7 @@ public class CustomAttributesTest {
     Truth.assertThat(attributes.putBoolean("valid_boolean", true)).isTrue();
 
     String tooLongString = "this is too long string value. we cannot accept value if size over 64.";
-    Truth.assertThat(attributes.putString("invalid_too_long_string", "this is too long string value. we cannot accept value if size over 64.")).isFalse();
+    Truth.assertThat(attributes.putString("invalid_too_long_string", tooLongString)).isFalse();
   }
 
   @Test
@@ -70,20 +70,16 @@ public class CustomAttributesTest {
     attributes.putString("key1", "overwrite1");
     Truth.assertThat(attributes.size()).isEqualTo(1);
 
-    attributes.putString("key2", "value2");
-    attributes.putString("key3", "value3");
-    attributes.putString("key4", "value4");
-    attributes.putString("key5", "value5");
-    attributes.putString("key6", "value6");
-    attributes.putString("key7", "value7");
-    attributes.putString("key8", "value8");
-    Truth.assertThat(attributes.size()).isEqualTo(8);
+    for (int i = 2; i <= 64; i++) {
+      attributes.putString("key" + i, "value" + i);
+    }
+    Truth.assertThat(attributes.size()).isEqualTo(64);
 
-    attributes.putString("key9", "value9");
-    Truth.assertThat(attributes.size()).isEqualTo(8);
+    attributes.putString("key65", "value65");
+    Truth.assertThat(attributes.size()).isEqualTo(64);
 
     attributes.remove("key1");
-    Truth.assertThat(attributes.size()).isEqualTo(7);
+    Truth.assertThat(attributes.size()).isEqualTo(63);
 
     attributes.removeAll();
     Truth.assertThat(attributes.size()).isEqualTo(0);
@@ -131,53 +127,43 @@ public class CustomAttributesTest {
 
   @Test
   public void not_exceed_max_size() {
-    Truth.assertThat(attributes.putString("key1", "value1")).isTrue();
-    Truth.assertThat(attributes.putString("key2", "value2")).isTrue();
-    Truth.assertThat(attributes.putString("key3", "value3")).isTrue();
-    Truth.assertThat(attributes.putString("key4", "value4")).isTrue();
-    Truth.assertThat(attributes.putString("key5", "value5")).isTrue();
-    Truth.assertThat(attributes.putString("key6", "value6")).isTrue();
-    Truth.assertThat(attributes.putString("key7", "value7")).isTrue();
-    Truth.assertThat(attributes.putString("key8", "value8")).isTrue();
+    for (int i = 1; i <= 64; i++) {
+      Truth.assertThat(attributes.putString("key" + i, "value" + i)).isTrue();
+    }
 
     // allow to overwrite
     Truth.assertThat(attributes.putString("key1", "overwrite1_1")).isTrue();
     // not allow to put value with new key because of max size
-    Truth.assertThat(attributes.putString("key9", "value9")).isFalse();
+    Truth.assertThat(attributes.putString("key65", "value65")).isFalse();
 
-    attributes.remove("key8");
+    attributes.remove("key64");
 
     // allow to put value with new key after remove exists key
-    Truth.assertThat(attributes.putString("key9", "value9")).isTrue();
+    Truth.assertThat(attributes.putString("key65", "value65")).isTrue();
     // allow to overwrite
     Truth.assertThat(attributes.putString("key1", "overwrite1_2")).isTrue();
     // not allow to put value with new key because of max size
-    Truth.assertThat(attributes.putString("key10", "value10")).isFalse();
+    Truth.assertThat(attributes.putString("key66", "value66")).isFalse();
 
     attributes.removeAll();
 
     // allow to put value less than max size
-    Truth.assertThat(attributes.putString("key1", "another_value1")).isTrue();
-    Truth.assertThat(attributes.putString("key2", "another_value2")).isTrue();
-    Truth.assertThat(attributes.putString("key3", "another_value3")).isTrue();
-    Truth.assertThat(attributes.putString("key4", "another_value4")).isTrue();
-    Truth.assertThat(attributes.putString("key5", "another_value5")).isTrue();
-    Truth.assertThat(attributes.putString("key6", "another_value6")).isTrue();
-    Truth.assertThat(attributes.putString("key7", "another_value7")).isTrue();
-    Truth.assertThat(attributes.putString("key8", "another_value8")).isTrue();
-    Truth.assertThat(attributes.putString("key9", "another_value9")).isFalse();
+    for (int i = 1; i <= 64; i++) {
+      Truth.assertThat(attributes.putString("key" + i, "another_value" + i)).isTrue();
+    }
+    Truth.assertThat(attributes.putString("key65", "another_value65")).isFalse();
   }
 
   @Test()
   public void not_exceed_max_size_multi_thread() {
     // prepare attributes with max size
-    for (int i = 0; i < 8; i++) {
+    for (int i = 1; i <= 64; i++) {
       attributes.putString("key" + i, "value" + i);
     }
 
     // try to put value with multi thread
     ExecutorService executors = Executors.newCachedThreadPool();
-    for (int i = 0; i < 100; i++) {
+    for (int i = 1; i <= 100; i++) {
       final int index = i;
       executors.submit(new Runnable() {
         @Override
@@ -187,17 +173,13 @@ public class CustomAttributesTest {
       });
     }
 
-    Truth.assertThat(attributes.size()).isEqualTo(8);
-    String expectedJSON = "{" +
-        "\"key0\":\"value0\"," +
-        "\"key1\":\"value1\"," +
-        "\"key2\":\"value2\"," +
-        "\"key3\":\"value3\"," +
-        "\"key4\":\"value4\"," +
-        "\"key5\":\"value5\"," +
-        "\"key6\":\"value6\"," +
-        "\"key7\":\"value7\"" +
-        "}";
-    Truth.assertThat(attributes.getJSONString()).isEqualTo(expectedJSON);
+    Truth.assertThat(attributes.size()).isEqualTo(64);
+    StringBuilder expectedJSONBuilder = new StringBuilder("{");
+    for (int i = 1; i < 64; i++) {
+      expectedJSONBuilder.append(String.format("\"key%d\":\"value%d\",", i, i));
+    }
+    expectedJSONBuilder.append("\"key64\":\"value64\"}");
+
+    Truth.assertThat(attributes.getJSONString()).isEqualTo(expectedJSONBuilder.toString());
   }
 }
