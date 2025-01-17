@@ -149,9 +149,9 @@ public class CustomAttributesTest {
 
     // allow to put value less than max size
     for (int i = 1; i <= 64; i++) {
-      Truth.assertThat(attributes.putString("key" + i, "value" + i)).isTrue();
+      Truth.assertThat(attributes.putString("key" + i, "another_value" + i)).isTrue();
     }
-    Truth.assertThat(attributes.putString("key65", "value65")).isFalse();
+    Truth.assertThat(attributes.putString("key65", "another_value65")).isFalse();
   }
 
   @Test()
