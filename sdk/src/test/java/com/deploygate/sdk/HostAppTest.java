@@ -36,7 +36,7 @@ public class HostAppTest {
         Truth.assertThat(app.canUseLogcat).isTrue();
         Truth.assertThat(app.packageName).isEqualTo("com.deploygate.sdk.test");
         Truth.assertThat(app.sdkVersion).isEqualTo(4);
-        Truth.assertThat(app.sdkArtifactVersion).isEqualTo("4.9.0");
+        Truth.assertThat(app.sdkArtifactVersion).isEqualTo("4.10.0");
         Truth.assertThat(app.activeFeatureFlags).isEqualTo(FULL_BIT);
         Truth.assertThat(app.canUseDeviceCapture()).isTrue();
     }
