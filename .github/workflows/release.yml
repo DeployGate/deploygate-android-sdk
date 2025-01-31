@@ -5,8 +5,8 @@ on:
     branches-ignore:
       - '**'
     tags:
-      - \d.\d.\d
-      - \d.\d.\d-(alpha|rc)\d
+      - (0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
+      - (0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-(alpha|rc)[1-9]\d*
 
 jobs:
   production-release:
