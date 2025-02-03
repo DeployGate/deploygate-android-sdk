@@ -4,7 +4,7 @@ dependencies {
     devrealImplementation project(':sdk')
     devmockImplementation project(':sdkMock')
 
-    def version = "4.9.0"
+    def version = "4.10.0"
     stablerealImplementation "com.deploygate:sdk:$version"
     stablemockImplementation "com.deploygate:sdk-mock:$version"
 }
