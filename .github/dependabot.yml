@@ -2,7 +2,8 @@ version: 2
 updates:
   - package-ecosystem: gradle
     directories:
-      - "/**"
+      - "/"
+      - "/plugins"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
@@ -22,3 +23,4 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+        update-types: ["minor", "patch"]
